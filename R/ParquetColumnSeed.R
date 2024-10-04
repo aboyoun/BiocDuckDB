@@ -65,11 +65,9 @@ setMethod("type", "ParquetColumnSeed", function(x) x@type)
 setMethod("path", "ParquetColumnSeed", function(object) object@path)
 
 #' @export
-#' @importFrom arrow as_arrow_table
 #' @importFrom DelayedArray extract_array
 setMethod("extract_array", "ParquetColumnSeed", function(x, index) {
-    ds <- acquireDataset(x@path)
-    tab <- as_arrow_table(ds)
+    tab <- acquireTable(x@path)
     slice <- index[[1]]
 
     if (is.null(slice)) {
@@ -110,7 +108,6 @@ setMethod("extract_array", "ParquetColumnSeed", function(x, index) {
 #' @export
 #' @rdname ParquetColumnSeed
 #' @importFrom DelayedArray type
-#' @importFrom utils head
 ParquetColumnSeed <- function(path, column, type=NULL, length=NULL, ...) {
     if (is.null(type) || is.null(length)) {
         tab <- acquireDataset(path)
@@ -124,7 +121,7 @@ ParquetColumnSeed <- function(path, column, type=NULL, length=NULL, ...) {
             }
         }
         if (is.null(length)) {
-            length <- nrow(ds)
+            length <- nrow(tab)
         }
     } 
     new("ParquetColumnSeed", path=path, column=column, length=length, type=type)
