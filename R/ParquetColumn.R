@@ -51,10 +51,11 @@ setMethod("show", "ParquetColumn", function(object) {
     if (len <= n1 + n2 + 1L) {
         vec <- as.vector(object)
     } else {
-        vec <- format(c(as.vector(head(object, n1)), as.vector(tail(object, n2))))
+        vec <- c(as.vector(head(object, n1)), as.vector(tail(object, n2)))
         if (type(object) == "character") {
-            vec <- sprintf("\"%s\"", vec)
+            vec <- setNames(sprintf("\"%s\"", vec), names(vec))
         }
+        vec <- format(vec, justify = "right")
         vec1 <- head(vec, n1)
         vec2 <- tail(vec, n2)
         vec <- c(vec1, "..." = "...", vec2)

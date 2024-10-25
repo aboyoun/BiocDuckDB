@@ -2,6 +2,11 @@
 esoph_path <- tempfile()
 arrow::write_parquet(esoph, esoph_path)
 
+# Infertility after Spontaneous and Induced Abortion
+infert_df <- cbind(id = rownames(infert), infert)
+infert_path <- tempfile()
+arrow::write_parquet(infert_df, infert_path)
+
 # Motor Trend Car Road Tests
 mtcars_df <- cbind(model = rownames(mtcars), mtcars)
 rownames(mtcars_df) <- NULL
