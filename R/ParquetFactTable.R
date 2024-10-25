@@ -100,7 +100,10 @@ setMethod("arrow_query", "ParquetFactTable", function(x) x@query)
 setMethod("nkey", "ParquetFactTable", function(x) length(x@key))
 
 #' @export
-setMethod("nrow", "ParquetFactTable", function(x) as.integer(prod(lengths(x@key, use.names = FALSE))))
+setMethod("nkeydim", "ParquetFactTable", function(x) lengths(x@key, use.names = FALSE))
+
+#' @export
+setMethod("nrow", "ParquetFactTable", function(x) as.integer(prod(nkeydim(x))))
 
 #' @export
 setMethod("ncol", "ParquetFactTable", function(x) length(x@fact))
@@ -153,7 +156,7 @@ setReplaceMethod("colnames", "ParquetFactTable", function(x, value) {
     initialize(x, query = query, fact = fact)
 })
 
-.subset.ParquetFactTable <- function(x, i, j, ..., drop = TRUE) {
+.subset_ParquetFactTable <- function(x, i, j, ..., drop = TRUE) {
     query <- x@query
     fact <- x@fact
     if (!missing(j)) {
@@ -173,11 +176,9 @@ setReplaceMethod("colnames", "ParquetFactTable", function(x, value) {
             sub <- i[[k]]
             if (is.atomic(sub)) {
                 key[[k]] <- key[[k]][sub]
-            } else if (is(sub, "ParquetColumn") &&
-                       (sub@data@seed@type == "logical") &&
-                       .identicalQueryBody(x@query, sub@data@seed@query) &&
-                       identical(x@key, sub@data@seed@key)) {
-                keep <- sub@data@seed@query$selected_columns[sub@data@seed@value]
+            } else if (is(sub, "ParquetColumn") && (type(sub) == "logical") &&
+                       isTRUE(all.equal(as(x, "ParquetFactTable"), sub@table))) {
+                keep <- sub@table@query$selected_columns[colnames(sub@table)]
                 query <- filter(query, !!keep)
                 for (kname in names(key)) {
                     kdnames <- pull(distinct(select(query, as.name(!!kname))), as_vector = TRUE)
@@ -193,7 +194,7 @@ setReplaceMethod("colnames", "ParquetFactTable", function(x, value) {
 }
 
 #' @export
-setMethod("[", "ParquetFactTable", .subset.ParquetFactTable)
+setMethod("[", "ParquetFactTable", .subset_ParquetFactTable)
 
 #' @export
 #' @importFrom S4Vectors bindCOLS
@@ -357,6 +358,7 @@ setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, opt
 
 #' @export
 #' @importFrom dplyr distinct everything mutate pull select
+#' @importFrom IRanges CharacterList
 #' @rdname ParquetFactTable
 ParquetFactTable <- function(query, key, fact = setdiff(names(query), names(key)), ...) {
     if (!inherits(query, "arrow_dplyr_query")) {

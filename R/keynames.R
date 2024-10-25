@@ -22,11 +22,13 @@
 #' keydimnames
 #' keydimnames<-
 #' nkey
+#' nkeydim
 #'
 #' keynames,ParquetFactTable-method
 #' keydimnames,ParquetFactTable-method
 #' keydimnames<-,ParquetFactTable-method
 #' nkey,ParquetFactTable-method
+#' nkeydim,ParquetFactTable-method
 #'
 #' @name keynames
 NULL
@@ -47,3 +49,7 @@ setGeneric("keydimnames<-", function(x, value) standardGeneric("keydimnames<-"))
 #' @export
 #' @rdname keynames
 setGeneric("nkey", function(x) standardGeneric("nkey"))
+
+#' @export
+#' @rdname keynames
+setGeneric("nkeydim", function(x) standardGeneric("nkeydim"))

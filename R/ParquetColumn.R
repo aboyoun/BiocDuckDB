@@ -3,7 +3,7 @@
 #' @author Patrick Aboyoun
 #'
 #' @include arrow_query.R
-#' @include ParquetArray.R
+#' @include ParquetFactTable.R
 #'
 #' @aliases
 #' ParquetColumn-class
@@ -15,9 +15,10 @@
 #' show,ParquetColumn-method
 #' showAsCell,ParquetColumn-method
 #' tail,ParquetColumn-method
+#' type,ParquetColumn-method
 #' Ops,ParquetColumn,ParquetColumn-method
-#' Ops,ParquetColumn,vector-method
-#' Ops,vector,ParquetColumn-method
+#' Ops,ParquetColumn,atomic-method
+#' Ops,atomic,ParquetColumn-method
 #' Math,ParquetColumn-method
 #'
 #' @name ParquetColumn
@@ -25,38 +26,68 @@ NULL
 
 #' @export
 #' @importClassesFrom S4Vectors Vector
-setClass("ParquetColumn", contains = "Vector", slots = c(data = "ParquetArray"))
+setClass("ParquetColumn", contains = "Vector", slots = c(table = "ParquetFactTable"))
+
+#' @importFrom S4Vectors isTRUEorFALSE setValidity2
+setValidity2("ParquetColumn", function(x) {
+    table <- x@table
+    if (ncol(table) != 1L) {
+        return("'table' slot must be a single-column ParquetFactTable")
+    }
+    if (nkey(table) != 1L) {
+        return("'table' slot must have a 'key' with a named list containing a single named character vector")
+    }
+    TRUE
+})
 
 #' @export
 #' @importFrom S4Vectors classNameForDisplay
 #' @importFrom utils capture.output
 setMethod("show", "ParquetColumn", function(object) {
-    text <- capture.output(object@data)
-    text[1L] <- sub(classNameForDisplay(object@data), classNameForDisplay(object), text[1L])
-    cat(text, sep = "\n")
+    len <- length(object)
+    cat(sprintf("<%d> %s object of type \"%s\":\n", len,
+                classNameForDisplay(object), type(object)))
+    n1 <- n2 <- 2L
+    if (len <= n1 + n2 + 1L) {
+        vec <- as.vector(object)
+    } else {
+        vec <- format(c(as.vector(head(object, n1)), as.vector(tail(object, n2))))
+        if (type(object) == "character") {
+            vec <- sprintf("\"%s\"", vec)
+        }
+        vec1 <- head(vec, n1)
+        vec2 <- tail(vec, n2)
+        vec <- c(vec1, "..." = "...", vec2)
+    }
+    print(vec, quote = FALSE)
 })
 
 #' @export
 #' @importFrom S4Vectors showAsCell
 setMethod("showAsCell", "ParquetColumn", function(object) {
-    callGeneric(as.vector(object@data))
+    callGeneric(as.vector(object@table))
 })
 
 #' @export
-setMethod("arrow_query", "ParquetColumn", function(x) x@data@seed@query)
+setMethod("arrow_query", "ParquetColumn", function(x) callGeneric(x@table))
 
 #' @export
-setMethod("length", "ParquetColumn", function(x) length(x@data))
+setMethod("length", "ParquetColumn", function(x) nrow(x@table))
 
 #' @export
-setMethod("names", "ParquetColumn", function(x) names(names(x@data)))
+setMethod("names", "ParquetColumn", function(x) keydimnames(x@table)[[1L]])
+
+#' @export
+#' @importFrom DelayedArray type
+setMethod("type", "ParquetColumn", function(x) unname(x@table@fact))
 
 #' @export
 setMethod("extractROWS", "ParquetColumn", function(x, i) {
     if (is(i, "ParquetColumn")) {
-        i <- i@data
+        i <- i@table
     }
-    initialize(x, data = callGeneric(x@data, i = i))
+    i <- setNames(list(i), keynames(x@table))
+    initialize(x, table = .subset_ParquetFactTable(x@table, i = i))
 })
 
 #' @export
@@ -66,14 +97,14 @@ setMethod("head", "ParquetColumn", function(x, n = 6L, ...) {
         stop("'n' must be a single number")
     }
     n <- as.integer(n)
+    len <- length(x)
     if (n < 0) {
-        n <- max(0L, length(x) + n)
+        n <- max(0L, len + n)
     }
-    if (n > length(x)) {
+    if (n > len) {
         x
     } else {
-        x@data@seed@key[[1L]] <- head(x@data@seed@key[[1L]], n)
-        x
+        extractROWS(x, seq_len(n))
     }
 })
 
@@ -84,41 +115,44 @@ setMethod("tail", "ParquetColumn", function(x, n = 6L, ...) {
         stop("'n' must be a single number")
     }
     n <- as.integer(n)
+    len <- length(x)
     if (n < 0) {
-        n <- max(0L, length(x) + n)
+        n <- max(0L, len + n)
     }
-    if (n > length(x)) {
+    if (n > len) {
         x
     } else {
-        x@data@seed@key[[1L]] <- tail(x@data@seed@key[[1L]], n)
-        x
+        extractROWS(x, (len - (n - 1L)):len)
     }
 })
 
 #' @export
 setMethod("Ops", c(e1 = "ParquetColumn", e2 = "ParquetColumn"), function(e1, e2) {
-    initialize(e1, data = callGeneric(e1@data, e2@data))
+    initialize(e1, table = callGeneric(e1@table, e2@table))
 })
 
 #' @export
-setMethod("Ops", c(e1 = "ParquetColumn", e2 = "vector"), function(e1, e2) {
-    initialize(e1, data = callGeneric(e1@data, e2))
+setMethod("Ops", c(e1 = "ParquetColumn", e2 = "atomic"), function(e1, e2) {
+    initialize(e1, table = callGeneric(e1@table, e2))
 })
 
 #' @export
-setMethod("Ops", c(e1 = "vector", e2 = "ParquetColumn"), function(e1, e2) {
-    initialize(e1, data = callGeneric(e1, e2@data))
+setMethod("Ops", c(e1 = "atomic", e2 = "ParquetColumn"), function(e1, e2) {
+    initialize(e1, table = callGeneric(e1, e2@table))
 })
 
 #' @export
 setMethod("Math", "ParquetColumn", function(x) {
-    initialize(x, data = callGeneric(x@data))
+    initialize(x, table = callGeneric(x@table))
 })
 
 #' @export
 #' @importFrom BiocGenerics as.vector
+#' @importFrom stats setNames
 setMethod("as.vector", "ParquetColumn", function(x, mode = "any") {
-    vec <- c(as.array(x@data))
+    df <- as.data.frame(x@table)
+    vec <- setNames(df[[colnames(x@table)]], df[[keynames(x@table)[[1L]]]])
+    vec <- vec[rownames(x@table)]
     if (mode != "any") {
         storage.mode(vec) <- mode
     }

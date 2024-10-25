@@ -11,9 +11,10 @@
 \alias{show,ParquetColumn-method}
 \alias{showAsCell,ParquetColumn-method}
 \alias{tail,ParquetColumn-method}
+\alias{type,ParquetColumn-method}
 \alias{Ops,ParquetColumn,ParquetColumn-method}
-\alias{Ops,ParquetColumn,vector-method}
-\alias{Ops,vector,ParquetColumn-method}
+\alias{Ops,ParquetColumn,atomic-method}
+\alias{Ops,atomic,ParquetColumn-method}
 \alias{Math,ParquetColumn-method}
 \title{ParquetColumn objects}
 \description{

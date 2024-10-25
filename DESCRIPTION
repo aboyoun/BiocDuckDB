@@ -37,12 +37,12 @@ URL: https://github.com/LTLA/ParquetDataFrame
 RoxygenNote: 7.3.2
 Encoding: UTF-8
 Collate:
+    'keynames.R'
     'acquireDataset.R'
     'arrow_query.R'
+    'ParquetFactTable.R'
     'ParquetArraySeed.R'
     'ParquetArray.R'
     'ParquetColumn.R'
-    'keynames.R'
-    'ParquetFactTable.R'
     'ParquetDataFrame.R'
     'ParquetMatrix.R'

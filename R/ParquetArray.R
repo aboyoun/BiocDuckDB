@@ -28,13 +28,9 @@
 #' [,ParquetArray,ANY,ANY,ANY-method
 #' aperm,ParquetArray-method
 #' t,ParquetArray-method
-#' Arith,ParquetArray,ParquetArray-method
-#' Arith,ParquetArray,numeric-method
-#' Arith,numeric,ParquetArray-method
-#' Compare,ParquetArray,ParquetArray-method
-#' Compare,ParquetArray,vector-method
-#' Compare,vector,ParquetArray-method
-#' Logic,ParquetArray,ParquetArray-method
+#' Ops,ParquetArray,ParquetArray-method
+#' Ops,ParquetArray,atomic-method
+#' Ops,atomic,ParquetArray-method
 #' Math,ParquetArray-method
 #'
 #' @seealso
@@ -53,7 +49,7 @@ setClass("ParquetArray", contains = "DelayedArray", slots = c(seed = "ParquetArr
 
 #' @export
 #' @importFrom DelayedArray seed
-setMethod("arrow_query", "ParquetArray", function(x) x@seed@query)
+setMethod("arrow_query", "ParquetArray", function(x) callGeneric(x@seed))
 
 #' @export
 setMethod("[", "ParquetArray", function(x, i, j, ..., drop = TRUE) {
@@ -74,38 +70,18 @@ setMethod("t", "ParquetArray", function(x) {
 })
 
 #' @export
-setMethod("Arith", c(e1 = "ParquetArray", e2 = "ParquetArray"), function(e1, e2) {
+setMethod("Ops", c(e1 = "ParquetArray", e2 = "ParquetArray"), function(e1, e2) {
     initialize(e1, seed = callGeneric(e1@seed, e2@seed))
 })
 
 #' @export
-setMethod("Arith", c(e1 = "ParquetArray", e2 = "numeric"), function(e1, e2) {
+setMethod("Ops", c(e1 = "ParquetArray", e2 = "atomic"), function(e1, e2) {
     initialize(e1, seed = callGeneric(e1@seed, e2))
 })
 
 #' @export
-setMethod("Arith", c(e1 = "numeric", e2 = "ParquetArray"), function(e1, e2) {
+setMethod("Ops", c(e1 = "atomic", e2 = "ParquetArray"), function(e1, e2) {
     initialize(e2, seed = callGeneric(e1, e2@seed))
-})
-
-#' @export
-setMethod("Compare", c(e1 = "ParquetArray", e2 = "ParquetArray"), function(e1, e2) {
-    initialize(e1, seed = callGeneric(e1@seed, e2@seed))
-})
-
-#' @export
-setMethod("Compare", c(e1 = "ParquetArray", e2 = "vector"), function(e1, e2) {
-    initialize(e1, seed = callGeneric(e1@seed, e2))
-})
-
-#' @export
-setMethod("Compare", c(e1 = "vector", e2 = "ParquetArray"), function(e1, e2) {
-    initialize(e2, seed = callGeneric(e1, e2@seed))
-})
-
-#' @export
-setMethod("Logic", c(e1 = "ParquetArray", e2 = "ParquetArray"), function(e1, e2) {
-    initialize(e1, seed = callGeneric(e1@seed, e2@seed))
 })
 
 #' @export

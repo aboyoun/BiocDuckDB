@@ -5,10 +5,12 @@
 \alias{keydimnames}
 \alias{keydimnames<-}
 \alias{nkey}
+\alias{nkeydim}
 \alias{keynames,ParquetFactTable-method}
 \alias{keydimnames,ParquetFactTable-method}
 \alias{keydimnames<-,ParquetFactTable-method}
 \alias{nkey,ParquetFactTable-method}
+\alias{nkeydim,ParquetFactTable-method}
 \title{Key Names and Key Count}
 \usage{
 keynames(x)
@@ -18,6 +20,8 @@ keydimnames(x, value)
 keydimnames(x) <- value
 
 nkey(x)
+
+nkeydim(x)
 }
 \arguments{
 \item{x}{An object to get the key related information.}

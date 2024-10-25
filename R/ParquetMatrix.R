@@ -59,7 +59,7 @@ NULL
 setClass("ParquetMatrix", contains = c("ParquetArray", "DelayedMatrix"))
 
 setValidity2("ParquetMatrix", function(x) {
-    if (length(seed(x)@key) != 2L) {
+    if (nkey(x@seed@table) != 2L) {
         return("'key' seed slot must be a two element named list of character vectors")
     }
     TRUE

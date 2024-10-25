@@ -11,13 +11,9 @@
 \alias{extract_array,ParquetArraySeed-method}
 \alias{t,ParquetArraySeed-method}
 \alias{type,ParquetArraySeed-method}
-\alias{Arith,ParquetArraySeed,ParquetArraySeed-method}
-\alias{Arith,ParquetArraySeed,numeric-method}
-\alias{Arith,numeric,ParquetArraySeed-method}
-\alias{Compare,ParquetArraySeed,ParquetArraySeed-method}
-\alias{Compare,ParquetArraySeed,vector-method}
-\alias{Compare,vector,ParquetArraySeed-method}
-\alias{Logic,ParquetArraySeed,ParquetArraySeed-method}
+\alias{Ops,ParquetArraySeed,ParquetArraySeed-method}
+\alias{Ops,ParquetArraySeed,atomic-method}
+\alias{Ops,atomic,ParquetArraySeed-method}
 \alias{Math,ParquetArraySeed-method}
 \title{ParquetArraySeed objects}
 \usage{

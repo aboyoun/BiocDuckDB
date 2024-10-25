@@ -135,7 +135,7 @@ setMethod("extractROWS", "ParquetDataFrame", function(x, i) {
         return(x)
     }
     i <- setNames(list(i), keynames(x))
-    .subset.ParquetFactTable(x, i = i)
+    .subset_ParquetFactTable(x, i = i)
 })
 
 #' @export
@@ -145,10 +145,11 @@ setMethod("head", "ParquetDataFrame", function(x, n = 6L, ...) {
         stop("'n' must be a single number")
     }
     n <- as.integer(n)
+    nr <- nrow(x)
     if (n < 0) {
-        n <- max(0L, nrow(x) + n)
+        n <- max(0L, nr + n)
     }
-    if (n > nrow(x)) {
+    if (n > nr) {
         x
     } else {
         extractROWS(x, seq_len(n))
@@ -162,10 +163,10 @@ setMethod("tail", "ParquetDataFrame", function(x, n = 6L, ...) {
         stop("'n' must be a single number")
     }
     n <- as.integer(n)
-    if (n < 0) {
-        n <- max(0L, nrow(x) + n)
-    }
     nr <- nrow(x)
+    if (n < 0) {
+        n <- max(0L, nr + n)
+    }
     if (n > nr) {
         x
     } else {
@@ -186,7 +187,7 @@ setMethod("extractCOLS", "ParquetDataFrame", function(x, i) {
         stop("cannot extract duplicate columns in a ParquetDataFrame")
     }
     mc <- extractROWS(mcols(x), i)
-    .subset.ParquetFactTable(x, j = i, elementMetadata = mc)
+    .subset_ParquetFactTable(x, j = i, elementMetadata = mc)
 })
 
 #' @export
@@ -218,7 +219,7 @@ setMethod("[[", "ParquetDataFrame", function(x, i, j, ...) {
     }
 
     i <- normalizeDoubleBracketSubscript(i, x)
-    new("ParquetColumn", data = ParquetArray(x@query, key = x@key, value = names(x)[i]))
+    new("ParquetColumn", table = as(extractCOLS(x, i), "ParquetFactTable"))
 })
 
 #' @export
@@ -231,10 +232,7 @@ setMethod("replaceROWS", "ParquetDataFrame", function(x, i, value) {
 #' @importFrom S4Vectors normalizeSingleBracketReplacementValue
 setMethod("normalizeSingleBracketReplacementValue", "ParquetDataFrame", function(value, x) {
     if (is(value, "ParquetColumn")) {
-        query <- value@data@seed@query
-        key <- value@data@seed@key
-        fact <- setNames(value@data@seed@type, value@data@seed@value)
-        return(new("ParquetDataFrame", query = query, key = key, fact = fact))
+        return(new("ParquetDataFrame", value@table))
     }
     callNextMethod()
 })
@@ -247,7 +245,7 @@ setMethod("replaceCOLS", "ParquetDataFrame", function(x, i, value) {
     i2 <- normalizeSingleBracketSubscript(i, xstub, allow.NAs = TRUE)
     if (!anyNA(i2)) {
         if (is(value, "ParquetDataFrame")) {
-            if (.identicalQueryBody(x@query, value@query) && identical(x@key, value@key)) {
+            if (isTRUE(all.equal(x, value))) {
                 x@query$selected_columns[names(x)[i2]] <- value@query$selected_columns[names(value)]
                 return(x)
             }
@@ -262,9 +260,8 @@ setMethod("[[<-", "ParquetDataFrame", function(x, i, j, ..., value) {
     i2 <- normalizeDoubleBracketSubscript(i, x, allow.nomatch = TRUE)
     if (length(i2) == 1L && !is.na(i2)) {
         if (is(value, "ParquetColumn")) {
-            if (.identicalQueryBody(x@query, value@data@seed@query) &&
-                identical(x@key, value@data@seed@key)) {
-                x@query$selected_columns[names(x)[i2]] <- value@data@seed@query$selected_columns[value@data@seed@value]
+            if (isTRUE(all.equal(as(x, "ParquetFactTable"), value@table))) {
+                x@query$selected_columns[names(x)[i2]] <- value@table@query$selected_columns[colnames(value@table)]
                 return(x)
             }
         }
@@ -294,15 +291,12 @@ cbind.ParquetDataFrame <- function(..., deparse.level = 1) {
         md <- list()
         mc <- make_zero_col_DFrame(NCOL(obj))
         if (is(obj, "ParquetColumn")) {
-            query <- obj@data@seed@query
-            key <- obj@data@seed@key
-            fact <- setNames(obj@data@seed@type, obj@data@seed@value)
+            table <- obj@table
             cname <- names(objects)[i]
             if (!is.null(cname)) {
-                query <- rename(query, !!!setNames(obj@data@seed@value, cname))
-                names(fact)[match(obj@data@seed@value, names(fact))] <- cname
+                colnames(table) <- cname
             }
-            objects[[i]] <- new("ParquetDataFrame", query = query, key = key, fact = fact)
+            objects[[i]] <- new("ParquetDataFrame", table)
         } else if (is(obj, "ParquetDataFrame")) {
             mc <- mcols(obj, use.names = FALSE) %||% mc
             if (ncol(mc) > 0L) {

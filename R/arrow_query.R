@@ -29,28 +29,3 @@ setOldClass("arrow_dplyr_query")
 .getColumnType <- function(column_query) {
     DelayedArray::type(pull(slice_head(column_query, n = 0L), as_vector = TRUE))
 }
-
-.identicalQueryBody <- function(x, y) {
-    body <-  c(".data", "filtered_rows", "group_by_vars", "drop_empty_groups", "arrange_vars", "arrange_desc")
-    inherits(x, "arrow_dplyr_query") &&
-    inherits(y, "arrow_dplyr_query") &&
-    identical(unclass(x)[body], unclass(y)[body])
-}
-
-#' @importFrom dplyr filter
-.executeQuery <- function(query, key) {
-    for (i in names(key)) {
-        query <- filter(query, !!as.name(i) %in% key[[i]])
-    }
-
-    # Allow for 1 extra row to check for duplicate keys
-    length <- prod(lengths(key, use.names = FALSE)) + 1L
-    query <- head(query, n = length)
-
-    df <- as.data.frame(query)
-    if (anyDuplicated(df[, names(key)])) {
-        stop("duplicate keys found in Parquet data")
-    }
-
-    df
-}
