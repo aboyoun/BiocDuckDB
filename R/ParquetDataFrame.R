@@ -2,7 +2,7 @@
 #'
 #' Create a Parquet-backed \linkS4class{DataFrame}, where the data are kept on disk until requested.
 #'
-#' @param data Either a string containing the path to the Parquet data,
+#' @param query Either a string containing the path to the Parquet data,
 #' or an \code{arrow_dplyr_query} object.
 #' @param key Either a character vector or a named list of character vectors
 #' containing the names of the columns in the Parquet data that specify
@@ -81,8 +81,8 @@ NULL
 #' @importFrom dplyr everything select
 #' @importFrom S4Vectors isSingleString
 #' @importFrom stats setNames
-ParquetDataFrame <- function(data, key, ...) {
-    tbl <- ParquetFactTable(query = data, key = key, ...)
+ParquetDataFrame <- function(query, key, ...) {
+    tbl <- ParquetFactTable(query = query, key = key, ...)
     new("ParquetDataFrame", tbl, ...)
 }
 
