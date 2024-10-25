@@ -45,11 +45,8 @@
 #' ParquetDataFrame-class
 #' makeNakedCharacterMatrixForDisplay,ParquetDataFrame-method
 #'
-#' nrow,ParquetDataFrame-method
-#' ncol,ParquetDataFrame-method
 #' length,ParquetDataFrame-method
 #'
-#' rownames,ParquetDataFrame-method
 #' names,ParquetDataFrame-method
 #' rownames<-,ParquetDataFrame-method
 #' names<-,ParquetDataFrame-method
@@ -58,6 +55,7 @@
 #' head,ParquetDataFrame-method
 #' tail,ParquetDataFrame-method
 #' extractCOLS,ParquetDataFrame-method
+#' [,ParquetDataFrame,ANY,ANY,ANY-method
 #' [[,ParquetDataFrame-method
 #'
 #' replaceROWS,ParquetDataFrame-method
@@ -74,6 +72,7 @@
 #' @include arrow_query.R
 #' @include acquireDataset.R
 #' @include ParquetColumn.R
+#' @include ParquetFactTable.R
 #'
 #' @name ParquetDataFrame
 NULL
@@ -83,39 +82,17 @@ NULL
 #' @importFrom S4Vectors isSingleString
 #' @importFrom stats setNames
 ParquetDataFrame <- function(data, key, ...) {
-    if (inherits(data, "arrow_dplyr_query")) {
-        query <- data
-    } else {
-        query <- select(acquireDataset(data, ...), everything())
-    }
-
-    if (isSingleString(key)) {
-        rownames <- pull(distinct(select(query, as.name(!!key))), as_vector = TRUE)
-        names(rownames) <- rownames
-        key <- setNames(list(rownames), key)
-    }
-
-    if (is.list(key)) {
-        key <- CharacterList(key)
-    }
-
-    if (is(key, "CharacterList") && (length(key) == 1L) && is.null(names(key[[1L]]))) {
-        names(key[[1L]]) <- key[[1L]]
-    }
-
-    new("ParquetDataFrame", query = query, key = key)
+    tbl <- ParquetFactTable(query = data, key = key, ...)
+    new("ParquetDataFrame", tbl, ...)
 }
 
 #' @export
-#' @importClassesFrom BiocGenerics OutOfMemoryObject
-#' @importClassesFrom IRanges CharacterList
 #' @importClassesFrom S4Vectors DataFrame
-setClass("ParquetDataFrame", contains = c("DataFrame", "OutOfMemoryObject"), slots = c(query = "arrow_dplyr_query", key = "CharacterList"))
+setClass("ParquetDataFrame", contains = c("ParquetFactTable", "DataFrame"))
 
 #' @importFrom S4Vectors setValidity2
 setValidity2("ParquetDataFrame", function(x) {
-    if ((length(x@key) != 1L) || is.null(names(x@key[[1L]])) ||
-         is.null(names(x@key)) || !(names(x@key) %in% names(x@query))) {
+    if (nkey(x) != 1L) {
         return("'key' slot must be a named list containing a single named character vector")
     }
     TRUE
@@ -128,69 +105,37 @@ setMethod("makeNakedCharacterMatrixForDisplay", "ParquetDataFrame", function(x) 
 })
 
 #' @export
-setMethod("arrow_query", "ParquetDataFrame", function(x) x@query)
+setMethod("length", "ParquetDataFrame", function(x) ncol(x))
 
 #' @export
-setMethod("nrow", "ParquetDataFrame", function(x) length(x@key[[1L]]))
-
-#' @export
-setMethod("length", "ParquetDataFrame", function(x) length(names(x)))
-
-#' @export
-setMethod("rownames", "ParquetDataFrame", function(x) names(x@key[[1L]]))
-
-#' @export
-setMethod("names", "ParquetDataFrame", function(x) setdiff(names(x@query), names(x@key)))
+setMethod("names", "ParquetDataFrame", function(x) colnames(x))
 
 #' @export
 setReplaceMethod("rownames", "ParquetDataFrame", function(x, value) {
-    names(x@key[[1L]]) <- value
+    keydimnames(x) <- list(value)
     x
 })
 
 #' @export
-#' @importFrom dplyr rename
 #' @importFrom S4Vectors mcols
-#' @importFrom stats setNames
 setReplaceMethod("names", "ParquetDataFrame", function(x, value) {
-    if (identical(value, names(x))) {
-        return(x)
-    }
-    query <- rename(x@query, !!!setNames(names(x), value))
+    colnames(x) <- value
     mc <- mcols(x)
     if (!is.null(mc)) {
-        rownames(mc) <- value
+        rownames(mcols(mc)) <- value
     }
-    initialize(x, query = query, elementMetadata = mc)
+    x
 })
 
 #' @export
-#' @importFrom dplyr filter
 #' @importFrom S4Vectors extractROWS
+#' @importFrom stats setNames
 setMethod("extractROWS", "ParquetDataFrame", function(x, i) {
     if (missing(i)) {
         return(x)
     }
-
-    key <- x@key
-    if (is.atomic(i)) {
-        if (is.character(i) && !all(i %in% x@key[[1L]])) {
-            stop("'i' contains row names not present in the Parquet key")
-        }
-        key[[1L]] <- key[[1L]][i]
-    } else if (is(i, "ParquetColumn") &&
-               (i@data@seed@type == "logical") &&
-               .identicalQueryBody(x@query, i@data@seed@query) &&
-               identical(x@key, i@data@seed@key)) {
-        keep <- i@data@seed@query$selected_columns[i@data@seed@value]
-        query <- filter(x@query, !!keep)
-        rownames <- pull(distinct(select(query, as.name(!!names(x@key)))), as_vector = TRUE)
-        key[[1L]] <- key[[1L]][match(rownames, key[[1L]])]
-    } else {
-        stop("unsupported 'i' for subsetting a ParquetDataFrame")
-    }
-
-    initialize(x, key = key)
+    i <- setNames(list(i), keynames(x))
+    .subset.ParquetFactTable(x, i = i)
 })
 
 #' @export
@@ -206,9 +151,7 @@ setMethod("head", "ParquetDataFrame", function(x, n = 6L, ...) {
     if (n > nrow(x)) {
         x
     } else {
-        key <- x@key
-        key[[1L]] <- head(x@key[[1L]], n)
-        initialize(x, key = key)
+        extractROWS(x, seq_len(n))
     }
 })
 
@@ -222,12 +165,11 @@ setMethod("tail", "ParquetDataFrame", function(x, n = 6L, ...) {
     if (n < 0) {
         n <- max(0L, nrow(x) + n)
     }
-    if (n > nrow(x)) {
+    nr <- nrow(x)
+    if (n > nr) {
         x
     } else {
-        key <- x@key
-        key[[1L]] <- tail(x@key[[1L]], n)
-        initialize(x, key = key)
+        extractROWS(x, (nr - (n - 1L)):nr)
     }
 })
 
@@ -242,11 +184,26 @@ setMethod("extractCOLS", "ParquetDataFrame", function(x, i) {
     i <- normalizeSingleBracketSubscript(i, xstub)
     if (anyDuplicated(i)) {
         stop("cannot extract duplicate columns in a ParquetDataFrame")
-    } else {
-        query <- x@query[, c(names(x@key), names(x)[i])]
-        mc <- extractROWS(mcols(x), i)
-        initialize(x, query = query, elementMetadata = mc)
     }
+    mc <- extractROWS(mcols(x), i)
+    .subset.ParquetFactTable(x, j = i, elementMetadata = mc)
+})
+
+#' @export
+setMethod("[", "ParquetDataFrame", function(x, i, j, ..., drop = TRUE) {
+    if (!missing(j)) {
+        x <- extractCOLS(x, j)
+    }
+    if (!missing(i)) {
+        x <- extractROWS(x, i)
+    }
+    if (missing(drop)) {
+        drop <- (ncol(x) == 1L)
+    }
+    if (drop && (ncol(x) == 1L)) {
+        x <- x[[1L]]
+    }
+    x
 })
 
 #' @export
@@ -274,7 +231,10 @@ setMethod("replaceROWS", "ParquetDataFrame", function(x, i, value) {
 #' @importFrom S4Vectors normalizeSingleBracketReplacementValue
 setMethod("normalizeSingleBracketReplacementValue", "ParquetDataFrame", function(value, x) {
     if (is(value, "ParquetColumn")) {
-        return(new("ParquetDataFrame", query = value@data@seed@query, key = value@data@seed@key))
+        query <- value@data@seed@query
+        key <- value@data@seed@key
+        fact <- setNames(value@data@seed@type, value@data@seed@value)
+        return(new("ParquetDataFrame", query = query, key = key, fact = fact))
     }
     callNextMethod()
 })
@@ -320,87 +280,54 @@ setMethod("bindROWS", "ParquetDataFrame", function(x, objects = list(), use.name
 
 #' @export
 #' @importFrom dplyr rename
-#' @importFrom S4Vectors combineRows make_zero_col_DFrame mcols metadata
+#' @importFrom S4Vectors combineRows make_zero_col_DFrame mcols mcols<- metadata
 cbind.ParquetDataFrame <- function(..., deparse.level = 1) {
-    preserved <- TRUE
     objects <- list(...)
-    xquery <- NULL
-    xkey <- NULL
+
+    all_mcols <- vector("list", length(objects))
+    all_metadata <- vector("list", length(objects))
+    has_mcols <- FALSE
 
     for (i in seq_along(objects)) {
         obj <- objects[[i]]
+
+        md <- list()
+        mc <- make_zero_col_DFrame(NCOL(obj))
         if (is(obj, "ParquetColumn")) {
+            query <- obj@data@seed@query
+            key <- obj@data@seed@key
+            fact <- setNames(obj@data@seed@type, obj@data@seed@value)
             cname <- names(objects)[i]
             if (!is.null(cname)) {
-                seed <- obj@data@seed
-                query <- rename(obj@data@seed@query, !!!setNames(obj@data@seed@value, cname))
-                obj@data@seed <- initialize(seed, query = query, value = cname)
-                objects[[i]] <- obj
+                query <- rename(query, !!!setNames(obj@data@seed@value, cname))
+                names(fact)[match(obj@data@seed@value, names(fact))] <- cname
             }
-            if (is.null(xquery)) {
-                xquery <- obj@data@seed@query
-                xkey <- obj@data@seed@key
-            } else if (!.identicalQueryBody(obj@data@seed@query, xquery) || !identical(obj@data@seed@key, xkey)) {
-                preserved <- FALSE
-                break
-            }
+            objects[[i]] <- new("ParquetDataFrame", query = query, key = key, fact = fact)
         } else if (is(obj, "ParquetDataFrame")) {
-            if (is.null(xquery)) {
-                xquery <- obj@query
-                xkey <- obj@key
-            } else if (!.identicalQueryBody(obj@query, xquery) || !identical(obj@key, xkey)) {
-                preserved <- FALSE
-                break
+            mc <- mcols(obj, use.names = FALSE) %||% mc
+            if (ncol(mc) > 0L) {
+                has_mcols <- TRUE
+                mcols(objects[[i]]) <- NULL
             }
-        } else {
-            preserved <- FALSE
-            break
+            md <- metadata(obj)
         }
+        all_mcols[[i]] <- mc
+        all_metadata[[i]] <- md
     }
 
-    if (!preserved) {
-        stop("cannot combine incompatible objects with the ParquetDataFrame")
+    x <- objects[[1L]]
+    objects <- objects[-1L]
+    bound <- bindCOLS(x, objects)
+
+    if (has_mcols) {
+        all_mcols <- do.call(combineRows, all_mcols)
+        rownames(all_mcols) <- colnames(bound)
     } else {
-        all_selected_columns <- vector("list", length(objects))
-        all_mcols <- vector("list", length(objects))
-        all_metadata <- vector("list", length(objects))
-        has_mcols <- FALSE
-
-        for (i in seq_along(objects)) {
-            obj <- objects[[i]]
-
-            md <- list()
-            mc <- make_zero_col_DFrame(NCOL(obj))
-            if (is(obj, "ParquetColumn")) {
-                sc <- obj@data@seed@query$selected_columns[obj@data@seed@value]
-            } else if (is(obj, "ParquetDataFrame")) {
-                sc <- obj@query$selected_columns[names(obj)]
-                mc <- mcols(obj, use.names = FALSE) %||% mc
-                has_mcols <- has_mcols || (ncol(mc) > 0L)
-                md <- metadata(obj)
-            }
-
-            all_selected_columns[[i]] <- sc
-            all_mcols[[i]] <- mc
-            all_metadata[[i]] <- md
-        }
-
-        all_selected_columns <- c(xquery$selected_columns[names(xkey)],
-                                  all_selected_columns)
-        cols <- do.call(c, all_selected_columns)
-        names(cols) <- make.unique(names(cols), sep = "_")
-        xquery$selected_columns <- cols
-
-        if (has_mcols) {
-            all_mcols <- do.call(combineRows, all_mcols)
-            rownames(all_mcols) <- setdiff(names(cols), names(xkey))
-        } else {
-            all_mcols <- NULL
-        }
-
-        new("ParquetDataFrame", query = xquery, key = xkey,
-            elementMetadata = all_mcols, metadata = do.call(c, all_metadata))
+        all_mcols <- NULL
     }
+    all_metadata <- do.call(c, all_metadata)
+
+    initialize(bound, elementMetadata = all_mcols, metadata = all_metadata)
 }
 
 #' @export
@@ -408,10 +335,13 @@ setMethod("cbind", "ParquetDataFrame", cbind.ParquetDataFrame)
 
 #' @export
 #' @importFrom BiocGenerics as.data.frame
+#' @importFrom stats setNames
 setMethod("as.data.frame", "ParquetDataFrame", function(x, row.names = NULL, optional = FALSE, ...) {
-    df <- .executeQuery(x@query, key = x@key)
-    rownames(df) <- df[[names(x@key)]]
-    df <- df[x@key[[1L]], names(x), drop = FALSE]
-    rownames(df) <- names(x@key[[1L]])[match(rownames(df), x@key[[1L]])]
-    df
+    # as.data.frame,ParquetFactTable-method
+    df <- callNextMethod(x, row.names = row.names, optional = optional, ...)
+
+    rownames <- x@key[[1L]]
+    rownames <- setNames(names(rownames), rownames)
+    rownames(df) <- rownames[df[[keynames(x)]]]
+    df[rownames(x), colnames(x), drop = FALSE]
 })

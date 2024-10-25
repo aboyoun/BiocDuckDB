@@ -17,7 +17,6 @@
 #' arrow_query,ParquetArray-method
 #' arrow_query,ParquetArraySeed-method
 #' arrow_query,ParquetColumn-method
-#' arrow_query,ParquetDataFrame-method
 #' arrow_query,ParquetFactTable-method
 #' arrow_query,ParquetMatrix-method
 #'

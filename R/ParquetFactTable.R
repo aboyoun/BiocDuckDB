@@ -100,7 +100,7 @@ setMethod("arrow_query", "ParquetFactTable", function(x) x@query)
 setMethod("nkey", "ParquetFactTable", function(x) length(x@key))
 
 #' @export
-setMethod("nrow", "ParquetFactTable", function(x) prod(lengths(x@key, use.names = FALSE)))
+setMethod("nrow", "ParquetFactTable", function(x) as.integer(prod(lengths(x@key, use.names = FALSE))))
 
 #' @export
 setMethod("ncol", "ParquetFactTable", function(x) length(x@fact))
@@ -132,7 +132,7 @@ setReplaceMethod("keydimnames", "ParquetFactTable", function(x, value) {
 #' @export
 #' @importFrom BiocGenerics rownames
 setMethod("rownames", "ParquetFactTable", function(x, do.NULL = TRUE, prefix = "row") {
-    do.call(paste, c(do.call(expand.grid, as.list(x@key)), list(sep = "|")))
+    do.call(paste, c(do.call(expand.grid, lapply(x@key, names)), list(sep = "|")))
 })
 
 #' @export
@@ -153,11 +153,13 @@ setReplaceMethod("colnames", "ParquetFactTable", function(x, value) {
     initialize(x, query = query, fact = fact)
 })
 
-#' @export
-setMethod("[", "ParquetFactTable", function(x, i, j, ..., drop = TRUE) {
+.subset.ParquetFactTable <- function(x, i, j, ..., drop = TRUE) {
     query <- x@query
     fact <- x@fact
     if (!missing(j)) {
+        if (!is.character(j)) {
+            j <- names(fact)[j]
+        }
         query$selected_columns <- c(query$selected_columns[names(x@key)], query$selected_columns[j])
         fact <- fact[j]
     }
@@ -171,14 +173,27 @@ setMethod("[", "ParquetFactTable", function(x, i, j, ..., drop = TRUE) {
             sub <- i[[k]]
             if (is.atomic(sub)) {
                 key[[k]] <- key[[k]][sub]
+            } else if (is(sub, "ParquetColumn") &&
+                       (sub@data@seed@type == "logical") &&
+                       .identicalQueryBody(x@query, sub@data@seed@query) &&
+                       identical(x@key, sub@data@seed@key)) {
+                keep <- sub@data@seed@query$selected_columns[sub@data@seed@value]
+                query <- filter(query, !!keep)
+                for (kname in names(key)) {
+                    kdnames <- pull(distinct(select(query, as.name(!!kname))), as_vector = TRUE)
+                    key[[kname]] <- key[[kname]][match(kdnames, key[[kname]])]
+                }
             } else {
-                stop("invalid value for '", k, "' in 'i'")
+                stop("unsupported 'i' for row subsetting")
             }
         }
     }
 
-    initialize(x, query = query, key = key, fact = fact)
-})
+    initialize(x, query = query, key = key, fact = fact, ...)
+}
+
+#' @export
+setMethod("[", "ParquetFactTable", .subset.ParquetFactTable)
 
 #' @export
 #' @importFrom S4Vectors bindCOLS

@@ -4,10 +4,7 @@
 \alias{ParquetDataFrame}
 \alias{ParquetDataFrame-class}
 \alias{makeNakedCharacterMatrixForDisplay,ParquetDataFrame-method}
-\alias{nrow,ParquetDataFrame-method}
-\alias{ncol,ParquetDataFrame-method}
 \alias{length,ParquetDataFrame-method}
-\alias{rownames,ParquetDataFrame-method}
 \alias{names,ParquetDataFrame-method}
 \alias{rownames<-,ParquetDataFrame-method}
 \alias{names<-,ParquetDataFrame-method}
@@ -15,6 +12,7 @@
 \alias{head,ParquetDataFrame-method}
 \alias{tail,ParquetDataFrame-method}
 \alias{extractCOLS,ParquetDataFrame-method}
+\alias{[,ParquetDataFrame,ANY,ANY,ANY-method}
 \alias{[[,ParquetDataFrame-method}
 \alias{replaceROWS,ParquetDataFrame-method}
 \alias{replaceCOLS,ParquetDataFrame-method}
