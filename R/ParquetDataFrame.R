@@ -219,7 +219,8 @@ setMethod("[[", "ParquetDataFrame", function(x, i, j, ...) {
     }
 
     i <- normalizeDoubleBracketSubscript(i, x)
-    new("ParquetColumn", table = as(extractCOLS(x, i), "ParquetFactTable"))
+    column <- extractCOLS(x, i)
+    new("ParquetColumn", table = as(column, "ParquetFactTable"), metadata = as.list(mcols(column)))
 })
 
 #' @export
@@ -297,6 +298,12 @@ cbind.ParquetDataFrame <- function(..., deparse.level = 1) {
                 colnames(table) <- cname
             }
             objects[[i]] <- new("ParquetDataFrame", table)
+            md <- metadata(obj)
+            if (length(md) > 0L) {
+                has_mcols <- TRUE
+                mc <- new("DFrame", rownames = cname, nrows = 1L, listData = md)
+                md <- list()
+            }
         } else if (is(obj, "ParquetDataFrame")) {
             mc <- mcols(obj, use.names = FALSE) %||% mc
             if (ncol(mc) > 0L) {

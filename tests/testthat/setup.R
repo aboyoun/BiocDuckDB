@@ -12,6 +12,13 @@ mtcars_df <- cbind(model = rownames(mtcars), mtcars)
 rownames(mtcars_df) <- NULL
 mtcars_path <- tempfile()
 arrow::write_parquet(mtcars_df, mtcars_path)
+mtcars_mcols <- DataFrame(description = c("Miles/(US) gallon", "Number of cylinders",
+                                          "Displacement (cu.in.)", "Gross horsepower",
+                                          "Rear axle ratio", "Weight (1000 lbs)",
+                                          "1/4 mile time", "Engine (0 = V-shaped, 1 = straight)",
+                                          "Transmission (0 = automatic, 1 = manual)",
+                                          "Number of forward gears", "Number of carburetors"),
+                          row.names = colnames(mtcars))
 
 # State dataset
 state_df <- data.frame(

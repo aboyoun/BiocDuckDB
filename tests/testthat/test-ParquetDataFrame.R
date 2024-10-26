@@ -59,6 +59,18 @@ test_that("slicing by columns preserves type of a ParquetDataFrame", {
     mcols(copy) <- DataFrame(whee=seq_len(ncol(df)))
     copy <- copy[,3:1]
     expect_identical(mcols(copy)$whee, 3:1)
+
+    # Respects metadata.
+    copy <- df
+    mcols(copy) <- mtcars_mcols
+    expect_identical(metadata(copy[["carb"]]),
+                     as.list(mtcars_mcols["carb", "description", drop=FALSE]))
+
+    # Respects metadata when extracting columns.
+    copy <- df
+    mcols(copy) <- mtcars_mcols
+    copy <- cbind(copy[, c(2, 4, 6)], copy[[1]])
+    expect_identical(mcols(copy), mtcars_mcols[c(2, 4, 6, 1), , drop = FALSE])
 })
 
 test_that("extraction of a column yields a ParquetColumn", {
