@@ -2,12 +2,7 @@
 #'
 #' Create a Parquet-backed \linkS4class{DataFrame}, where the data are kept on disk until requested.
 #'
-#' @param query Either a string containing the path to the Parquet data,
-#' or an \code{arrow_dplyr_query} object.
-#' @param key Either a character vector or a named list of character vectors
-#' containing the names of the columns in the Parquet data that specify
-#' the primary key of the array.
-#' @param ... Further arguments to be passed to \code{\link[arrow]{open_dataset}}.
+#' @inheritParams ParquetFactTable
 #'
 #' @return A ParquetDataFrame where each column is a \linkS4class{ParquetColumn}.
 #'
@@ -18,6 +13,7 @@
 #' Thus, users can specialize code paths for a ParquetDataFrame to operate directly on the underlying Parquet data.
 #'
 #' @author Aaron Lun, Patrick Aboyoun
+#'
 #' @examples
 #' # Mocking up a file:
 #' tf <- tempfile()
@@ -76,15 +72,6 @@
 #'
 #' @name ParquetDataFrame
 NULL
-
-#' @export
-#' @importFrom dplyr everything select
-#' @importFrom S4Vectors isSingleString
-#' @importFrom stats setNames
-ParquetDataFrame <- function(query, key, ...) {
-    tbl <- ParquetFactTable(query = query, key = key, ...)
-    new("ParquetDataFrame", tbl, ...)
-}
 
 #' @export
 #' @importClassesFrom S4Vectors DataFrame
@@ -346,3 +333,17 @@ setMethod("as.data.frame", "ParquetDataFrame", function(x, row.names = NULL, opt
     rownames(df) <- rownames[df[[keynames(x)]]]
     df[rownames(x), colnames(x), drop = FALSE]
 })
+
+#' @export
+#' @importFrom dplyr everything select
+#' @importFrom S4Vectors isSingleString
+#' @importFrom stats setNames
+#' @rdname ParquetDataFrame
+ParquetDataFrame <- function(query, key, fact, ...) {
+    if (missing(fact)) {
+        tbl <- ParquetFactTable(query, key = key, ...)
+    } else {
+        tbl <- ParquetFactTable(query, key = key, fact = fact, ...)
+    }
+    new("ParquetDataFrame", tbl, ...)
+}

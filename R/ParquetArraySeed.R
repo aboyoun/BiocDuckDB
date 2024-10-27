@@ -9,8 +9,8 @@
 #' \link{ParquetArray} object instead. See \code{?\link{ParquetArray}} for
 #' more information.
 #'
-#' @param data Either a string containing the path to the Parquet data,
-#' or an \code{arrow_dplyr_query} object.
+#' @param query Either a string containing the path to the Parquet data,
+#' an \code{ArrowObject} \code{Dataset}, or an \code{arrow_dplyr_query} object.
 #' @param key Either a character vector or a named list of character vectors
 #' containing the names of the columns in the Parquet data that specify
 #' the primary key of the array.
@@ -245,12 +245,12 @@ setMethod("DelayedArray", "ParquetArraySeed", function(seed) ParquetArray(seed))
 #' @export
 #' @importFrom stats setNames
 #' @rdname ParquetArraySeed
-ParquetArraySeed <- function(data, key, value, type = NULL, ...) {
+ParquetArraySeed <- function(query, key, value, type = NULL, ...) {
     if (is.null(type)) {
         fact <- value
     } else {
         fact <- setNames(type, value)
     }
-    table <- ParquetFactTable(data, key = key, fact = fact, ...)
+    table <- ParquetFactTable(query, key = key, fact = fact, ...)
     new("ParquetArraySeed", table = table, drop = FALSE)
 }

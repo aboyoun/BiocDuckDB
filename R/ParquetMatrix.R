@@ -7,8 +7,8 @@
 #' All the operations available for \link[DelayedArray]{DelayedMatrix}
 #' objects work on ParquetMatrix objects.
 #'
-#' @param data Either a string containing the path to the Parquet data,
-#' or an existing ParquetArraySeed object.
+#' @param query Either a string containing the path to the Parquet data,
+#' an \code{ArrowObject} \code{Dataset}, or an \code{arrow_dplyr_query} object.
 #' @param row Either a character vector or a named list of character vectors
 #' containing the names of the columns in the Parquet data that specify the
 #' rows of the matrix.
@@ -84,12 +84,12 @@ setMethod("[", "ParquetArray", function(x, i, j, ..., drop = TRUE) {
 #' @export
 #' @importFrom S4Vectors isSingleString
 #' @rdname ParquetMatrix
-ParquetMatrix <- function(data, row, col, value, key = c(row, col), type = NULL, ...) {
-    if (!is(data, "ParquetArraySeed")) {
+ParquetMatrix <- function(query, row, col, value, key = c(row, col), type = NULL, ...) {
+    if (!is(query, "ParquetArraySeed")) {
         if (length(key) != 2L) {
             stop("'key' must contain exactly 2 elements: rows and columns")
         }
-        data <- ParquetArraySeed(data, key = key, value = value, type = type, ...)
+        query <- ParquetArraySeed(query, key = key, value = value, type = type, ...)
     }
-    new("ParquetMatrix", seed = data)
+    new("ParquetMatrix", seed = query)
 }

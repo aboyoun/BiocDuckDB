@@ -17,11 +17,11 @@
 \alias{Math,ParquetArraySeed-method}
 \title{ParquetArraySeed objects}
 \usage{
-ParquetArraySeed(data, key, value, type = NULL, ...)
+ParquetArraySeed(query, key, value, type = NULL, ...)
 }
 \arguments{
-\item{data}{Either a string containing the path to the Parquet data,
-or an \code{arrow_dplyr_query} object.}
+\item{query}{Either a string containing the path to the Parquet data,
+an \code{ArrowObject} \code{Dataset}, or an \code{arrow_dplyr_query} object.}
 
 \item{key}{Either a character vector or a named list of character vectors
 containing the names of the columns in the Parquet data that specify

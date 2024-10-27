@@ -6,11 +6,11 @@
 \alias{[,ParquetMatrix,ANY,ANY,ANY-method}
 \title{Parquet datasets as DelayedMatrix objects}
 \usage{
-ParquetMatrix(data, row, col, value, key = c(row, col), type = NULL, ...)
+ParquetMatrix(query, row, col, value, key = c(row, col), type = NULL, ...)
 }
 \arguments{
-\item{data}{Either a string containing the path to the Parquet data,
-or an existing ParquetArraySeed object.}
+\item{query}{Either a string containing the path to the Parquet data,
+an \code{ArrowObject} \code{Dataset}, or an \code{arrow_dplyr_query} object.}
 
 \item{row}{Either a character vector or a named list of character vectors
 containing the names of the columns in the Parquet data that specify the

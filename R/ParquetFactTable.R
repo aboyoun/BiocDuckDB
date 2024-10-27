@@ -5,7 +5,7 @@
 #' pointer to a Parquet fact table.
 #'
 #' @param query Either a string containing the path to the Parquet data,
-#' or an \code{arrow_dplyr_query} object.
+#' an \code{ArrowObject} \code{Dataset}, or an \code{arrow_dplyr_query} object.
 #' @param key Either a character vector or a named list of character vectors
 #' containing the names of the columns in the Parquet data that specify
 #' the primary key of the array.
@@ -361,8 +361,14 @@ setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, opt
 #' @importFrom IRanges CharacterList
 #' @rdname ParquetFactTable
 ParquetFactTable <- function(query, key, fact = setdiff(names(query), names(key)), ...) {
+    if (is.character(query)) {
+        query <- acquireDataset(query, ...)
+    }
+    if (inherits(query, "ArrowObject") && inherits(query, "Dataset")) {
+        query <- select(query, everything())
+    }
     if (!inherits(query, "arrow_dplyr_query")) {
-        query <- select(acquireDataset(query, ...), everything())
+        stop("'query' must be an 'arrow_dplyr_query' object")
     }
 
     if (is.character(key)) {

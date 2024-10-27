@@ -91,9 +91,9 @@ setMethod("Math", "ParquetArray", function(x) {
 
 #' @export
 #' @rdname ParquetArray
-ParquetArray <- function(data, key, value, type = NULL, ...) {
-    if (!is(data, "ParquetArraySeed")) {
-        data <- ParquetArraySeed(data, key = key, value = value, type = type, ...)
+ParquetArray <- function(query, key, value, type = NULL, ...) {
+    if (!is(query, "ParquetArraySeed")) {
+        query <- ParquetArraySeed(query, key = key, value = value, type = type, ...)
     }
-    new("ParquetArray", seed = data)
+    new("ParquetArray", seed = query)
 }
