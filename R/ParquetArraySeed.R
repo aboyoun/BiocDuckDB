@@ -184,9 +184,7 @@ setMethod("Math", "ParquetArraySeed", function(x) {
     initialize(x, table = callGeneric(x@table))
 })
 
-#' @export
-#' @importFrom DelayedArray extract_array
-setMethod("extract_array", "ParquetArraySeed", function(x, index) {
+.extract_array_index <- function(x, index) {
     if (!is.list(index)) {
         stop("'index' must be a list")
     }
@@ -217,6 +215,16 @@ setMethod("extract_array", "ParquetArraySeed", function(x, index) {
             index <- key
         }
     }
+
+    index
+}
+
+#' @export
+#' @importFrom DelayedArray extract_array
+setMethod("extract_array", "ParquetArraySeed", function(x, index) {
+    index <- .extract_array_index(x, index)
+
+    table <- x@table
 
     # Initialize output array
     fill <- switch(x@table@fact, logical = FALSE, integer = 0L, double = 0, character = "")
