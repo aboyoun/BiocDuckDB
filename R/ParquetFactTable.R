@@ -375,7 +375,7 @@ ParquetFactTable <- function(query, key, fact = setdiff(names(query), names(key)
         key <- sapply(key, function(x) pull(distinct(select(query, as.name(!!x))), as_vector = TRUE), simplify = FALSE)
     }
     if (is.list(key)) {
-        key <- CharacterList(key)
+        key <- CharacterList(key, compress = FALSE)
     }
     if (!is(key, "CharacterList") || is.null(names(key))) {
         stop("'key' must be a character vector or a named list of character vectors")
