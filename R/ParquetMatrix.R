@@ -76,11 +76,6 @@ setMethod("[", "ParquetMatrix", function(x, i, j, ..., drop = TRUE) {
     }
 })
 
-setMethod("[", "ParquetArray", function(x, i, j, ..., drop = TRUE) {
-    Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
-    initialize(x, seed = .subset_ParquetArraySeed(seed(x), Nindex = Nindex, drop = drop))
-})
-
 #' @export
 #' @importFrom S4Vectors isSingleString
 #' @rdname ParquetMatrix
