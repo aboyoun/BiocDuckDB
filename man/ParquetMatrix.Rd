@@ -6,11 +6,11 @@
 \alias{[,ParquetMatrix,ANY,ANY,ANY-method}
 \title{Parquet datasets as DelayedMatrix objects}
 \usage{
-ParquetMatrix(query, row, col, value, key = c(row, col), type = NULL, ...)
+ParquetMatrix(conn, row, col, fact, key = c(row, col), type = NULL, ...)
 }
 \arguments{
-\item{query}{Either a string containing the path to the Parquet data,
-an \code{ArrowObject} \code{Dataset}, or an \code{arrow_dplyr_query} object.}
+\item{conn}{Either a string containing the path to the Parquet data or a
+\code{tbl_duckdb_connection} object.}
 
 \item{row}{Either a character vector or a named list of character vectors
 containing the names of the columns in the Parquet data that specify the
@@ -20,7 +20,7 @@ rows of the matrix.}
 containing the names of the columns in the Parquet data that specify the
 columns of the matrix.}
 
-\item{value}{String containing the name of the column in the Parquet data
+\item{fact}{String containing the name of the column in the Parquet data
 that specifies the value of the matrix.}
 
 \item{key}{Either a character vector or a named list of character vectors
@@ -32,8 +32,7 @@ one of \code{"logical"}, \code{"integer"}, \code{"double"}, or
 \code{"character"}. If \code{NULL}, this is determined by inspecting
 the data.}
 
-\item{...}{Further arguments to be passed to
-\code{\link[arrow]{open_dataset}}.}
+\item{...}{Further arguments to be passed to \code{read_parquet}.}
 }
 \description{
 The ParquetMatrix class is a \link[DelayedArray]{DelayedMatrix} subclass
@@ -55,7 +54,7 @@ tf <- tempfile()
 on.exit(unlink(tf))
 arrow::write_parquet(df, tf)
 
-pqmat <- ParquetMatrix(tf, row = "rowname", col = "colname", value = "value")
+pqmat <- ParquetMatrix(tf, row = "rowname", col = "colname", fact = "value")
 
 }
 \author{

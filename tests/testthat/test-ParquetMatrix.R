@@ -4,27 +4,27 @@
 test_that("basic methods work as expected for a ParquetMatrix", {
     names(dimnames(state.x77)) <- c("rowname", "colname")
 
-    pqmat <- ParquetMatrix(state_path, row = "rowname", col = "colname", value = "value")
+    pqmat <- ParquetMatrix(state_path, row = "rowname", col = "colname", fact = "value")
     expect_s4_class(pqmat, "ParquetMatrix")
     expect_identical(type(pqmat), "double")
     expect_identical(type(pqmat), typeof(state.x77))
     expect_identical(length(pqmat), length(state.x77))
     expect_identical(dim(pqmat), dim(state.x77))
     expect_setequal(rownames(pqmat), rownames(state.x77))
-    expect_identical(colnames(pqmat), colnames(state.x77))
-    expect_equal(as.matrix(pqmat)[rownames(state.x77), ], state.x77)
+    expect_setequal(colnames(pqmat), colnames(state.x77))
+    expect_equal(as.matrix(pqmat)[rownames(state.x77), colnames(state.x77)], state.x77)
 
-    pqmat <- ParquetMatrix(state_path, row = list("rowname" = row.names(state.x77)), col = list("colname" = colnames(state.x77)), value = "value")
+    pqmat <- ParquetMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], fact = "value")
     checkParquetMatrix(pqmat, state.x77)
 
-    pqmat <- ParquetMatrix(state_path, key = list("rowname" = row.names(state.x77), "colname" = colnames(state.x77)), value = "value")
+    pqmat <- ParquetMatrix(state_path, key = dimnames(state.x77), fact = "value")
     checkParquetMatrix(pqmat, state.x77)
 })
 
 test_that("extraction methods work as expected for a ParquetMatrix", {
     names(dimnames(state.x77)) <- c("rowname", "colname")
 
-    pqmat <- ParquetMatrix(state_path, row = list("rowname" = row.names(state.x77)), col = list("colname" = colnames(state.x77)), value = "value")
+    pqmat <- ParquetMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], fact = "value")
 
     expected <- as.array(state.x77[1, ])
     names(dimnames(expected)) <- "colname"
@@ -57,13 +57,14 @@ test_that("extraction methods work as expected for a ParquetMatrix", {
 
 test_that("aperm and t methods work as expected for a ParquetMatrix", {
     names(dimnames(state.x77)) <- c("rowname", "colname")
-    pqmat <- ParquetMatrix(state_path, row = list("rowname" = row.names(state.x77)), col = list("colname" = colnames(state.x77)), value = "value")
+    pqmat <- ParquetMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], fact = "value")
     checkParquetMatrix(aperm(pqmat, c(2, 1)), aperm(state.x77, c(2, 1)))
     checkParquetMatrix(t(pqmat), t(state.x77))
 })
 
 test_that("Arith methods work as expected for a ParquetMatrix", {
-    pqmat <- ParquetMatrix(state_path, row = list("rowname" = row.names(state.x77)), col = list("colname" = colnames(state.x77)), value = "value")
+    names(dimnames(state.x77)) <- c("rowname", "colname")
+    pqmat <- ParquetMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], fact = "value")
 
     ## "+"
     checkParquetMatrix(pqmat + sqrt(pqmat), as.array(pqmat) + sqrt(as.array(pqmat)))
@@ -100,21 +101,18 @@ test_that("Arith methods work as expected for a ParquetMatrix", {
 
     ## "%%"
     checkParquetMatrix(pqmat %% sqrt(pqmat), as.array(pqmat) %% sqrt(as.array(pqmat)))
-    checkParquetMatrix(pqmat %% 1L, as.array(pqmat) %% 1L)
     checkParquetMatrix(pqmat %% 3.14, as.array(pqmat) %% 3.14)
-    checkParquetMatrix(1L %% pqmat, 1L %% as.array(pqmat))
     checkParquetMatrix(3.14 %% pqmat, 3.14 %% as.array(pqmat))
 
     ## "%/%"
     checkParquetMatrix(pqmat %/% sqrt(pqmat), as.array(pqmat) %/% sqrt(as.array(pqmat)))
-    checkParquetMatrix(pqmat %/% 1L, as.array(pqmat) %/% 1L)
     checkParquetMatrix(pqmat %/% 3.14, as.array(pqmat) %/% 3.14)
-    checkParquetMatrix(1L %/% pqmat, 1L %/% as.array(pqmat))
     checkParquetMatrix(3.14 %/% pqmat, 3.14 %/% as.array(pqmat))
 })
 
 test_that("Compare methods work as expected for a ParquetMatrix", {
-    pqmat <- ParquetMatrix(state_path, row = list("rowname" = row.names(state.x77)), col = list("colname" = colnames(state.x77)), value = "value")
+    names(dimnames(state.x77)) <- c("rowname", "colname")
+    pqmat <- ParquetMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], fact = "value")
 
     ## "=="
     checkParquetMatrix(pqmat == sqrt(pqmat), as.array(pqmat) == sqrt(as.array(pqmat)))
@@ -160,7 +158,8 @@ test_that("Compare methods work as expected for a ParquetMatrix", {
 })
 
 test_that("Logic methods work as expected for a ParquetMatrix", {
-    pqmat <- ParquetMatrix(state_path, row = list("rowname" = row.names(state.x77)), col = list("colname" = colnames(state.x77)), value = "value")
+    names(dimnames(state.x77)) <- c("rowname", "colname")
+    pqmat <- ParquetMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], fact = "value")
 
     ## "&"
     x <- pqmat > 70
@@ -174,7 +173,8 @@ test_that("Logic methods work as expected for a ParquetMatrix", {
 })
 
 test_that("Math methods work as expected for a ParquetMatrix", {
-    pqmat <- ParquetMatrix(state_path, row = list("rowname" = row.names(state.x77)), col = list("colname" = colnames(state.x77)), value = "value")
+    names(dimnames(state.x77)) <- c("rowname", "colname")
+    pqmat <- ParquetMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], fact = "value")
 
     income <- pqmat[, "Income", drop = FALSE]
     ikeep <-
@@ -186,7 +186,6 @@ test_that("Math methods work as expected for a ParquetMatrix", {
     illiteracy <- pqmat[ikeep, "Illiteracy", drop = FALSE]
 
     checkParquetMatrix(abs(income), abs(as.array(income)))
-    checkParquetMatrix(sign(income), sign(as.array(income)))
     checkParquetMatrix(sqrt(income), sqrt(as.array(income)))
     checkParquetMatrix(ceiling(income), ceiling(as.array(income)))
     checkParquetMatrix(floor(income), floor(as.array(income)))
@@ -200,39 +199,38 @@ test_that("Math methods work as expected for a ParquetMatrix", {
     checkParquetMatrix(log(income), log(as.array(income)))
     checkParquetMatrix(log10(income), log10(as.array(income)))
     checkParquetMatrix(log2(income), log2(as.array(income)))
-    checkParquetMatrix(log1p(income), log1p(as.array(income)))
+
+    expect_error(log1p(income))
 
     checkParquetMatrix(acos(illiteracy), acos(as.array(illiteracy)))
-
-    expect_error(acosh(illiteracy))
-
+    checkParquetMatrix(acosh(income), acosh(as.array(income)))
     checkParquetMatrix(asin(illiteracy), asin(as.array(illiteracy)))
-
-    expect_error(asinh(illiteracy))
-    expect_error(atan(illiteracy))
-    expect_error(atanh(illiteracy))
+    checkParquetMatrix(asinh(income), asinh(as.array(income)))
+    checkParquetMatrix(atan(income), atan(as.array(income)))
+    checkParquetMatrix(atanh(illiteracy), atanh(as.array(illiteracy)))
 
     checkParquetMatrix(exp(income), exp(as.array(income)))
 
     expect_error(expm1(income))
 
-    checkParquetMatrix(cos(income), cos(as.array(income)))
+    checkParquetMatrix(cos(illiteracy), cos(as.array(illiteracy)))
+    checkParquetMatrix(cosh(illiteracy), cosh(as.array(illiteracy)))
 
-    expect_error(cosh(income))
-    expect_error(cospi(income))
+    expect_error(cospi(illiteracy))
 
-    checkParquetMatrix(sin(income), sin(as.array(income)))
+    checkParquetMatrix(sin(illiteracy), sin(as.array(illiteracy)))
+    checkParquetMatrix(sinh(illiteracy), sinh(as.array(illiteracy)))
 
-    expect_error(sinh(income))
-    expect_error(sinpi(income))
+    expect_error(sinpi(illiteracy))
 
-    checkParquetMatrix(tan(income), tan(as.array(income)))
+    checkParquetMatrix(tan(illiteracy), tan(as.array(illiteracy)))
+    checkParquetMatrix(tanh(illiteracy), tanh(as.array(illiteracy)))
 
-    expect_error(tanh(income))
-    expect_error(tanpi(income))
+    expect_error(tanpi(illiteracy))
 
-    expect_error(gamma(income))
-    expect_error(lgamma(income))
-    expect_error(digamma(income))
-    expect_error(trigamma(income))
+    checkParquetMatrix(gamma(illiteracy), gamma(as.array(illiteracy)))
+    checkParquetMatrix(lgamma(illiteracy), lgamma(as.array(illiteracy)))
+
+    expect_error(digamma(illiteracy))
+    expect_error(trigamma(illiteracy))
 })

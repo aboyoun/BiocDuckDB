@@ -2,7 +2,7 @@
 #'
 #' @author Patrick Aboyoun
 #'
-#' @include arrow_query.R
+#' @include duckdb_connection.R
 #' @include ParquetFactTable.R
 #'
 #' @aliases
@@ -15,7 +15,6 @@
 #' show,ParquetColumn-method
 #' showAsCell,ParquetColumn-method
 #' tail,ParquetColumn-method
-#' type,ParquetColumn-method
 #' Ops,ParquetColumn,ParquetColumn-method
 #' Ops,ParquetColumn,atomic-method
 #' Ops,atomic,ParquetColumn-method
@@ -42,17 +41,15 @@ setValidity2("ParquetColumn", function(x) {
 
 #' @export
 #' @importFrom S4Vectors classNameForDisplay
-#' @importFrom utils capture.output
 setMethod("show", "ParquetColumn", function(object) {
     len <- length(object)
-    cat(sprintf("<%d> %s object of type \"%s\":\n", len,
-                classNameForDisplay(object), type(object)))
+    cat(sprintf("%s of length %d\n", classNameForDisplay(object), len))
     n1 <- n2 <- 2L
     if (len <= n1 + n2 + 1L) {
         vec <- as.vector(object)
     } else {
         vec <- c(as.vector(head(object, n1)), as.vector(tail(object, n2)))
-        if (type(object) == "character") {
+        if (is.character(vec)) {
             vec <- setNames(sprintf("\"%s\"", vec), names(vec))
         }
         vec <- format(vec, justify = "right")
@@ -70,17 +67,13 @@ setMethod("showAsCell", "ParquetColumn", function(object) {
 })
 
 #' @export
-setMethod("arrow_query", "ParquetColumn", function(x) callGeneric(x@table))
+setMethod("duckdb_connection", "ParquetColumn", function(x) callGeneric(x@table))
 
 #' @export
 setMethod("length", "ParquetColumn", function(x) nrow(x@table))
 
 #' @export
 setMethod("names", "ParquetColumn", function(x) keydimnames(x@table)[[1L]])
-
-#' @export
-#' @importFrom DelayedArray type
-setMethod("type", "ParquetColumn", function(x) unname(x@table@fact))
 
 #' @export
 setMethod("extractROWS", "ParquetColumn", function(x, i) {

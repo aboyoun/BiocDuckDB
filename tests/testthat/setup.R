@@ -1,6 +1,10 @@
 # Smoking, Alcohol and (O)esophageal Cancer
+esoph_df <- esoph
+for (i in 1:3) {
+  esoph_df[[i]] <- as.character(esoph_df[[i]])
+}
 esoph_path <- tempfile()
-arrow::write_parquet(esoph, esoph_path)
+arrow::write_parquet(esoph_df, esoph_path)
 
 # Infertility after Spontaneous and Induced Abortion
 infert_df <- cbind(id = rownames(infert), infert)

@@ -12,7 +12,7 @@ releaseDataset(path)
 \arguments{
 \item{path}{String specifying a path to a Parquet data directory or file.}
 
-\item{...}{Further arguments to be passed to \code{\link[arrow]{open_dataset}}.}
+\item{...}{Further arguments to be passed to \code{read_parquet}.}
 }
 \value{
 For \code{acquireDataset}, an Arrow Dataset identical to that returned by \code{as_arrow_table(\link[arrow]{open_dataset})}.

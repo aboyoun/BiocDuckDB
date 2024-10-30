@@ -65,7 +65,7 @@
 #'
 #' as.data.frame,ParquetDataFrame-method
 #'
-#' @include arrow_query.R
+#' @include duckdb_connection.R
 #' @include acquireDataset.R
 #' @include ParquetColumn.R
 #' @include ParquetFactTable.R
@@ -95,16 +95,19 @@ setMethod("makeNakedCharacterMatrixForDisplay", "ParquetDataFrame", function(x) 
 setMethod("length", "ParquetDataFrame", function(x) ncol(x))
 
 #' @export
+#' @importFrom BiocGenerics colnames
 setMethod("names", "ParquetDataFrame", function(x) colnames(x))
 
 #' @export
+#' @importFrom BiocGenerics rownames<-
 setReplaceMethod("rownames", "ParquetDataFrame", function(x, value) {
     keydimnames(x) <- list(value)
     x
 })
 
 #' @export
-#' @importFrom S4Vectors mcols
+#' @importFrom BiocGenerics colnames<-
+#' @importFrom S4Vectors mcols mcols<-
 setReplaceMethod("names", "ParquetDataFrame", function(x, value) {
     colnames(x) <- value
     mc <- mcols(x)
@@ -234,7 +237,7 @@ setMethod("replaceCOLS", "ParquetDataFrame", function(x, i, value) {
     if (!anyNA(i2)) {
         if (is(value, "ParquetDataFrame")) {
             if (isTRUE(all.equal(x, value))) {
-                x@query$selected_columns[names(x)[i2]] <- value@query$selected_columns[names(value)]
+                x@fact[i2] <- unname(value@fact)
                 return(x)
             }
         }
@@ -249,7 +252,7 @@ setMethod("[[<-", "ParquetDataFrame", function(x, i, j, ..., value) {
     if (length(i2) == 1L && !is.na(i2)) {
         if (is(value, "ParquetColumn")) {
             if (isTRUE(all.equal(as(x, "ParquetFactTable"), value@table))) {
-                x@query$selected_columns[names(x)[i2]] <- value@table@query$selected_columns[colnames(value@table)]
+                x@fact[[i2]] <- value@table@fact[[1L]]
                 return(x)
             }
         }
@@ -339,11 +342,11 @@ setMethod("as.data.frame", "ParquetDataFrame", function(x, row.names = NULL, opt
 #' @importFrom S4Vectors isSingleString
 #' @importFrom stats setNames
 #' @rdname ParquetDataFrame
-ParquetDataFrame <- function(query, key, fact, ...) {
+ParquetDataFrame <- function(conn, key, fact, ...) {
     if (missing(fact)) {
-        tbl <- ParquetFactTable(query, key = key, ...)
+        tbl <- ParquetFactTable(conn, key = key, ...)
     } else {
-        tbl <- ParquetFactTable(query, key = key, fact = fact, ...)
+        tbl <- ParquetFactTable(conn, key = key, fact = fact, ...)
     }
     new("ParquetDataFrame", tbl, ...)
 }

@@ -9,19 +9,18 @@
 #' \link{ParquetArray} object instead. See \code{?\link{ParquetArray}} for
 #' more information.
 #'
-#' @param query Either a string containing the path to the Parquet data,
-#' an \code{ArrowObject} \code{Dataset}, or an \code{arrow_dplyr_query} object.
+#' @param conn Either a string containing the path to the Parquet data or a
+#' \code{tbl_duckdb_connection} object.
 #' @param key Either a character vector or a named list of character vectors
 #' containing the names of the columns in the Parquet data that specify
 #' the primary key of the array.
-#' @param value String containing the name of the column in the Parquet data
+#' @param fact String containing the name of the column in the Parquet data
 #' that specifies the value of the array.
 #' @param type String specifying the type of the Parquet data values;
 #' one of \code{"logical"}, \code{"integer"}, \code{"double"}, or
 #' \code{"character"}. If \code{NULL}, this is determined by inspecting
 #' the data.
-#' @param ... Further arguments to be passed to
-#' \code{\link[arrow]{open_dataset}}.
+#' @param ... Further arguments to be passed to \code{read_parquet}.
 #'
 #' @author Patrick Aboyoun
 #'
@@ -35,7 +34,7 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' pqaseed <- ParquetArraySeed(tf, key = c("Class", "Sex", "Age", "Survived"), value = "fate")
+#' pqaseed <- ParquetArraySeed(tf, key = c("Class", "Sex", "Age", "Survived"), fact = "fate")
 #'
 #' @aliases
 #' ParquetArraySeed-class
@@ -56,7 +55,7 @@
 #' \code{\link{ParquetArray}},
 #' \code{\link[S4Arrays]{Array}}
 #'
-#' @include arrow_query.R
+#' @include duckdb_connection.R
 #' @include acquireDataset.R
 #' @include ParquetFactTable.R
 #'
@@ -66,12 +65,15 @@ NULL
 #' @export
 #' @import methods
 #' @importClassesFrom S4Arrays Array
-setClass("ParquetArraySeed", contains = "Array", slots = c(table = "ParquetFactTable", drop = "logical"))
+setClass("ParquetArraySeed", contains = "Array", slots = c(table = "ParquetFactTable", type = "character", drop = "logical"))
 
-#' @importFrom S4Vectors isTRUEorFALSE setValidity2
+#' @importFrom S4Vectors isTRUEorFALSE setValidity2 isSingleString
 setValidity2("ParquetArraySeed", function(x) {
     if (ncol(x@table) != 1L) {
         return("'table' slot must be a single-column ParquetFactTable")
+    }
+    if (!isSingleString(x@type)) {
+        return("'type' slot must be a single string")
     }
     if (!isTRUEorFALSE(x@drop)) {
         return("'drop' slot must be TRUE or FALSE")
@@ -80,7 +82,7 @@ setValidity2("ParquetArraySeed", function(x) {
 })
 
 #' @export
-setMethod("arrow_query", "ParquetArraySeed", function(x) callGeneric(x@table))
+setMethod("duckdb_connection", "ParquetArraySeed", function(x) callGeneric(x@table))
 
 #' @export
 setMethod("dim", "ParquetArraySeed", function(x) {
@@ -112,7 +114,7 @@ setMethod("dimnames", "ParquetArraySeed", function(x) {
 
 #' @export
 #' @importFrom DelayedArray type
-setMethod("type", "ParquetArraySeed", function(x) unname(x@table@fact))
+setMethod("type", "ParquetArraySeed", function(x) x@type)
 
 #' @export
 #' @importFrom BiocGenerics aperm
@@ -162,26 +164,46 @@ setMethod("[", "ParquetArraySeed", function(x, i, j, ..., drop = TRUE) {
 })
 
 #' @export
+#' @importFrom dplyr mutate
 setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "ParquetArraySeed"), function(e1, e2) {
     if (!isTRUE(all.equal(e1@table, e2@table)) || !identical(e1@drop, e2@drop)) {
         stop("can only perform arithmetic operations with compatible objects")
     }
-    initialize(e1, table = callGeneric(e1@table, e2@table))
+    table <- callGeneric(e1@table, e2@table)
+    fact <- table@fact
+    column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
+    type <- .getColumnType(column)
+    initialize(e1, table = table, type = type)
 })
 
 #' @export
+#' @importFrom dplyr mutate
 setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "atomic"), function(e1, e2) {
-    initialize(e1, table = callGeneric(e1@table, e2))
+    table <- callGeneric(e1@table, e2)
+    fact <- table@fact
+    column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
+    type <- .getColumnType(column)
+    initialize(e1, table = table, type = type)
 })
 
 #' @export
+#' @importFrom dplyr mutate
 setMethod("Ops", c(e1 = "atomic", e2 = "ParquetArraySeed"), function(e1, e2) {
-    initialize(e2, table = callGeneric(e1, e2@table))
+    table <- callGeneric(e1, e2@table)
+    fact <- table@fact
+    column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
+    type <- .getColumnType(column)
+    initialize(e2, table = table, type = type)
 })
 
 #' @export
+#' @importFrom dplyr mutate
 setMethod("Math", "ParquetArraySeed", function(x) {
-    initialize(x, table = callGeneric(x@table))
+    table <- callGeneric(x@table)
+    fact <- table@fact
+    column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
+    type <- .getColumnType(column)
+    initialize(x, table = table, type = type)
 })
 
 .extract_array_index <- function(x, index) {
@@ -227,7 +249,7 @@ setMethod("extract_array", "ParquetArraySeed", function(x, index) {
     table <- x@table
 
     # Initialize output array
-    fill <- switch(x@table@fact, logical = FALSE, integer = 0L, double = 0, character = "")
+    fill <- switch(x@type, logical = FALSE, integer = 0L, double = 0, character = "")
     output <- array(fill, dim = lengths(index, use.names = FALSE))
     if (min(dim(output)) == 0L) {
         return(output)
@@ -251,14 +273,16 @@ setMethod("extract_array", "ParquetArraySeed", function(x, index) {
 setMethod("DelayedArray", "ParquetArraySeed", function(seed) ParquetArray(seed))
 
 #' @export
+#' @importFrom dplyr select
 #' @importFrom stats setNames
 #' @rdname ParquetArraySeed
-ParquetArraySeed <- function(query, key, value, type = NULL, ...) {
+ParquetArraySeed <- function(conn, key, fact, type = NULL, ...) {
     if (is.null(type)) {
-        fact <- value
+        table <- ParquetFactTable(conn, key = key, fact = fact, ...)
+        column <- as.data.frame(select(head(table@conn, 0L), !!fact))[[fact]]
+        type <- .getColumnType(column)
     } else {
-        fact <- setNames(type, value)
+        table <- ParquetFactTable(conn, key = key, fact = fact, type = setNames(type, fact), ...)
     }
-    table <- ParquetFactTable(query, key = key, fact = fact, ...)
-    new("ParquetArraySeed", table = table, drop = FALSE)
+    new("ParquetArraySeed", table = table, type = type, drop = FALSE)
 }

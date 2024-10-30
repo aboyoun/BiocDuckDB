@@ -4,18 +4,17 @@
 #' ParquetFactTable is a low-level helper class for representing a
 #' pointer to a Parquet fact table.
 #'
-#' @param query Either a string containing the path to the Parquet data,
-#' an \code{ArrowObject} \code{Dataset}, or an \code{arrow_dplyr_query} object.
+#' @param conn Either a string containing the path to the Parquet data or a
+#' \code{tbl_duckdb_connection} object.
 #' @param key Either a character vector or a named list of character vectors
 #' containing the names of the columns in the Parquet data that specify
 #' the primary key of the array.
 #' @param fact Either a character vector containing the names of the columns
-#' in the Parquet data that specify the facts or a named character vector where
-#' the names specify the column names and the values specify the column type;
-#' one of \code{"logical"}, \code{"integer"}, \code{"double"}, or
-#' \code{"character"}.
-#' @param ... Further arguments to be passed to
-#' \code{\link[arrow]{open_dataset}}.
+#' in the Parquet data that specify the facts
+#' @param type An optional named character vector where the names specify the
+#' column names and the values specify the column type; one of
+#' \code{"logical"}, \code{"integer"}, \code{"double"}, or \code{"character"}.
+#' @param ... Further arguments to be passed to \code{read_parquet}.
 #'
 #' @author Patrick Aboyoun
 #'
@@ -47,29 +46,28 @@
 #' Ops,atomic,ParquetFactTable-method
 #' Math,ParquetFactTable-method
 #'
-#' @include arrow_query.R
+#' @include duckdb_connection.R
 #' @include acquireDataset.R
 #' @include keynames.R
 #'
 #' @name ParquetFactTable
 NULL
 
-setOldClass("arrow_dplyr_query")
-
 #' @export
 #' @importClassesFrom BiocGenerics OutOfMemoryObject
 #' @importClassesFrom IRanges CharacterList
 #' @importClassesFrom S4Vectors RectangularData
 setClass("ParquetFactTable", contains = c("RectangularData", "OutOfMemoryObject"),
-    slots = c(query = "arrow_dplyr_query", key = "CharacterList", fact = "character"))
+    slots = c(conn = "tbl_duckdb_connection", key = "CharacterList", fact = "list"))
 
+#' @importFrom S4Vectors setValidity2
 setValidity2("ParquetFactTable", function(x) {
     msg <- NULL
     if (is.null(names(x@key))) {
         msg <- c(msg, "'key' slot must be a named CharacterList")
     }
-    if (!all(names(x@key) %in% names(x@query))) {
-        msg <- c(msg, "all names in 'key' slot must match columns in 'query'")
+    if (!all(names(x@key) %in% colnames(x@conn))) {
+        msg <- c(msg, "all names in 'key' slot must match column names in 'conn'")
     }
     for (i in seq_along(x@key)) {
         if (is.null(names(x@key[[i]]))) {
@@ -78,10 +76,7 @@ setValidity2("ParquetFactTable", function(x) {
         }
     }
     if (is.null(names(x@fact))) {
-        msg <- c(msg, "'fact' slot must be a named character vector")
-    }
-    if (!all(names(x@fact) %in% names(x@query))) {
-        msg <- c(msg, "all names in 'fact' slot must match columns in 'query'")
+        msg <- c(msg, "'fact' slot must be a named list")
     }
     if (length(intersect(names(x@key), names(x@fact)))) {
         msg <- c(msg, "names in 'key' and 'fact' slots must be unique")
@@ -94,7 +89,7 @@ setValidity2("ParquetFactTable", function(x) {
 })
 
 #' @export
-setMethod("arrow_query", "ParquetFactTable", function(x) x@query)
+setMethod("duckdb_connection", "ParquetFactTable", function(x) x@conn)
 
 #' @export
 setMethod("nkey", "ParquetFactTable", function(x) length(x@key))
@@ -103,9 +98,11 @@ setMethod("nkey", "ParquetFactTable", function(x) length(x@key))
 setMethod("nkeydim", "ParquetFactTable", function(x) lengths(x@key, use.names = FALSE))
 
 #' @export
+#' @importFrom BiocGenerics nrow
 setMethod("nrow", "ParquetFactTable", function(x) as.integer(prod(nkeydim(x))))
 
 #' @export
+#' @importFrom BiocGenerics ncol
 setMethod("ncol", "ParquetFactTable", function(x) length(x@fact))
 
 #' @export
@@ -144,26 +141,17 @@ setMethod("colnames", "ParquetFactTable", function(x, do.NULL = TRUE, prefix = "
 
 #' @export
 #' @importFrom BiocGenerics colnames<-
-#' @importFrom dplyr rename
-#' @importFrom stats setNames
 setReplaceMethod("colnames", "ParquetFactTable", function(x, value) {
-    query <- x@query
     fact <- x@fact
-    orig <- names(fact)
-    query <- rename(query, !!!setNames(orig, value))
-    value <- setNames(value, orig)
-    names(fact) <- value[names(fact)]
-    initialize(x, query = query, fact = fact)
+    names(fact) <- value
+    initialize(x, fact = fact)
 })
 
+#' @importFrom dplyr distinct filter pull select
 .subset_ParquetFactTable <- function(x, i, j, ..., drop = TRUE) {
-    query <- x@query
+    conn <- x@conn
     fact <- x@fact
     if (!missing(j)) {
-        if (!is.character(j)) {
-            j <- names(fact)[j]
-        }
-        query$selected_columns <- c(query$selected_columns[names(x@key)], query$selected_columns[j])
         fact <- fact[j]
     }
 
@@ -176,12 +164,13 @@ setReplaceMethod("colnames", "ParquetFactTable", function(x, value) {
             sub <- i[[k]]
             if (is.atomic(sub)) {
                 key[[k]] <- key[[k]][sub]
-            } else if (is(sub, "ParquetColumn") && (type(sub) == "logical") &&
+            } else if (is(sub, "ParquetColumn") &&
+                       is.logical(as.vector(head(sub, 0L))) &&
                        isTRUE(all.equal(as(x, "ParquetFactTable"), sub@table))) {
-                keep <- sub@table@query$selected_columns[colnames(sub@table)]
-                query <- filter(query, !!keep)
+                keep <- sub@table@fact[[1L]]
+                conn <- filter(conn, !!keep)
                 for (kname in names(key)) {
-                    kdnames <- pull(distinct(select(query, as.name(!!kname))), as_vector = TRUE)
+                    kdnames <- pull(distinct(select(conn, as.name(!!kname))))
                     key[[kname]] <- key[[kname]][match(kdnames, key[[kname]])]
                 }
             } else {
@@ -190,7 +179,7 @@ setReplaceMethod("colnames", "ParquetFactTable", function(x, value) {
         }
     }
 
-    initialize(x, query = query, key = key, fact = fact, ...)
+    initialize(x, conn = conn, key = key, fact = fact, ...)
 }
 
 #' @export
@@ -200,8 +189,6 @@ setMethod("[", "ParquetFactTable", .subset_ParquetFactTable)
 #' @importFrom S4Vectors bindCOLS
 setMethod("bindCOLS", "ParquetFactTable",
 function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TRUE) {
-    query <- x@query
-    selected_columns <- query$selected_columns
     fact <- x@fact
 
     for (i in seq_along(objects)) {
@@ -219,13 +206,10 @@ function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TR
             }
             colnames(obj) <- newname
         }
-        selected_columns <- c(selected_columns, obj@query$selected_columns[colnames(obj)])
         fact <- c(fact, obj@fact)
     }
-    names(selected_columns) <- make.unique(names(selected_columns), sep = "_")
     names(fact) <- make.unique(names(fact), sep = "_")
-    query$selected_columns <- selected_columns
-    initialize(x, query = query, fact = fact)
+    initialize(x, fact = fact)
 })
 
 #' @exportS3Method base::all.equal
@@ -233,31 +217,19 @@ all.equal.ParquetFactTable <- function(target, current, check.fact = FALSE, ...)
     if (!is(current, "ParquetFactTable")) {
         return("current is not a ParquetFactTable")
     }
-    if (!identical(target@query$.data, current@query$.data)) {
-        return("query data mismatch")
+    target <- as(target, "ParquetFactTable")
+    current <- as(current, "ParquetFactTable")
+    if (!check.fact) {
+        target <- target[, integer()]
+        current <- current[, integer()]
     }
-    if (check.fact) {
-        i <- setdiff(names(unclass(target@query)), ".data")
-    } else {
-        i <- setdiff(names(unclass(target@query)), c(".data", "selected_columns"))
-    }
-    target <- c(unclass(target@query)[i], list(key = as.list(target@key), fact = list(target@fact)[check.fact]))
-    current <- c(unclass(current@query)[i], list(key = as.list(current@key), fact = list(current@fact)[check.fact]))
-    callGeneric(target, current, ...)
+    callGeneric(unclass(target), unclass(current), ...)
 }
 
-
-#' @importFrom dplyr mutate select
 #' @importFrom stats setNames
-.Ops.ParquetFactTable <- function(.Generic, query, key, fin1, fin2, fout) {
-    cols <- setNames(Map(function(x, y) call(.Generic, x, y), fin1, fin2), fout)
-    query <- do.call(mutate, c(list(query), cols))
-    query <- select(query, c(names(key), fout))
-    fact <- setNames(rep.int(NA_character_, length(cols)), fout)
-    for (i in seq_along(fout)) {
-        fact[i] <- .getColumnType(select(query, as.name(fout[i])))
-    }
-    new("ParquetFactTable", query = query, key = key, fact = fact)
+.Ops.ParquetFactTable <- function(.Generic, conn, key, fin1, fin2, fout) {
+    fact <- setNames(Map(function(x, y) call(.Generic, x, y), fin1, fin2), fout)
+    new("ParquetFactTable", conn = conn, key = key, fact = fact)
 }
 
 #' @export
@@ -266,14 +238,14 @@ setMethod("Ops", c(e1 = "ParquetFactTable", e2 = "ParquetFactTable"), function(e
         stop("can only perform arithmetic operations with compatible objects")
     }
     comb <- cbind(e1, e2)
-    fin1 <- lapply(head(colnames(comb), ncol(e1)), as.name)
-    fin2 <- lapply(tail(colnames(comb), ncol(e2)), as.name)
+    fin1 <- head(comb@fact, ncol(e1))
+    fin2 <- tail(comb@fact, ncol(e2))
     if (ncol(e1) >= ncol(e2)) {
         fout <- colnames(e1)
     } else {
         fout <- colnames(e2)
     }
-    .Ops.ParquetFactTable(.Generic, query = comb@query, key = comb@key, fin1 = fin1, fin2 = fin2, fout = fout)
+    .Ops.ParquetFactTable(.Generic, conn = comb@conn, key = comb@key, fin1 = fin1, fin2 = fin2, fout = fout)
 })
 
 #' @export
@@ -281,8 +253,7 @@ setMethod("Ops", c(e1 = "ParquetFactTable", e2 = "atomic"), function(e1, e2) {
     if (length(e2) != 1L) {
         stop("can only perform binary operations with a scalar value")
     }
-    fin1 <- lapply(names(e1@fact), as.name)
-    .Ops.ParquetFactTable(.Generic, query = e1@query, key = e1@key, fin1 = fin1, fin2 = e2, fout = colnames(e1))
+    .Ops.ParquetFactTable(.Generic, conn = e1@conn, key = e1@key, fin1 = e1@fact, fin2 = e2, fout = colnames(e1))
 })
 
 #' @export
@@ -290,16 +261,12 @@ setMethod("Ops", c(e1 = "atomic", e2 = "ParquetFactTable"), function(e1, e2) {
     if (length(e1) != 1L) {
         stop("can only perform binary operations with a scalar value")
     }
-    fin2 <- lapply(names(e2@fact), as.name)
-    .Ops.ParquetFactTable(.Generic, query = e2@query, key = e2@key, fin1 = e1, fin2 = fin2, fout = colnames(e2))
+    .Ops.ParquetFactTable(.Generic, conn = e2@conn, key = e2@key, fin1 = e1, fin2 = e2@fact, fout = colnames(e2))
 })
 
 #' @export
-#' @importFrom dplyr mutate select
 setMethod("Math", "ParquetFactTable", function(x) {
-    query <- x@query
-    fact <- x@fact
-    cols <-
+    fact <-
       switch(.Generic,
              abs =,
              sign =,
@@ -310,40 +277,48 @@ setMethod("Math", "ParquetFactTable", function(x) {
              log =,
              log10 =,
              log2 =,
-             log1p =,
              acos =,
+             acosh =,
              asin =,
+             asinh =,
+             atan =,
+             atanh =,
              exp =,
              cos =,
+             cosh =,
              sin =,
-             tan = {
-                setNames(lapply(colnames(x), function(y) call(.Generic, as.name(y))), colnames(x))
+             sinh =,
+             tan =,
+             tanh =,
+             gamma =,
+             lgamma = {
+                lapply(x@fact, function(j) call(.Generic, j))
              },
              stop("unsupported Math operator: ", .Generic))
-    query <- do.call(mutate, c(list(query), cols))
-    for (i in names(fact)) {
-        fact[i] <- .getColumnType(select(query, as.name(i)))
-    }
-    initialize(x, query = query, fact = fact)
+    initialize(x, fact = fact)
 })
 
 #' @export
 #' @importFrom BiocGenerics as.data.frame
-#' @importFrom dplyr filter
+#' @importFrom dplyr filter mutate select
 setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, optional = FALSE, ...) {
-    query <- x@query
+    conn <- x@conn
     key <- x@key
     fact <- x@fact
 
     for (i in names(key)) {
-        query <- filter(query, as.character(!!as.name(i)) %in% key[[i]])
+        set <- key[[i]]
+        conn <- filter(conn, as.character(!!as.name(i)) %in% set)
     }
+
+    conn <- mutate(conn, !!!fact)
+    conn <- select(conn, c(names(key), names(fact)))
 
     # Allow for 1 extra row to check for duplicate keys
     length <- prod(lengths(key, use.names = FALSE)) + 1L
-    query <- head(query, n = length)
+    conn <- head(conn, n = length)
 
-    df <- as.data.frame(query)[, c(names(key), names(fact))]
+    df <- as.data.frame(conn)[, c(names(key), names(fact))]
     if (anyDuplicated(df[, names(key)])) {
         stop("duplicate keys found in Parquet data")
     }
@@ -351,28 +326,20 @@ setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, opt
     df
 })
 
-#' @importFrom dplyr pull slice_head
-.getColumnType <- function(column_query) {
-    DelayedArray::type(pull(slice_head(column_query, n = 0L), as_vector = TRUE))
-}
-
 #' @export
-#' @importFrom dplyr distinct everything mutate pull select
+#' @importFrom dplyr distinct pull select
 #' @importFrom IRanges CharacterList
 #' @rdname ParquetFactTable
-ParquetFactTable <- function(query, key, fact = setdiff(names(query), names(key)), ...) {
-    if (is.character(query)) {
-        query <- acquireDataset(query, ...)
+ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key)), type = NULL, ...) {
+    if (is.character(conn)) {
+        conn <- acquireDataset(conn, ...)
     }
-    if (inherits(query, "ArrowObject") && inherits(query, "Dataset")) {
-        query <- select(query, everything())
-    }
-    if (!inherits(query, "arrow_dplyr_query")) {
-        stop("'query' must be an 'arrow_dplyr_query' object")
+    if (!inherits(conn, "tbl_duckdb_connection")) {
+        stop("'conn' must be a 'tbl_duckdb_connection' object")
     }
 
     if (is.character(key)) {
-        key <- sapply(key, function(x) pull(distinct(select(query, as.name(!!x))), as_vector = TRUE), simplify = FALSE)
+        key <- sapply(key, function(x) pull(distinct(select(conn, as.name(!!x)))), simplify = FALSE)
     }
     if (is.list(key)) {
         key <- CharacterList(key, compress = FALSE)
@@ -387,26 +354,26 @@ ParquetFactTable <- function(query, key, fact = setdiff(names(query), names(key)
         }
     }
 
-    if (!is.character(fact)) {
-        stop("'fact' must be a character vector")
-    }
-    if (is.null(names(fact))) {
-        fact <- setNames(rep.int(NA_character_, length(fact)), fact)
-    }
-
-    for (i in names(fact)) {
-        if (is.na(fact[[i]])) {
-            column_query <- select(query, !!as.name(i))
-            fact[[i]] <- .getColumnType(column_query)
-        } else {
-            cast <- switch(fact[[i]], logical = "as.logical", integer = "as.integer", double = "as.double", character = "as.character",
-                           stop("'type' must be one of 'logical', 'integer', 'double', or 'character'"))
-            query <- do.call(mutate, c(list(query), setNames(list(call(cast, as.name(i))), i)))
+    if (is.character(fact)) {
+        fact <- sapply(fact, as.name, simplify = FALSE)
+        if (!is.null(type)) {
+            if (is.null(names(type)) || length(setdiff(names(type), names(fact)))) {
+                stop("all names in 'type' must have a corresponding name in 'fact'")
+            }
+            for (j in names(type)) {
+                cast <- switch(type[j],
+                               logical = "as.logical",
+                               integer = "as.integer",
+                               double = "as.double",
+                               character = "as.character",
+                               stop("'type' must be one of 'logical', 'integer', 'double', or 'character'"))
+                fact[[j]] <- call(cast, fact[[j]])
+            }
         }
     }
+    if (!is.list(fact) || is.null(names(fact))) {
+        stop("'fact' must be a character vector or a named list")
+    }
 
-    cols <- c(lapply(names(key), as.name), lapply(names(fact), as.name))
-    query <- do.call(select, c(list(query), cols))
-
-    new("ParquetFactTable", query = query, key = key, fact = fact)
+    new("ParquetFactTable", conn = conn, key = key, fact = fact)
 }

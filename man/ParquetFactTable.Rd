@@ -18,24 +18,30 @@
 \alias{Math,ParquetFactTable-method}
 \title{ParquetFactTable objects}
 \usage{
-ParquetFactTable(query, key, fact = setdiff(names(query), names(key)), ...)
+ParquetFactTable(
+  conn,
+  key,
+  fact = setdiff(colnames(conn), names(key)),
+  type = NULL,
+  ...
+)
 }
 \arguments{
-\item{query}{Either a string containing the path to the Parquet data,
-an \code{ArrowObject} \code{Dataset}, or an \code{arrow_dplyr_query} object.}
+\item{conn}{Either a string containing the path to the Parquet data or a
+\code{tbl_duckdb_connection} object.}
 
 \item{key}{Either a character vector or a named list of character vectors
 containing the names of the columns in the Parquet data that specify
 the primary key of the array.}
 
 \item{fact}{Either a character vector containing the names of the columns
-in the Parquet data that specify the facts or a named character vector where
-the names specify the column names and the values specify the column type;
-one of \code{"logical"}, \code{"integer"}, \code{"double"}, or
-\code{"character"}.}
+in the Parquet data that specify the facts}
 
-\item{...}{Further arguments to be passed to
-\code{\link[arrow]{open_dataset}}.}
+\item{type}{An optional named character vector where the names specify the
+column names and the values specify the column type; one of
+\code{"logical"}, \code{"integer"}, \code{"double"}, or \code{"character"}.}
+
+\item{...}{Further arguments to be passed to \code{read_parquet}.}
 }
 \description{
 ParquetFactTable is a low-level helper class for representing a

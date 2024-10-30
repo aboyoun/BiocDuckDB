@@ -1,31 +1,34 @@
-#' Arrow Query Accessor
+#' DuckDB Connection Accessor
 #'
-#' Get the arrow query value contained in an object.
+#' Get the DuckDB connection value contained in an object.
 #'
-#' @param x An object to get the arrow query value.
+#' @param x An object to get the DuckDB connection value.
 #' @param ... Additional arguments, for use in specific methods.
 #'
 #' @author Patrick Aboyoun
 #'
 #' @examples
-#' arrow_query
-#' showMethods("arrow_query")
+#' duckdb_connection
+#' showMethods("duckdb_connection")
 #'
 #' @aliases
-#' arrow_query
+#' duckdb_connection
 #'
-#' arrow_query,ParquetArray-method
-#' arrow_query,ParquetArraySeed-method
-#' arrow_query,ParquetColumn-method
-#' arrow_query,ParquetFactTable-method
-#' arrow_query,ParquetMatrix-method
+#' duckdb_connection,ParquetArray-method
+#' duckdb_connection,ParquetArraySeed-method
+#' duckdb_connection,ParquetColumn-method
+#' duckdb_connection,ParquetFactTable-method
+#' duckdb_connection,ParquetMatrix-method
 #'
 #' @export
-setGeneric("arrow_query", function(x, ...) standardGeneric("arrow_query"))
+setGeneric("duckdb_connection", function(x, ...) standardGeneric("duckdb_connection"))
 
-setOldClass("arrow_dplyr_query")
+setOldClass("tbl_duckdb_connection")
 
-#' @importFrom dplyr pull slice_head
-.getColumnType <- function(column_query) {
-    DelayedArray::type(pull(slice_head(column_query, n = 0L), as_vector = TRUE))
+.getColumnType <- function(column) {
+    if (inherits(column, "Date")) {
+        "Date"
+    } else {
+        DelayedArray::type(column)
+    }
 }

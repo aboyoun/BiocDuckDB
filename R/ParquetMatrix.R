@@ -7,8 +7,8 @@
 #' All the operations available for \link[DelayedArray]{DelayedMatrix}
 #' objects work on ParquetMatrix objects.
 #'
-#' @param query Either a string containing the path to the Parquet data,
-#' an \code{ArrowObject} \code{Dataset}, or an \code{arrow_dplyr_query} object.
+#' @param conn Either a string containing the path to the Parquet data or a
+#' \code{tbl_duckdb_connection} object.
 #' @param row Either a character vector or a named list of character vectors
 #' containing the names of the columns in the Parquet data that specify the
 #' rows of the matrix.
@@ -18,14 +18,13 @@
 #' @param key Either a character vector or a named list of character vectors
 #' containing the names of the columns in the Parquet data that specify the
 #' rows and columns of the matrix.
-#' @param value String containing the name of the column in the Parquet data
+#' @param fact String containing the name of the column in the Parquet data
 #' that specifies the value of the matrix.
 #' @param type String specifying the type of the Parquet data values;
 #' one of \code{"logical"}, \code{"integer"}, \code{"double"}, or
 #' \code{"character"}. If \code{NULL}, this is determined by inspecting
 #' the data.
-#' @param ... Further arguments to be passed to
-#' \code{\link[arrow]{open_dataset}}.
+#' @param ... Further arguments to be passed to \code{read_parquet}.
 #'
 #' @author Patrick Aboyoun
 #'
@@ -42,7 +41,7 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' pqmat <- ParquetMatrix(tf, row = "rowname", col = "colname", value = "value")
+#' pqmat <- ParquetMatrix(tf, row = "rowname", col = "colname", fact = "value")
 #'
 #' @aliases
 #' ParquetMatrix-class
@@ -58,6 +57,7 @@ NULL
 #' @importClassesFrom DelayedArray DelayedMatrix
 setClass("ParquetMatrix", contains = c("ParquetArray", "DelayedMatrix"))
 
+#' @importFrom S4Vectors setValidity2
 setValidity2("ParquetMatrix", function(x) {
     if (nkey(x@seed@table) != 2L) {
         return("'key' seed slot must be a two element named list of character vectors")
@@ -68,7 +68,7 @@ setValidity2("ParquetMatrix", function(x) {
 #' @export
 setMethod("[", "ParquetMatrix", function(x, i, j, ..., drop = TRUE) {
     Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
-    seed <- .subset_ParquetArraySeed(seed(x), Nindex = Nindex, drop = drop)
+    seed <- .subset_ParquetArraySeed(x@seed, Nindex = Nindex, drop = drop)
     if (length(dim(seed)) == 1L) {
         ParquetArray(seed)
     } else {
@@ -79,12 +79,12 @@ setMethod("[", "ParquetMatrix", function(x, i, j, ..., drop = TRUE) {
 #' @export
 #' @importFrom S4Vectors isSingleString
 #' @rdname ParquetMatrix
-ParquetMatrix <- function(query, row, col, value, key = c(row, col), type = NULL, ...) {
-    if (!is(query, "ParquetArraySeed")) {
+ParquetMatrix <- function(conn, row, col, fact, key = c(row, col), type = NULL, ...) {
+    if (!is(conn, "ParquetArraySeed")) {
         if (length(key) != 2L) {
             stop("'key' must contain exactly 2 elements: rows and columns")
         }
-        query <- ParquetArraySeed(query, key = key, value = value, type = type, ...)
+        conn <- ParquetArraySeed(conn, key = key, fact = fact, type = type, ...)
     }
-    new("ParquetMatrix", seed = query)
+    new("ParquetMatrix", seed = conn)
 }

@@ -123,10 +123,10 @@ colData(se)
 ## 17               2   0.4853946
 ```
 
-Advanced users can also use the `arrow_query` method to retrieve the query for the underlying Arrow Dataset:
+Advanced users can also use the `duckdb_connection` method to retrieve the query for the underlying Arrow Dataset:
 
 ```r
-arrow_query(df)
+duckdb_connection(df)
 ## FileSystemDataset (query)
 ## mpg: double
 ## cyl: double

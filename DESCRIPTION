@@ -18,18 +18,19 @@ Depends:
 Imports:
     methods,
     stats,
-    utils,
     BiocGenerics (>= 0.51.2),
     S4Vectors,
     IRanges,
     S4Arrays (>= 1.1.1),
-    arrow,
-    dplyr
+    DBI,
+    dplyr,
+    duckdb,
 Suggests:
     knitr,
     rmarkdown,
     BiocStyle,
-    testthat
+    testthat,
+    arrow
 biocViews: DataRepresentation, Infrastructure, Software
 VignetteBuilder: knitr
 BugReports: https://github.com/LTLA/ParquetDataFrame
@@ -39,7 +40,7 @@ Encoding: UTF-8
 Collate:
     'keynames.R'
     'acquireDataset.R'
-    'arrow_query.R'
+    'duckdb_connection.R'
     'ParquetFactTable.R'
     'ParquetArraySeed.R'
     'ParquetArray.R'

@@ -21,7 +21,7 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' pqarray <- ParquetArray(tf, key = c("Class", "Sex", "Age", "Survived"), value = "fate")
+#' pqarray <- ParquetArray(tf, key = c("Class", "Sex", "Age", "Survived"), fact = "fate")
 #'
 #' @aliases
 #' ParquetArray-class
@@ -37,7 +37,7 @@
 #' \code{\link{ParquetArraySeed}},
 #' \code{\link[DelayedArray]{DelayedArray}}
 #'
-#' @include arrow_query.R
+#' @include duckdb_connection.R
 #' @include ParquetArraySeed.R
 #'
 #' @name ParquetArray
@@ -48,8 +48,7 @@ NULL
 setClass("ParquetArray", contains = "DelayedArray", slots = c(seed = "ParquetArraySeed"))
 
 #' @export
-#' @importFrom DelayedArray seed
-setMethod("arrow_query", "ParquetArray", function(x) callGeneric(x@seed))
+setMethod("duckdb_connection", "ParquetArray", function(x) callGeneric(x@seed))
 
 #' @export
 setMethod("[", "ParquetArray", function(x, i, j, ..., drop = TRUE) {
@@ -91,9 +90,9 @@ setMethod("Math", "ParquetArray", function(x) {
 
 #' @export
 #' @rdname ParquetArray
-ParquetArray <- function(query, key, value, type = NULL, ...) {
-    if (!is(query, "ParquetArraySeed")) {
-        query <- ParquetArraySeed(query, key = key, value = value, type = type, ...)
+ParquetArray <- function(conn, key, fact, type = NULL, ...) {
+    if (!is(conn, "ParquetArraySeed")) {
+        conn <- ParquetArraySeed(conn, key = key, fact = fact, type = type, ...)
     }
-    new("ParquetArray", seed = query)
+    new("ParquetArray", seed = conn)
 }

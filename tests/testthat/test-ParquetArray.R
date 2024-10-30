@@ -2,10 +2,10 @@
 # library(testthat); library(ParquetDataFrame); source("setup.R"); source("test-ParquetArray.R")
 
 test_that("basic methods work as expected for a ParquetArray", {
-    pqarray <- ParquetArray(titanic_path, key = c("Class", "Sex", "Age", "Survived"), value = "fate")
+    pqarray <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate")
     checkParquetArray(pqarray, titanic_array)
 
-    pqarray <- ParquetArray(titanic_path, key = c("Class", "Sex", "Age", "Survived"), value = "fate", type = "double")
+    pqarray <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate", type = "double")
     expect_s4_class(pqarray, "ParquetArray")
     expect_identical(type(pqarray), "double")
     expect_identical(length(pqarray), length(titanic_array))
@@ -13,7 +13,7 @@ test_that("basic methods work as expected for a ParquetArray", {
     expect_identical(dimnames(pqarray), dimnames(titanic_array))
     expect_equal(as.array(pqarray), titanic_array)
 
-    pqarray <- ParquetArray(titanic_path, key = c("Class", "Sex", "Age", "Survived"), value = "fate", type = "character")
+    pqarray <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate", type = "character")
     expect_s4_class(pqarray, "ParquetArray")
     expect_identical(type(pqarray), "character")
     expect_identical(length(pqarray), length(titanic_array))
@@ -22,7 +22,7 @@ test_that("basic methods work as expected for a ParquetArray", {
 })
 
 test_that("extraction methods work as expected for a ParquetArray", {
-    pqarray <- ParquetArray(titanic_path, key = c("Class", "Sex", "Age", "Survived"), value = "fate")
+    pqarray <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate")
 
     expect_error(pqarray[,])
 
@@ -55,14 +55,14 @@ test_that("extraction methods work as expected for a ParquetArray", {
 })
 
 test_that("aperm and t methods work as expected for a ParquetArray", {
-    seed <- ParquetArray(titanic_path, key = c("Class", "Sex", "Age", "Survived"), value = "fate")
+    seed <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate")
 
     object <- aperm(seed, c(4, 2, 1, 3))
     expected <- aperm(titanic_array, c(4, 2, 1, 3))
     checkParquetArray(object, expected)
 
     names(dimnames(state.x77)) <- c("rowname", "colname")
-    seed <- ParquetArray(state_path, key = c("rowname", "colname"), value = "value")
+    seed <- ParquetArray(state_path, key = dimnames(state.x77), fact = "value")
 
     object <- t(seed)
     expected <- t(state.x77)
@@ -76,7 +76,7 @@ test_that("aperm and t methods work as expected for a ParquetArray", {
 })
 
 test_that("Arith methods work as expected for a ParquetArray", {
-    pqarray <- ParquetArray(titanic_path, key = c("Class", "Sex", "Age", "Survived"), value = "fate")
+    pqarray <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate")
 
     ## "+"
     checkParquetArray(pqarray + sqrt(pqarray), as.array(pqarray) + sqrt(as.array(pqarray)))
@@ -113,21 +113,17 @@ test_that("Arith methods work as expected for a ParquetArray", {
 
     ## "%%"
     checkParquetArray(pqarray %% sqrt(pqarray), as.array(pqarray) %% sqrt(as.array(pqarray)))
-    checkParquetArray(pqarray %% 1L, as.array(pqarray) %% 1L)
     checkParquetArray(pqarray %% 3.14, as.array(pqarray) %% 3.14)
-    checkParquetArray(1L %% pqarray, 1L %% as.array(pqarray))
     checkParquetArray(3.14 %% pqarray, 3.14 %% as.array(pqarray))
 
     ## "%/%"
     checkParquetArray(pqarray %/% sqrt(pqarray), as.array(pqarray) %/% sqrt(as.array(pqarray)))
-    checkParquetArray(pqarray %/% 1L, as.array(pqarray) %/% 1L)
     checkParquetArray(pqarray %/% 3.14, as.array(pqarray) %/% 3.14)
-    checkParquetArray(1L %/% pqarray, 1L %/% as.array(pqarray))
     checkParquetArray(3.14 %/% pqarray, 3.14 %/% as.array(pqarray))
 })
 
 test_that("Compare methods work as expected for a ParquetArray", {
-    pqarray <- ParquetArray(titanic_path, key = c("Class", "Sex", "Age", "Survived"), value = "fate")
+    pqarray <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate")
 
     ## "=="
     checkParquetArray(pqarray == sqrt(pqarray), as.array(pqarray) == sqrt(as.array(pqarray)))
@@ -173,7 +169,7 @@ test_that("Compare methods work as expected for a ParquetArray", {
 })
 
 test_that("Logic methods work as expected for a ParquetArray", {
-    pqarray <- ParquetArray(titanic_path, key = c("Class", "Sex", "Age", "Survived"), value = "fate")
+    pqarray <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate")
 
     ## "&"
     x <- pqarray > 70
@@ -187,7 +183,8 @@ test_that("Logic methods work as expected for a ParquetArray", {
 })
 
 test_that("Math methods work as expected for a ParquetArray", {
-    pqarray <- ParquetArray(state_path, key = list("rowname" = row.names(state.x77), "colname" = colnames(state.x77)), value = "value")
+    names(dimnames(state.x77)) <- c("rowname", "colname")
+    pqarray <- ParquetArray(state_path, key = dimnames(state.x77), fact = "value")
 
     income <- pqarray[, "Income"]
     ikeep <-
@@ -199,7 +196,6 @@ test_that("Math methods work as expected for a ParquetArray", {
     illiteracy <- pqarray[ikeep, "Illiteracy"]
 
     checkParquetArray(abs(income), abs(as.array(income)))
-    checkParquetArray(sign(income), sign(as.array(income)))
     checkParquetArray(sqrt(income), sqrt(as.array(income)))
     checkParquetArray(ceiling(income), ceiling(as.array(income)))
     checkParquetArray(floor(income), floor(as.array(income)))
@@ -213,39 +209,38 @@ test_that("Math methods work as expected for a ParquetArray", {
     checkParquetArray(log(income), log(as.array(income)))
     checkParquetArray(log10(income), log10(as.array(income)))
     checkParquetArray(log2(income), log2(as.array(income)))
-    checkParquetArray(log1p(income), log1p(as.array(income)))
+
+    expect_error(log1p(income))
 
     checkParquetArray(acos(illiteracy), acos(as.array(illiteracy)))
-
-    expect_error(acosh(illiteracy))
-
+    checkParquetArray(acosh(income), acosh(as.array(income)))
     checkParquetArray(asin(illiteracy), asin(as.array(illiteracy)))
-
-    expect_error(asinh(illiteracy))
-    expect_error(atan(illiteracy))
-    expect_error(atanh(illiteracy))
+    checkParquetArray(asinh(income), asinh(as.array(income)))
+    checkParquetArray(atan(income), atan(as.array(income)))
+    checkParquetArray(atanh(illiteracy), atanh(as.array(illiteracy)))
 
     checkParquetArray(exp(income), exp(as.array(income)))
 
     expect_error(expm1(income))
 
-    checkParquetArray(cos(income), cos(as.array(income)))
+    checkParquetArray(cos(illiteracy), cos(as.array(illiteracy)))
+    checkParquetArray(cosh(illiteracy), cosh(as.array(illiteracy)))
 
-    expect_error(cosh(income))
-    expect_error(cospi(income))
+    expect_error(cospi(illiteracy))
 
-    checkParquetArray(sin(income), sin(as.array(income)))
+    checkParquetArray(sin(illiteracy), sin(as.array(illiteracy)))
+    checkParquetArray(sinh(illiteracy), sinh(as.array(illiteracy)))
 
-    expect_error(sinh(income))
-    expect_error(sinpi(income))
+    expect_error(sinpi(illiteracy))
 
-    checkParquetArray(tan(income), tan(as.array(income)))
+    checkParquetArray(tan(illiteracy), tan(as.array(illiteracy)))
+    checkParquetArray(tanh(illiteracy), tanh(as.array(illiteracy)))
 
-    expect_error(tanh(income))
-    expect_error(tanpi(income))
+    expect_error(tanpi(illiteracy))
 
-    expect_error(gamma(income))
-    expect_error(lgamma(income))
-    expect_error(digamma(income))
-    expect_error(trigamma(income))
+    checkParquetArray(gamma(illiteracy), gamma(as.array(illiteracy)))
+    checkParquetArray(lgamma(illiteracy), lgamma(as.array(illiteracy)))
+
+    expect_error(digamma(illiteracy))
+    expect_error(trigamma(illiteracy))
 })

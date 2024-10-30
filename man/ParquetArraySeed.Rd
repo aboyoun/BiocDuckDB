@@ -17,17 +17,17 @@
 \alias{Math,ParquetArraySeed-method}
 \title{ParquetArraySeed objects}
 \usage{
-ParquetArraySeed(query, key, value, type = NULL, ...)
+ParquetArraySeed(conn, key, fact, type = NULL, ...)
 }
 \arguments{
-\item{query}{Either a string containing the path to the Parquet data,
-an \code{ArrowObject} \code{Dataset}, or an \code{arrow_dplyr_query} object.}
+\item{conn}{Either a string containing the path to the Parquet data or a
+\code{tbl_duckdb_connection} object.}
 
 \item{key}{Either a character vector or a named list of character vectors
 containing the names of the columns in the Parquet data that specify
 the primary key of the array.}
 
-\item{value}{String containing the name of the column in the Parquet data
+\item{fact}{String containing the name of the column in the Parquet data
 that specifies the value of the array.}
 
 \item{type}{String specifying the type of the Parquet data values;
@@ -35,8 +35,7 @@ one of \code{"logical"}, \code{"integer"}, \code{"double"}, or
 \code{"character"}. If \code{NULL}, this is determined by inspecting
 the data.}
 
-\item{...}{Further arguments to be passed to
-\code{\link[arrow]{open_dataset}}.}
+\item{...}{Further arguments to be passed to \code{read_parquet}.}
 }
 \description{
 ParquetArraySeed is a low-level helper class for representing a
@@ -57,7 +56,7 @@ tf <- tempfile()
 on.exit(unlink(tf))
 arrow::write_parquet(df, tf)
 
-pqaseed <- ParquetArraySeed(tf, key = c("Class", "Sex", "Age", "Survived"), value = "fate")
+pqaseed <- ParquetArraySeed(tf, key = c("Class", "Sex", "Age", "Survived"), fact = "fate")
 
 }
 \seealso{

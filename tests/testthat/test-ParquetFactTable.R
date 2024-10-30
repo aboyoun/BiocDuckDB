@@ -4,10 +4,10 @@
 test_that("basic methods work as expected for a ParquetFactTable", {
     # esoph dataset
     tbl <- ParquetFactTable(esoph_path, key = c("agegp", "alcgp", "tobgp"))
-    checkParquetFactTable(tbl, esoph)
+    checkParquetFactTable(tbl, esoph_df)
 
     tbl <- ParquetFactTable(esoph_path, key = c("agegp", "alcgp", "tobgp"), fact = c("ncases", "ncontrols"))
-    checkParquetFactTable(tbl, esoph)
+    checkParquetFactTable(tbl, esoph_df)
 
     # mtcars dataset
     tbl <- ParquetFactTable(mtcars_path, key = "model")
@@ -35,7 +35,9 @@ test_that("basic methods work as expected for a ParquetFactTable", {
 })
 
 test_that("key names can be modified for a ParquetFactTable", {
-    tbl <- ParquetFactTable(esoph_path, key = c("agegp", "alcgp", "tobgp"), fact = c("ncases", "ncontrols"))
+    tbl <- ParquetFactTable(esoph_path,
+                            key = list("agegp" = levels(esoph[["agegp"]]), "alcgp" = levels(esoph[["alcgp"]]), "tobgp" = levels(esoph[["tobgp"]])),
+                            fact = c("ncases", "ncontrols"))
     expect_identical(nkey(tbl), 3L)
     expect_identical(keynames(tbl), c("agegp", "alcgp", "tobgp"))
     expect_identical(keydimnames(tbl), lapply(esoph[, c("agegp", "alcgp", "tobgp")], levels))
@@ -67,8 +69,9 @@ test_that("fact columns of a ParquetFactTable can be cast to a different type", 
     expect_is(as.data.frame(tbl)[["ncontrols"]], "numeric")
 
     tbl <- ParquetFactTable(esoph_path, key = c("agegp", "alcgp", "tobgp"),
-                            fact = c("ncases" = "integer", "ncontrols" = "integer"))
-    checkParquetFactTable(tbl, esoph)
+                            fact = c("ncases", "ncontrols"),
+                            type = c("ncases" = "integer", "ncontrols" = "integer"))
+    checkParquetFactTable(tbl, esoph_df)
     expect_is(as.data.frame(tbl)[["ncases"]], "integer")
     expect_is(as.data.frame(tbl)[["ncontrols"]], "integer")
 })
@@ -263,39 +266,38 @@ test_that("Math methods work as expected for a ParquetFactTable", {
     checkParquetFactTable(log(income), cbind(income_df[, 1:4], value = log(income_df$value)))
     checkParquetFactTable(log10(income), cbind(income_df[, 1:4], value = log10(income_df$value)))
     checkParquetFactTable(log2(income), cbind(income_df[, 1:4], value = log2(income_df$value)))
-    checkParquetFactTable(log1p(income), cbind(income_df[, 1:4], value = log1p(income_df$value)))
+
+    expect_error(log1p(income))
 
     checkParquetFactTable(acos(illiteracy), cbind(illiteracy_df[, 1:4], value = acos(illiteracy_df$value)))
-
-    expect_error(acosh(illiteracy))
-
+    checkParquetFactTable(acosh(income), cbind(income_df[, 1:4], value = acosh(income_df$value)))
     checkParquetFactTable(asin(illiteracy), cbind(illiteracy_df[, 1:4], value = asin(illiteracy_df$value)))
-
-    expect_error(asinh(illiteracy))
-    expect_error(atan(illiteracy))
-    expect_error(atanh(illiteracy))
+    checkParquetFactTable(asinh(income), cbind(income_df[, 1:4], value = asinh(income_df$value)))
+    checkParquetFactTable(atan(income), cbind(income_df[, 1:4], value = atan(income_df$value)))
+    checkParquetFactTable(atanh(illiteracy), cbind(illiteracy_df[, 1:4], value = atanh(illiteracy_df$value)))
 
     checkParquetFactTable(exp(income), cbind(income_df[, 1:4], value = exp(income_df$value)))
 
     expect_error(expm1(income))
 
-    checkParquetFactTable(cos(income), cbind(income_df[, 1:4], value = cos(income_df$value)))
+    checkParquetFactTable(cos(illiteracy), cbind(illiteracy_df[, 1:4], value = cos(illiteracy_df$value)))
+    checkParquetFactTable(cosh(illiteracy), cbind(illiteracy_df[, 1:4], value = cosh(illiteracy_df$value)))
 
-    expect_error(cosh(income))
-    expect_error(cospi(income))
+    expect_error(cospi(illiteracy))
 
-    checkParquetFactTable(sin(income), cbind(income_df[, 1:4], value = sin(income_df$value)))
+    checkParquetFactTable(sin(illiteracy), cbind(illiteracy_df[, 1:4], value = sin(illiteracy_df$value)))
+    checkParquetFactTable(sinh(illiteracy), cbind(illiteracy_df[, 1:4], value = sinh(illiteracy_df$value)))
 
-    expect_error(sinh(income))
-    expect_error(sinpi(income))
+    expect_error(sinpi(illiteracy))
 
-    checkParquetFactTable(tan(income), cbind(income_df[, 1:4], value = tan(income_df$value)))
+    checkParquetFactTable(tan(illiteracy), cbind(illiteracy_df[, 1:4], value = tan(illiteracy_df$value)))
+    checkParquetFactTable(tanh(illiteracy), cbind(illiteracy_df[, 1:4], value = tanh(illiteracy_df$value)))
 
-    expect_error(tanh(income))
-    expect_error(tanpi(income))
+    expect_error(tanpi(illiteracy))
 
-    expect_error(gamma(income))
-    expect_error(lgamma(income))
-    expect_error(digamma(income))
-    expect_error(trigamma(income))
+    checkParquetFactTable(gamma(illiteracy), cbind(illiteracy_df[, 1:4], value = gamma(illiteracy_df$value)))
+    checkParquetFactTable(lgamma(illiteracy), cbind(illiteracy_df[, 1:4], value = lgamma(illiteracy_df$value)))
+
+    expect_error(digamma(illiteracy))
+    expect_error(trigamma(illiteracy))
 })

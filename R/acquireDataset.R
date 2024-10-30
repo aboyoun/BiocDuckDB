@@ -6,7 +6,7 @@ persistent$handles <- list()
 #' Acquire a (possibly cached) Arrow Dataset created from Parquet data.
 #'
 #' @param path String specifying a path to a Parquet data directory or file.
-#' @param ... Further arguments to be passed to \code{\link[arrow]{open_dataset}}.
+#' @param ... Further arguments to be passed to \code{read_parquet}.
 #'
 #' @return
 #' For \code{acquireDataset}, an Arrow Dataset identical to that returned by \code{as_arrow_table(\link[arrow]{open_dataset})}.
@@ -40,16 +40,17 @@ persistent$handles <- list()
 #' acquireDataset(td) # just re-uses the cache
 #' releaseDataset(td) # clears the cache
 #' @export
-#' @importFrom arrow as_arrow_table
-#' @importFrom arrow open_dataset
-#' @importFrom S4Vectors isSingleString tail
+#' @importFrom DBI dbConnect
+#' @importFrom dplyr tbl
+#' @importFrom duckdb duckdb
+#' @importFrom S4Vectors isSingleString isTRUEorFALSE tail
 acquireDataset <- function(path, ...) {
     if (!(isSingleString(path) && nzchar(path))) {
         stop("'path' must be a single non-empty string")
     }
 
     # Here we set up an LRU cache for the Parquet handles.
-    # This avoids the initialization time when querying lots of columns.
+    # This avoids the initialization time when reading lots of columns.
     nhandles <- length(persistent$handles)
 
     i <- which(names(persistent$handles) == path)
@@ -67,19 +68,35 @@ acquireDataset <- function(path, ...) {
         persistent$handles <- tail(persistent$handles, limit - 1L)
     }
 
-    output <- open_dataset(path, format = "parquet", ...)
+    args <- list(...)
+    if (length(args) == 0L) {
+        args <- ""
+    } else {
+        args <- lapply(args, function(x) {
+            if (isTRUEorFALSE(x)) ifelse(x, "true", "false") else x
+        })
+        args <- paste(c("", paste(names(args), args, sep = " = ")), collapse = ", ")
+    }
+    if (dir.exists(path)) {
+        src <- sprintf("read_parquet('%s'%s)", file.path(path, "**"), args)
+    } else {
+        src <- sprintf("read_parquet('%s'%s)", path, args)
+    }
+    output <- tbl(dbConnect(duckdb()), src)
     persistent$handles[[path]] <- output
     output
 }
 
 #' @export
 #' @rdname acquireDataset
+#' @importFrom DBI dbDisconnect
 releaseDataset <- function(path) {
     if (is.null(path)) {
         persistent$handles <- list()
     } else {
         i <- which(names(persistent$handles) == path)
         if (length(i)) {
+            dbDisconnect(persistent$handles[[i]]$src$con)
             persistent$handles <- persistent$handles[-i]
         }
     }

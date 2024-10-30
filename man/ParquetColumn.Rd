@@ -11,7 +11,6 @@
 \alias{show,ParquetColumn-method}
 \alias{showAsCell,ParquetColumn-method}
 \alias{tail,ParquetColumn-method}
-\alias{type,ParquetColumn-method}
 \alias{Ops,ParquetColumn,ParquetColumn-method}
 \alias{Ops,ParquetColumn,atomic-method}
 \alias{Ops,atomic,ParquetColumn-method}
