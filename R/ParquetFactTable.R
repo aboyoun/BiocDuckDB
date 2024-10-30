@@ -132,7 +132,11 @@ setReplaceMethod("keydimnames", "ParquetFactTable", function(x, value) {
 #' @export
 #' @importFrom BiocGenerics rownames
 setMethod("rownames", "ParquetFactTable", function(x, do.NULL = TRUE, prefix = "row") {
-    do.call(paste, c(do.call(expand.grid, lapply(x@key, names)), list(sep = "|")))
+    if (length(x@key) == 1L) {
+        names(x@key[[1L]])
+    } else {
+        do.call(paste, c(do.call(expand.grid, lapply(x@key, names)), list(sep = "|")))
+    }
 })
 
 #' @export
