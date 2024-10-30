@@ -160,7 +160,7 @@ setMethod("tail", "ParquetDataFrame", function(x, n = 6L, ...) {
     if (n > nr) {
         x
     } else {
-        extractROWS(x, (nr - (n - 1L)):nr)
+        extractROWS(x, (nr + 1L) - rev(seq_len(n)))
     }
 })
 

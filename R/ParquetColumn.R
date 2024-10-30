@@ -116,7 +116,7 @@ setMethod("tail", "ParquetColumn", function(x, n = 6L, ...) {
     if (n > len) {
         x
     } else {
-        extractROWS(x, (len - (n - 1L)):len)
+        extractROWS(x, (len + 1L) - rev(seq_len(n)))
     }
 })
 

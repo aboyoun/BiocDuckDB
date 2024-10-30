@@ -96,10 +96,16 @@ test_that("positional slicing by rows preserves type of a ParquetDataFrame", {
 
 test_that("head preserves type of a ParquetDataFrame", {
     df <- ParquetDataFrame(mtcars_path, key = list(model = rownames(mtcars)))
+    checkParquetDataFrame(head(df, 0), head(mtcars, 0))
+
+    df <- ParquetDataFrame(mtcars_path, key = list(model = rownames(mtcars)))
     checkParquetDataFrame(head(df, 20), head(mtcars, 20))
 })
 
 test_that("tail preserves type of a ParquetDataFrame", {
+    df <- ParquetDataFrame(mtcars_path, key = list(model = rownames(mtcars)))
+    checkParquetDataFrame(tail(df, 0), tail(mtcars, 0))
+
     df <- ParquetDataFrame(mtcars_path, key = list(model = rownames(mtcars)))
     checkParquetDataFrame(tail(df, 20), tail(mtcars, 20))
 })
