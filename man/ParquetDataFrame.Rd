@@ -4,6 +4,7 @@
 \alias{ParquetDataFrame}
 \alias{ParquetDataFrame-class}
 \alias{makeNakedCharacterMatrixForDisplay,ParquetDataFrame-method}
+\alias{show,ParquetDataFrame-method}
 \alias{length,ParquetDataFrame-method}
 \alias{names,ParquetDataFrame-method}
 \alias{rownames<-,ParquetDataFrame-method}

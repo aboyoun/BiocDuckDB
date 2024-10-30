@@ -40,6 +40,7 @@
 #' @aliases
 #' ParquetDataFrame-class
 #' makeNakedCharacterMatrixForDisplay,ParquetDataFrame-method
+#' show,ParquetDataFrame-method
 #'
 #' length,ParquetDataFrame-method
 #'
@@ -89,6 +90,34 @@ setValidity2("ParquetDataFrame", function(x) {
 #' @importFrom S4Vectors makeNakedCharacterMatrixForDisplay
 setMethod("makeNakedCharacterMatrixForDisplay", "ParquetDataFrame", function(x) {
     callNextMethod(as.data.frame(x))
+})
+
+#' @export
+#' @importFrom S4Vectors classNameForDisplay get_showHeadLines get_showTailLines makeNakedCharacterMatrixForDisplay
+setMethod("show", "ParquetDataFrame", function(object) {
+    nhead <- get_showHeadLines()
+    ntail <- get_showTailLines()
+    x_nrow <- nrow(object)
+    x_ncol <- ncol(object)
+    cat(classNameForDisplay(object), " with ",
+        x_nrow, " row", ifelse(x_nrow == 1L, "", "s"), " and ",
+        x_ncol, " column", ifelse(x_ncol == 1L, "", "s"), "\n", sep = "")
+    if (x_nrow != 0L && x_ncol != 0L) {
+        x_rownames <- rownames(object)
+        if (x_nrow <= nhead + ntail + 1L) {
+            m <- makeNakedCharacterMatrixForDisplay(object)
+            if (!is.null(x_rownames))
+                rownames(m) <- x_rownames
+        } else {
+            m <- rbind(makeNakedCharacterMatrixForDisplay(head(object, nhead)),
+                       rbind(rep.int("...", x_ncol)),
+                       makeNakedCharacterMatrixForDisplay(tail(object, ntail)))
+            rownames(m) <- S4Vectors:::make_rownames_for_RectangularData_display(x_rownames, x_nrow, nhead, ntail)
+        }
+        m <- rbind(rep.int("<ParquetColumn>", ncol(object)), m)
+        print(m, quote = FALSE, right = TRUE)
+    }
+    invisible(NULL)
 })
 
 #' @export
