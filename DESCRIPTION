@@ -9,17 +9,19 @@ Description:
     (e.g., SummarizedExperiments) while keeping everything on disk.
 Authors@R:
     c(
-        person("Aaron", "Lun", role=c("aut", "cre"), email="infinite.monkeys.with.keyboards@gmail.com"),
+        person("Patrick", "Aboyoun", role=c("aut", "cre"), email="aboyounp@gene.com"),
+        person("Aaron", "Lun", role="aut", email="infinite.monkeys.with.keyboards@gmail.com"),
         person("Genentech, Inc.", role="cph")
     )
 License: MIT + file LICENSE
 Depends:
-    DelayedArray (>= 0.31.8)
-Imports:
+    R (>= 3.4),
     methods,
+    DelayedArray (>= 0.32.0)
+Imports:
     stats,
     BiocGenerics (>= 0.51.2),
-    S4Vectors,
+    S4Vectors (>= 0.27.13),
     IRanges,
     S4Arrays (>= 1.1.1),
     DBI,
