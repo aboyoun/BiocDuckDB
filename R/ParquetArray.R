@@ -89,10 +89,11 @@ setMethod("Math", "ParquetArray", function(x) {
 })
 
 #' @export
+#' @importFrom S4Vectors new2
 #' @rdname ParquetArray
 ParquetArray <- function(conn, key, fact, type = NULL, ...) {
     if (!is(conn, "ParquetArraySeed")) {
         conn <- ParquetArraySeed(conn, key = key, fact = fact, type = type, ...)
     }
-    new("ParquetArray", seed = conn)
+    new2("ParquetArray", seed = conn, check = FALSE)
 }

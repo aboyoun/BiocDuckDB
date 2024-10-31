@@ -274,6 +274,7 @@ setMethod("DelayedArray", "ParquetArraySeed", function(seed) ParquetArray(seed))
 
 #' @export
 #' @importFrom dplyr select
+#' @importFrom S4Vectors new2
 #' @importFrom stats setNames
 #' @rdname ParquetArraySeed
 ParquetArraySeed <- function(conn, key, fact, type = NULL, ...) {
@@ -284,5 +285,5 @@ ParquetArraySeed <- function(conn, key, fact, type = NULL, ...) {
     } else {
         table <- ParquetFactTable(conn, key = key, fact = fact, type = setNames(type, fact), ...)
     }
-    new("ParquetArraySeed", table = table, type = type, drop = FALSE)
+    new2("ParquetArraySeed", table = table, type = type, drop = FALSE, check = FALSE)
 }

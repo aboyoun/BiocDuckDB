@@ -227,7 +227,7 @@ setMethod("[", "ParquetDataFrame", function(x, i, j, ..., drop = TRUE) {
 })
 
 #' @export
-#' @importFrom S4Vectors normalizeDoubleBracketSubscript
+#' @importFrom S4Vectors new2 normalizeDoubleBracketSubscript
 setMethod("[[", "ParquetDataFrame", function(x, i, j, ...) {
     if (!missing(j)) {
         stop("list-style indexing of a ParquetDataFrame with non-missing 'j' is not supported")
@@ -239,7 +239,7 @@ setMethod("[[", "ParquetDataFrame", function(x, i, j, ...) {
 
     i <- normalizeDoubleBracketSubscript(i, x)
     column <- extractCOLS(x, i)
-    new("ParquetColumn", table = as(column, "ParquetFactTable"), metadata = as.list(mcols(column)))
+    new2("ParquetColumn", table = as(column, "ParquetFactTable"), metadata = as.list(mcols(column)), check = FALSE)
 })
 
 #' @export
@@ -249,10 +249,10 @@ setMethod("replaceROWS", "ParquetDataFrame", function(x, i, value) {
 })
 
 #' @export
-#' @importFrom S4Vectors normalizeSingleBracketReplacementValue
+#' @importFrom S4Vectors new2 normalizeSingleBracketReplacementValue
 setMethod("normalizeSingleBracketReplacementValue", "ParquetDataFrame", function(value, x) {
     if (is(value, "ParquetColumn")) {
-        return(new("ParquetDataFrame", value@table))
+        return(new2("ParquetDataFrame", value@table, check = FALSE))
     }
     callNextMethod()
 })
@@ -297,7 +297,7 @@ setMethod("bindROWS", "ParquetDataFrame", function(x, objects = list(), use.name
 
 #' @export
 #' @importFrom dplyr rename
-#' @importFrom S4Vectors combineRows make_zero_col_DFrame mcols mcols<- metadata
+#' @importFrom S4Vectors combineRows make_zero_col_DFrame mcols mcols<- metadata new2
 cbind.ParquetDataFrame <- function(..., deparse.level = 1) {
     objects <- list(...)
 
@@ -316,11 +316,11 @@ cbind.ParquetDataFrame <- function(..., deparse.level = 1) {
             if (!is.null(cname)) {
                 colnames(table) <- cname
             }
-            objects[[i]] <- new("ParquetDataFrame", table)
+            objects[[i]] <- new2("ParquetDataFrame", table, check = FALSE)
             md <- metadata(obj)
             if (length(md) > 0L) {
                 has_mcols <- TRUE
-                mc <- new("DFrame", rownames = cname, nrows = 1L, listData = md)
+                mc <- new2("DFrame", rownames = cname, nrows = 1L, listData = md, check = FALSE)
                 md <- list()
             }
         } else if (is(obj, "ParquetDataFrame")) {
@@ -368,7 +368,7 @@ setMethod("as.data.frame", "ParquetDataFrame", function(x, row.names = NULL, opt
 
 #' @export
 #' @importFrom dplyr everything select
-#' @importFrom S4Vectors isSingleString
+#' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
 #' @rdname ParquetDataFrame
 ParquetDataFrame <- function(conn, key, fact, ...) {
@@ -377,5 +377,5 @@ ParquetDataFrame <- function(conn, key, fact, ...) {
     } else {
         tbl <- ParquetFactTable(conn, key = key, fact = fact, ...)
     }
-    new("ParquetDataFrame", tbl, ...)
+    new2("ParquetDataFrame", tbl, ..., check = FALSE)
 }

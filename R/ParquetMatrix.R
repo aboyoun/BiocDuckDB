@@ -77,7 +77,7 @@ setMethod("[", "ParquetMatrix", function(x, i, j, ..., drop = TRUE) {
 })
 
 #' @export
-#' @importFrom S4Vectors isSingleString
+#' @importFrom S4Vectors isSingleString new2
 #' @rdname ParquetMatrix
 ParquetMatrix <- function(conn, row, col, fact, key = c(row, col), type = NULL, ...) {
     if (!is(conn, "ParquetArraySeed")) {
@@ -86,5 +86,5 @@ ParquetMatrix <- function(conn, row, col, fact, key = c(row, col), type = NULL, 
         }
         conn <- ParquetArraySeed(conn, key = key, fact = fact, type = type, ...)
     }
-    new("ParquetMatrix", seed = conn)
+    new2("ParquetMatrix", seed = conn, check = FALSE)
 }

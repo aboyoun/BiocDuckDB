@@ -230,10 +230,11 @@ all.equal.ParquetFactTable <- function(target, current, check.fact = FALSE, ...)
     callGeneric(unclass(target), unclass(current), ...)
 }
 
+#' @importFrom S4Vectors new2
 #' @importFrom stats setNames
 .Ops.ParquetFactTable <- function(.Generic, conn, key, fin1, fin2, fout) {
     fact <- setNames(Map(function(x, y) call(.Generic, x, y), fin1, fin2), fout)
-    new("ParquetFactTable", conn = conn, key = key, fact = fact)
+    new2("ParquetFactTable", conn = conn, key = key, fact = fact, check = FALSE)
 }
 
 #' @export
@@ -333,6 +334,7 @@ setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, opt
 #' @export
 #' @importFrom dplyr distinct pull select
 #' @importFrom IRanges CharacterList
+#' @importFrom S4Vectors new2
 #' @rdname ParquetFactTable
 ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key)), type = NULL, ...) {
     if (is.character(conn)) {
@@ -379,5 +381,5 @@ ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key
         stop("'fact' must be a character vector or a named list")
     }
 
-    new("ParquetFactTable", conn = conn, key = key, fact = fact)
+    new2("ParquetFactTable", conn = conn, key = key, fact = fact, check = FALSE)
 }
