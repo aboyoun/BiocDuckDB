@@ -46,6 +46,7 @@
 #' Ops,atomic,ParquetFactTable-method
 #' Math,ParquetFactTable-method
 #'
+#' @include LanguageList.R
 #' @include duckdb_connection.R
 #' @include acquireDataset.R
 #' @include keynames.R
@@ -58,7 +59,7 @@ NULL
 #' @importClassesFrom IRanges CharacterList
 #' @importClassesFrom S4Vectors RectangularData
 setClass("ParquetFactTable", contains = c("RectangularData", "OutOfMemoryObject"),
-    slots = c(conn = "tbl_duckdb_connection", key = "CharacterList", fact = "list"))
+    slots = c(conn = "tbl_duckdb_connection", key = "CharacterList", fact = "LanguageList"))
 
 #' @importFrom S4Vectors setValidity2
 setValidity2("ParquetFactTable", function(x) {
@@ -76,7 +77,7 @@ setValidity2("ParquetFactTable", function(x) {
         }
     }
     if (is.null(names(x@fact))) {
-        msg <- c(msg, "'fact' slot must be a named list")
+        msg <- c(msg, "'fact' slot must be a named LanguageList object")
     }
     if (length(intersect(names(x@key), names(x@fact)))) {
         msg <- c(msg, "names in 'key' and 'fact' slots must be unique")
@@ -233,7 +234,7 @@ all.equal.ParquetFactTable <- function(target, current, check.fact = FALSE, ...)
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
 .Ops.ParquetFactTable <- function(.Generic, conn, key, fin1, fin2, fout) {
-    fact <- setNames(Map(function(x, y) call(.Generic, x, y), fin1, fin2), fout)
+    fact <- LanguageList(setNames(Map(function(x, y) call(.Generic, x, y), fin1, fin2), fout))
     new2("ParquetFactTable", conn = conn, key = key, fact = fact, check = FALSE)
 }
 
@@ -270,6 +271,7 @@ setMethod("Ops", c(e1 = "atomic", e2 = "ParquetFactTable"), function(e1, e2) {
 })
 
 #' @export
+#' @importFrom S4Vectors endoapply
 setMethod("Math", "ParquetFactTable", function(x) {
     fact <-
       switch(.Generic,
@@ -297,7 +299,7 @@ setMethod("Math", "ParquetFactTable", function(x) {
              tanh =,
              gamma =,
              lgamma = {
-                lapply(x@fact, function(j) call(.Generic, j))
+                endoapply(x@fact, function(j) call(.Generic, j))
              },
              stop("unsupported Math operator: ", .Generic))
     initialize(x, fact = fact)
@@ -309,7 +311,7 @@ setMethod("Math", "ParquetFactTable", function(x) {
 setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, optional = FALSE, ...) {
     conn <- x@conn
     key <- x@key
-    fact <- x@fact
+    fact <- as.list(x@fact)
 
     for (i in names(key)) {
         set <- key[[i]]
@@ -377,8 +379,11 @@ ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key
             }
         }
     }
-    if (!is.list(fact) || is.null(names(fact))) {
-        stop("'fact' must be a character vector or a named list")
+    if (is.list(fact)) {
+        fact <- LanguageList(fact)
+    }
+    if (is.null(names(fact))) {
+        stop("'fact' must be a named LanguageList object")
     }
 
     new2("ParquetFactTable", conn = conn, key = key, fact = fact, check = FALSE)

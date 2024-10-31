@@ -170,7 +170,7 @@ setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "ParquetArraySeed"), function(e
         stop("can only perform arithmetic operations with compatible objects")
     }
     table <- callGeneric(e1@table, e2@table)
-    fact <- table@fact
+    fact <- as.list(table@fact)
     column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
     type <- .getColumnType(column)
     initialize(e1, table = table, type = type)
@@ -180,7 +180,7 @@ setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "ParquetArraySeed"), function(e
 #' @importFrom dplyr mutate
 setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "atomic"), function(e1, e2) {
     table <- callGeneric(e1@table, e2)
-    fact <- table@fact
+    fact <- as.list(table@fact)
     column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
     type <- .getColumnType(column)
     initialize(e1, table = table, type = type)
@@ -190,7 +190,7 @@ setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "atomic"), function(e1, e2) {
 #' @importFrom dplyr mutate
 setMethod("Ops", c(e1 = "atomic", e2 = "ParquetArraySeed"), function(e1, e2) {
     table <- callGeneric(e1, e2@table)
-    fact <- table@fact
+    fact <- as.list(table@fact)
     column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
     type <- .getColumnType(column)
     initialize(e2, table = table, type = type)
@@ -200,7 +200,7 @@ setMethod("Ops", c(e1 = "atomic", e2 = "ParquetArraySeed"), function(e1, e2) {
 #' @importFrom dplyr mutate
 setMethod("Math", "ParquetArraySeed", function(x) {
     table <- callGeneric(x@table)
-    fact <- table@fact
+    fact <- as.list(table@fact)
     column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
     type <- .getColumnType(column)
     initialize(x, table = table, type = type)
