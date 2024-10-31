@@ -46,6 +46,7 @@
 #' @aliases
 #' ParquetMatrix-class
 #' [,ParquetMatrix,ANY,ANY,ANY-method
+#' matrixClass,ParquetArray-method
 #'
 #' @include ParquetArraySeed.R
 #' @include ParquetArray.R
@@ -64,6 +65,10 @@ setValidity2("ParquetMatrix", function(x) {
     }
     TRUE
 })
+
+#' @export
+#' @importFrom DelayedArray matrixClass
+setMethod("matrixClass", "ParquetArray", function(x) "ParquetMatrix")
 
 #' @export
 setMethod("[", "ParquetMatrix", function(x, i, j, ..., drop = TRUE) {

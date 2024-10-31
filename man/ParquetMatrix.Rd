@@ -4,6 +4,7 @@
 \alias{ParquetMatrix}
 \alias{ParquetMatrix-class}
 \alias{[,ParquetMatrix,ANY,ANY,ANY-method}
+\alias{matrixClass,ParquetArray-method}
 \title{Parquet datasets as DelayedMatrix objects}
 \usage{
 ParquetMatrix(conn, row, col, fact, key = c(row, col), type = NULL, ...)
