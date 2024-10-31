@@ -17,11 +17,11 @@ License: MIT + file LICENSE
 Depends:
     R (>= 3.4),
     methods,
-    DelayedArray (>= 0.32.0)
+    DelayedArray (>= 0.31.8)
 Imports:
     stats,
     BiocGenerics (>= 0.51.2),
-    S4Vectors (>= 0.27.13),
+    S4Vectors,
     IRanges,
     S4Arrays (>= 1.1.1),
     DBI,
