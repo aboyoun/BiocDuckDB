@@ -48,7 +48,8 @@ setMethod("show", "ParquetColumn", function(object) {
     if (len <= n1 + n2 + 1L) {
         vec <- as.vector(object)
     } else {
-        vec <- c(as.vector(head(object, n1)), as.vector(tail(object, n2)))
+        i <- c(seq_len(n1), (len + 1L) - rev(seq_len(n2)))
+        vec <- as.vector(object[i])
         if (is.character(vec)) {
             vec <- setNames(sprintf("\"%s\"", vec), names(vec))
         }

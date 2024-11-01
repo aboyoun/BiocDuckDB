@@ -109,9 +109,11 @@ setMethod("show", "ParquetDataFrame", function(object) {
             if (!is.null(x_rownames))
                 rownames(m) <- x_rownames
         } else {
-            m <- rbind(makeNakedCharacterMatrixForDisplay(head(object, nhead)),
+            i <- c(seq_len(nhead), (x_nrow + 1L) - rev(seq_len(ntail)))
+            df <- as.data.frame(object[i, , drop = FALSE])
+            m <- rbind(makeNakedCharacterMatrixForDisplay(head(df, nhead)),
                        rbind(rep.int("...", x_ncol)),
-                       makeNakedCharacterMatrixForDisplay(tail(object, ntail)))
+                       makeNakedCharacterMatrixForDisplay(tail(df, ntail)))
             rownames(m) <- S4Vectors:::make_rownames_for_RectangularData_display(x_rownames, x_nrow, nhead, ntail)
         }
         m <- rbind(rep.int("<ParquetColumn>", ncol(object)), m)
