@@ -15,6 +15,7 @@
 \alias{Ops,ParquetColumn,atomic-method}
 \alias{Ops,atomic,ParquetColumn-method}
 \alias{Math,ParquetColumn-method}
+\alias{Summary,ParquetColumn-method}
 \title{ParquetColumn objects}
 \description{
 ParquetColumn objects

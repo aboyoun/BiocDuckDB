@@ -244,3 +244,14 @@ test_that("Math methods work as expected for a ParquetArraySeed", {
     expect_error(digamma(illiteracy))
     expect_error(trigamma(illiteracy))
 })
+
+test_that("Summary methods work as expected for a ParquetArraySeed", {
+    seed <- ParquetArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")
+    expect_identical(max(seed), max(as.array(seed)))
+    expect_identical(min(seed), min(as.array(seed)))
+    expect_identical(range(seed), range(as.array(seed)))
+    expect_equal(prod(seed), prod(as.array(seed)))
+    expect_equal(sum(seed), sum(as.array(seed)))
+    expect_identical(any(seed == 0L), any(as.array(seed) == 0L))
+    expect_identical(all(seed == 0L), all(as.array(seed) == 0L))
+})

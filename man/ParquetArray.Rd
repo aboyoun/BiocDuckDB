@@ -10,6 +10,7 @@
 \alias{Ops,ParquetArray,atomic-method}
 \alias{Ops,atomic,ParquetArray-method}
 \alias{Math,ParquetArray-method}
+\alias{Summary,ParquetArray-method}
 \title{Parquet datasets as DelayedArray objects}
 \usage{
 ParquetArray(conn, key, fact, type = NULL, ...)

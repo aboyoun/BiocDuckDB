@@ -15,6 +15,7 @@
 \alias{Ops,ParquetArraySeed,atomic-method}
 \alias{Ops,atomic,ParquetArraySeed-method}
 \alias{Math,ParquetArraySeed-method}
+\alias{Summary,ParquetArraySeed-method}
 \title{ParquetArraySeed objects}
 \usage{
 ParquetArraySeed(conn, key, fact, type = NULL, ...)

@@ -50,6 +50,7 @@
 #' Ops,ParquetArraySeed,atomic-method
 #' Ops,atomic,ParquetArraySeed-method
 #' Math,ParquetArraySeed-method
+#' Summary,ParquetArraySeed-method
 #'
 #' @seealso
 #' \code{\link{ParquetArray}},
@@ -204,6 +205,19 @@ setMethod("Math", "ParquetArraySeed", function(x) {
     column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
     type <- .getColumnType(column)
     initialize(x, table = table, type = type)
+})
+
+#' @export
+#' @importFrom dplyr pull summarize
+setMethod("Summary", "ParquetArraySeed", function(x, ..., na.rm = FALSE) {
+    if (.Generic == "range") {
+        aggr <- list(min = call("min", x@table@fact[[1L]], na.rm = TRUE),
+                     max = call("max", x@table@fact[[1L]], na.rm = TRUE))
+        unlist(as.data.frame(summarize(x@table@conn, !!!aggr)), use.names = FALSE)
+    } else {
+        aggr <- call(.Generic, x@table@fact[[1L]], na.rm = TRUE)
+        pull(summarize(x@table@conn, !!aggr))
+    }
 })
 
 .extract_array_index <- function(x, index) {

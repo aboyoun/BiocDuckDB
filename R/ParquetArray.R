@@ -32,6 +32,7 @@
 #' Ops,ParquetArray,atomic-method
 #' Ops,atomic,ParquetArray-method
 #' Math,ParquetArray-method
+#' Summary,ParquetArray-method
 #'
 #' @seealso
 #' \code{\link{ParquetArraySeed}},
@@ -86,6 +87,11 @@ setMethod("Ops", c(e1 = "atomic", e2 = "ParquetArray"), function(e1, e2) {
 #' @export
 setMethod("Math", "ParquetArray", function(x) {
     initialize(x, seed = callGeneric(x@seed))
+})
+
+#' @export
+setMethod("Summary", "ParquetArray", function(x, ..., na.rm = FALSE) {
+    callGeneric(x@seed, ..., na.rm = na.rm)
 })
 
 #' @export

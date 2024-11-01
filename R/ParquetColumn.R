@@ -19,6 +19,7 @@
 #' Ops,ParquetColumn,atomic-method
 #' Ops,atomic,ParquetColumn-method
 #' Math,ParquetColumn-method
+#' Summary,ParquetColumn-method
 #'
 #' @name ParquetColumn
 NULL
@@ -139,6 +140,11 @@ setMethod("Ops", c(e1 = "atomic", e2 = "ParquetColumn"), function(e1, e2) {
 #' @export
 setMethod("Math", "ParquetColumn", function(x) {
     initialize(x, table = callGeneric(x@table))
+})
+
+#' @export
+setMethod("Summary", "ParquetColumn", function(x, ..., na.rm = FALSE) {
+    callGeneric(x@table, ..., na.rm = na.rm)
 })
 
 #' @export
