@@ -215,7 +215,11 @@ setMethod("Summary", "ParquetArraySeed", function(x, ..., na.rm = FALSE) {
                      max = call("max", x@table@fact[[1L]], na.rm = TRUE))
         unlist(as.data.frame(summarize(x@table@conn, !!!aggr)), use.names = FALSE)
     } else {
-        aggr <- call(.Generic, x@table@fact[[1L]], na.rm = TRUE)
+        if (.Generic == "sum") {
+            aggr <- call("fsum", x@table@fact[[1L]])
+        } else {
+            aggr <- call(.Generic, x@table@fact[[1L]], na.rm = TRUE)
+        }
         pull(summarize(x@table@conn, !!aggr))
     }
 })
