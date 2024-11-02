@@ -9,6 +9,7 @@
 \alias{bindCOLS,ParquetFactTable-method}
 \alias{colnames,ParquetFactTable-method}
 \alias{colnames<-,ParquetFactTable-method}
+\alias{dbconn,ParquetFactTable-method}
 \alias{ncol,ParquetFactTable-method}
 \alias{nrow,ParquetFactTable-method}
 \alias{rownames,ParquetFactTable-method}

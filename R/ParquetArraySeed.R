@@ -40,6 +40,7 @@
 #' ParquetArraySeed-class
 #' [,ParquetArraySeed,ANY,ANY,ANY-method
 #' aperm,ParquetArraySeed-method
+#' dbconn,ParquetArraySeed-method
 #' DelayedArray,ParquetArraySeed-method
 #' dim,ParquetArraySeed-method
 #' dimnames,ParquetArraySeed-method
@@ -89,7 +90,8 @@ setValidity2("ParquetArraySeed", function(x) {
 })
 
 #' @export
-setMethod("duckdb_connection", "ParquetArraySeed", function(x) callGeneric(x@table))
+#' @importFrom BiocGenerics dbconn
+setMethod("dbconn", "ParquetArraySeed", function(x) callGeneric(x@table))
 
 #' @export
 setMethod("dim", "ParquetArraySeed", function(x) {

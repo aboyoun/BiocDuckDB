@@ -75,11 +75,11 @@ top.hits
 
 # Retrieving the Arrow Dataset
 
-At any point, users can retrieve the query to the underlying Parquet data via the `duckdb_connection` method.
+At any point, users can retrieve the query to the underlying Parquet data via the `dbconn` method.
 This can be used with methods in the `r CRANpkg("arrow")` package to push more complex operations to the C++ libraries for greater efficiency.
 
 ```{r}
-duckdb_connection(df)
+dbconn(df)
 ```
 
 Note that the acquired query will not capture any delayed subsetting/mutation operations that have been applied in the R session.

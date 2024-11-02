@@ -8,6 +8,7 @@
 #' @aliases
 #' ParquetColumn-class
 #' as.vector,ParquetColumn-method
+#' dbconn,ParquetColumn-method
 #' extractROWS,ParquetColumn,ANY-method
 #' head,ParquetColumn-method
 #' length,ParquetColumn-method
@@ -75,7 +76,8 @@ setMethod("showAsCell", "ParquetColumn", function(object) {
 })
 
 #' @export
-setMethod("duckdb_connection", "ParquetColumn", function(x) callGeneric(x@table))
+#' @importFrom BiocGenerics dbconn
+setMethod("dbconn", "ParquetColumn", function(x) callGeneric(x@table))
 
 #' @export
 setMethod("length", "ParquetColumn", function(x) nrow(x@table))

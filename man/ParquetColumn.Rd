@@ -4,6 +4,7 @@
 \alias{ParquetColumn}
 \alias{ParquetColumn-class}
 \alias{as.vector,ParquetColumn-method}
+\alias{dbconn,ParquetColumn-method}
 \alias{extractROWS,ParquetColumn,ANY-method}
 \alias{head,ParquetColumn-method}
 \alias{length,ParquetColumn-method}

@@ -5,6 +5,7 @@
 \alias{ParquetArraySeed-class}
 \alias{[,ParquetArraySeed,ANY,ANY,ANY-method}
 \alias{aperm,ParquetArraySeed-method}
+\alias{dbconn,ParquetArraySeed-method}
 \alias{DelayedArray,ParquetArraySeed-method}
 \alias{dim,ParquetArraySeed-method}
 \alias{dimnames,ParquetArraySeed-method}

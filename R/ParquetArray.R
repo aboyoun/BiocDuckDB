@@ -27,6 +27,7 @@
 #' ParquetArray-class
 #' [,ParquetArray,ANY,ANY,ANY-method
 #' aperm,ParquetArray-method
+#' dbconn,ParquetArray-method
 #' t,ParquetArray-method
 #' Ops,ParquetArray,ParquetArray-method
 #' Ops,ParquetArray,atomic-method
@@ -55,7 +56,8 @@ NULL
 setClass("ParquetArray", contains = "DelayedArray", slots = c(seed = "ParquetArraySeed"))
 
 #' @export
-setMethod("duckdb_connection", "ParquetArray", function(x) callGeneric(x@seed))
+#' @importFrom BiocGenerics dbconn
+setMethod("dbconn", "ParquetArray", function(x) callGeneric(x@seed))
 
 #' @export
 setMethod("[", "ParquetArray", function(x, i, j, ..., drop = TRUE) {

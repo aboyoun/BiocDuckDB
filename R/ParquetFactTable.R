@@ -38,6 +38,7 @@
 #' bindCOLS,ParquetFactTable-method
 #' colnames,ParquetFactTable-method
 #' colnames<-,ParquetFactTable-method
+#' dbconn,ParquetFactTable-method
 #' ncol,ParquetFactTable-method
 #' nrow,ParquetFactTable-method
 #' rownames,ParquetFactTable-method
@@ -97,7 +98,8 @@ setValidity2("ParquetFactTable", function(x) {
 })
 
 #' @export
-setMethod("duckdb_connection", "ParquetFactTable", function(x) x@conn)
+#' @importFrom BiocGenerics dbconn
+setMethod("dbconn", "ParquetFactTable", function(x) x@conn)
 
 #' @export
 setMethod("nkey", "ParquetFactTable", function(x) length(x@key))

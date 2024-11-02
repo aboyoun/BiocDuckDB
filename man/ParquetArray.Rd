@@ -5,6 +5,7 @@
 \alias{ParquetArray-class}
 \alias{[,ParquetArray,ANY,ANY,ANY-method}
 \alias{aperm,ParquetArray-method}
+\alias{dbconn,ParquetArray-method}
 \alias{t,ParquetArray-method}
 \alias{Ops,ParquetArray,ParquetArray-method}
 \alias{Ops,ParquetArray,atomic-method}
