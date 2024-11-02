@@ -320,4 +320,9 @@ test_that("Other aggregate methods work as expected for a ParquetFactTable", {
     expect_equal(var(tbl), var(as.data.frame(tbl)[["fate"]]))
     expect_equal(sd(tbl), sd(as.data.frame(tbl)[["fate"]]))
     expect_equal(mad(tbl), mad(as.data.frame(tbl)[["fate"]]))
+
+    expect_equal(quantile(tbl), quantile(as.data.frame(tbl)[["fate"]]))
+    expect_equal(quantile(tbl, probs = seq(0, 1, by = 0.05)), quantile(as.data.frame(tbl)[["fate"]], probs = seq(0, 1, by = 0.05)))
+    expect_equal(quantile(tbl, names = FALSE), quantile(as.data.frame(tbl)[["fate"]], names = FALSE))
+    expect_equal(quantile(tbl, type = 1), quantile(as.data.frame(tbl)[["fate"]], type = 1))
 })

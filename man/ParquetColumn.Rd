@@ -18,6 +18,7 @@
 \alias{Summary,ParquetColumn-method}
 \alias{mean,ParquetColumn-method}
 \alias{median.ParquetColumn}
+\alias{quantile.ParquetColumn}
 \alias{var,ParquetColumn,ANY-method}
 \alias{sd,ParquetColumn-method}
 \alias{mad,ParquetColumn-method}

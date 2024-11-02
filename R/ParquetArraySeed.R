@@ -53,6 +53,7 @@
 #' Summary,ParquetArraySeed-method
 #' mean,ParquetArraySeed-method
 #' median.ParquetArraySeed
+#' quantile.ParquetArraySeed
 #' var,ParquetArraySeed,ANY-method
 #' sd,ParquetArraySeed-method
 #' mad,ParquetArraySeed-method
@@ -227,6 +228,13 @@ setMethod("mean", "ParquetArraySeed", function(x, ...) {
 #' @importFrom stats median
 median.ParquetArraySeed <- function(x, na.rm = FALSE, ...) {
     median(x@table, na.rm = na.rm, ...)
+}
+
+#' @exportS3Method stats::quantile
+#' @importFrom stats quantile
+quantile.ParquetArraySeed <-
+function(x, probs = seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7, digits = 7, ...) {
+    quantile(x@table, probs = probs, na.rm = na.rm, names = names, type = type, digits = digits, ...)
 }
 
 #' @export

@@ -13,6 +13,7 @@
 \alias{Summary,ParquetArray-method}
 \alias{mean,ParquetArray-method}
 \alias{median.ParquetArray}
+\alias{quantile.ParquetArray}
 \alias{var,ParquetArray,ANY-method}
 \alias{sd,ParquetArray-method}
 \alias{mad,ParquetArray-method}

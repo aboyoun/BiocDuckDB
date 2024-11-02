@@ -48,6 +48,7 @@
 #' Summary,ParquetFactTable-method
 #' mean,ParquetFactTable-method
 #' median.ParquetFactTable
+#' quantile.ParquetFactTable
 #' var,ParquetFactTable,ANY-method
 #' sd,ParquetFactTable-method
 #' mad,ParquetFactTable-method
@@ -350,6 +351,31 @@ setMethod("mean", "ParquetFactTable", function(x, ...) {
 #' @importFrom stats median
 median.ParquetFactTable <- function(x, na.rm = FALSE, ...) {
     .pull.aggregagte(x, "median", na.rm = TRUE)
+}
+
+#' @exportS3Method stats::quantile
+#' @importFrom dplyr summarize
+#' @importFrom S4Vectors isSingleNumber
+#' @importFrom stats quantile
+quantile.ParquetFactTable <-
+function(x, probs = seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7, digits = 7, ...) {
+    if (length(x@fact) != 1L) {
+        stop("aggregation requires a single fact")
+    }
+    if (!isSingleNumber(type) || !(type %in% c(1L, 7L))) {
+        stop("'type' must be 1 or 7")
+    } else if (type == 1L) {
+        fun <- "quantile_disc"
+    } else {
+        fun <- "quantile_cont"
+    }
+    aggr <- lapply(probs, function(p) call(fun, x@fact[[1L]], p))
+    ans <- unlist(as.data.frame(summarize(x@conn, !!!aggr)), use.names = FALSE)
+    if (names) {
+        stopifnot(isSingleNumber(digits), digits >= 1)
+        names(ans) <- paste0(formatC(100 * probs, format = "fg", width = 1, digits = digits), "%")
+    }
+    ans
 }
 
 #' @export

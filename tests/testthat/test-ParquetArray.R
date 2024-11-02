@@ -263,4 +263,9 @@ test_that("Other aggregate methods work as expected for a ParquetArray", {
     expect_equal(var(pqarray), var(as.array(pqarray)))
     expect_equal(sd(pqarray), sd(as.array(pqarray)))
     expect_equal(mad(pqarray), mad(as.array(pqarray)))
+
+    expect_equal(quantile(pqarray), quantile(as.array(pqarray)))
+    expect_equal(quantile(pqarray, probs = seq(0, 1, by = 0.05)), quantile(as.array(pqarray), probs = seq(0, 1, by = 0.05)))
+    expect_equal(quantile(pqarray, names = FALSE), quantile(as.array(pqarray), names = FALSE))
+    expect_equal(quantile(pqarray, type = 1), quantile(as.array(pqarray), type = 1))
 })

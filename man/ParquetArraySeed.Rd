@@ -18,6 +18,7 @@
 \alias{Summary,ParquetArraySeed-method}
 \alias{mean,ParquetArraySeed-method}
 \alias{median.ParquetArraySeed}
+\alias{quantile.ParquetArraySeed}
 \alias{var,ParquetArraySeed,ANY-method}
 \alias{sd,ParquetArraySeed-method}
 \alias{mad,ParquetArraySeed-method}

@@ -147,4 +147,9 @@ test_that("Other aggregate methods work as expected for a ParquetColumn", {
     expect_equal(var(mpg), var(as.vector(mpg)))
     expect_equal(sd(mpg), sd(as.vector(mpg)))
     expect_equal(mad(mpg), mad(as.vector(mpg)))
+
+    expect_equal(quantile(mpg), quantile(as.vector(mpg)))
+    expect_equal(quantile(mpg, probs = seq(0, 1, by = 0.05)), quantile(as.vector(mpg), probs = seq(0, 1, by = 0.05)))
+    expect_equal(quantile(mpg, names = FALSE), quantile(as.vector(mpg), names = FALSE))
+    expect_equal(quantile(mpg, type = 1), quantile(as.vector(mpg), type = 1))
 })

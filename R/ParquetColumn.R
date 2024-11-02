@@ -22,6 +22,7 @@
 #' Summary,ParquetColumn-method
 #' mean,ParquetColumn-method
 #' median.ParquetColumn
+#' quantile.ParquetColumn
 #' var,ParquetColumn,ANY-method
 #' sd,ParquetColumn-method
 #' mad,ParquetColumn-method
@@ -162,6 +163,13 @@ setMethod("mean", "ParquetColumn", function(x, ...) {
 #' @importFrom stats median
 median.ParquetColumn <- function(x, na.rm = FALSE, ...) {
     median(x@table, na.rm = na.rm, ...)
+}
+
+#' @exportS3Method stats::quantile
+#' @importFrom stats quantile
+quantile.ParquetColumn <-
+function(x, probs = seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7, digits = 7, ...) {
+    quantile(x@table, probs = probs, na.rm = na.rm, names = names, type = type, digits = digits, ...)
 }
 
 #' @export

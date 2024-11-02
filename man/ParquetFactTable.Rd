@@ -19,6 +19,7 @@
 \alias{Summary,ParquetFactTable-method}
 \alias{mean,ParquetFactTable-method}
 \alias{median.ParquetFactTable}
+\alias{quantile.ParquetFactTable}
 \alias{var,ParquetFactTable,ANY-method}
 \alias{sd,ParquetFactTable-method}
 \alias{mad,ParquetFactTable-method}
