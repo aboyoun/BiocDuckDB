@@ -63,7 +63,6 @@
 #' \code{\link{ParquetArray}},
 #' \code{\link[S4Arrays]{Array}}
 #'
-#' @include duckdb_connection.R
 #' @include acquireDataset.R
 #' @include ParquetFactTable.R
 #'
@@ -171,6 +170,14 @@ setMethod("[", "ParquetArraySeed", function(x, i, j, ..., drop = TRUE) {
     Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
     .subset_ParquetArraySeed(x, Nindex = Nindex, drop = drop)
 })
+
+.getColumnType <- function(column) {
+    if (inherits(column, "Date")) {
+        "Date"
+    } else {
+        DelayedArray::type(column)
+    }
+}
 
 #' @export
 #' @importFrom dplyr mutate

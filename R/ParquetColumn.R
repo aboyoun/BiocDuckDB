@@ -2,7 +2,6 @@
 #'
 #' @author Patrick Aboyoun
 #'
-#' @include duckdb_connection.R
 #' @include ParquetFactTable.R
 #'
 #' @aliases

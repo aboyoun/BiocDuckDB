@@ -45,7 +45,6 @@
 #' \code{\link{ParquetArraySeed}},
 #' \code{\link[DelayedArray]{DelayedArray}}
 #'
-#' @include duckdb_connection.R
 #' @include ParquetArraySeed.R
 #'
 #' @name ParquetArray

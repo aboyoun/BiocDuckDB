@@ -43,7 +43,6 @@ Collate:
     'LanguageList.R'
     'keynames.R'
     'acquireDataset.R'
-    'duckdb_connection.R'
     'ParquetFactTable.R'
     'ParquetArraySeed.R'
     'ParquetArray.R'

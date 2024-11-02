@@ -66,7 +66,6 @@
 #'
 #' as.data.frame,ParquetDataFrame-method
 #'
-#' @include duckdb_connection.R
 #' @include acquireDataset.R
 #' @include ParquetColumn.R
 #' @include ParquetFactTable.R

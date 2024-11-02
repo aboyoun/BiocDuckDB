@@ -55,12 +55,13 @@
 #' mad,ParquetFactTable-method
 #'
 #' @include LanguageList.R
-#' @include duckdb_connection.R
 #' @include acquireDataset.R
 #' @include keynames.R
 #'
 #' @name ParquetFactTable
 NULL
+
+setOldClass("tbl_duckdb_connection")
 
 #' @export
 #' @importClassesFrom BiocGenerics OutOfMemoryObject
