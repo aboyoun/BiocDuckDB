@@ -16,6 +16,12 @@
 \alias{Ops,ParquetFactTable,atomic-method}
 \alias{Ops,atomic,ParquetFactTable-method}
 \alias{Math,ParquetFactTable-method}
+\alias{Summary,ParquetFactTable-method}
+\alias{mean,ParquetFactTable-method}
+\alias{median.ParquetFactTable}
+\alias{var,ParquetFactTable,ANY-method}
+\alias{sd,ParquetFactTable-method}
+\alias{mad,ParquetFactTable-method}
 \title{ParquetFactTable objects}
 \usage{
 ParquetFactTable(

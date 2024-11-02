@@ -16,6 +16,11 @@
 \alias{Ops,atomic,ParquetColumn-method}
 \alias{Math,ParquetColumn-method}
 \alias{Summary,ParquetColumn-method}
+\alias{mean,ParquetColumn-method}
+\alias{median.ParquetColumn}
+\alias{var,ParquetColumn,ANY-method}
+\alias{sd,ParquetColumn-method}
+\alias{mad,ParquetColumn-method}
 \title{ParquetColumn objects}
 \description{
 ParquetColumn objects

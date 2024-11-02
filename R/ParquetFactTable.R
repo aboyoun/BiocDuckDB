@@ -45,6 +45,12 @@
 #' Ops,ParquetFactTable,atomic-method
 #' Ops,atomic,ParquetFactTable-method
 #' Math,ParquetFactTable-method
+#' Summary,ParquetFactTable-method
+#' mean,ParquetFactTable-method
+#' median.ParquetFactTable
+#' var,ParquetFactTable,ANY-method
+#' sd,ParquetFactTable-method
+#' mad,ParquetFactTable-method
 #'
 #' @include LanguageList.R
 #' @include duckdb_connection.R
@@ -303,6 +309,69 @@ setMethod("Math", "ParquetFactTable", function(x) {
              },
              stop("unsupported Math operator: ", .Generic))
     initialize(x, fact = fact)
+})
+
+#' @importFrom dplyr pull summarize
+.pull.aggregagte <- function(x, fun, na.rm = FALSE) {
+    if (length(x@fact) != 1L) {
+        stop("aggregation requires a single fact")
+    }
+    if (na.rm) {
+        aggr <- call(fun, x@fact[[1L]], na.rm = TRUE)
+    } else {
+        aggr <- call(fun, x@fact[[1L]])
+    }
+    pull(summarize(x@conn, !!aggr))
+}
+
+#' @export
+setMethod("Summary", "ParquetFactTable", function(x, ..., na.rm = FALSE) {
+    if (.Generic == "range") {
+        if (length(x@fact) != 1L) {
+            stop("aggregation requires a single fact")
+        }
+        aggr <- list(min = call("min", x@fact[[1L]], na.rm = TRUE),
+                     max = call("max", x@fact[[1L]], na.rm = TRUE))
+        unlist(as.data.frame(summarize(x@conn, !!!aggr)), use.names = FALSE)
+    } else if (.Generic == "sum") {
+        .pull.aggregagte(x, "fsum")
+    } else {
+        .pull.aggregagte(x, .Generic, na.rm = TRUE)
+    }
+})
+
+#' @export
+#' @importFrom BiocGenerics mean
+setMethod("mean", "ParquetFactTable", function(x, ...) {
+    .pull.aggregagte(x, "mean", na.rm = TRUE)
+})
+
+#' @exportS3Method stats::median
+#' @importFrom stats median
+median.ParquetFactTable <- function(x, na.rm = FALSE, ...) {
+    .pull.aggregagte(x, "median", na.rm = TRUE)
+}
+
+#' @export
+#' @importFrom BiocGenerics var
+setMethod("var", "ParquetFactTable", function(x, y = NULL, na.rm = FALSE, use)  {
+    if (!is.null(y)) {
+        stop("covariance is not supported")
+    }
+    .pull.aggregagte(x, "var", na.rm = TRUE)
+})
+
+#' @export
+#' @importFrom BiocGenerics sd
+setMethod("sd", "ParquetFactTable", function(x, na.rm = FALSE) {
+    .pull.aggregagte(x, "sd", na.rm = TRUE)
+})
+
+#' @export
+#' @importFrom BiocGenerics mad
+setMethod("mad", "ParquetFactTable",
+function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, high = FALSE) {
+    constant * .pull.aggregagte(x, "mad")
 })
 
 #' @export

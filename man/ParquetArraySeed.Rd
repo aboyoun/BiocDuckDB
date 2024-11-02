@@ -16,6 +16,11 @@
 \alias{Ops,atomic,ParquetArraySeed-method}
 \alias{Math,ParquetArraySeed-method}
 \alias{Summary,ParquetArraySeed-method}
+\alias{mean,ParquetArraySeed-method}
+\alias{median.ParquetArraySeed}
+\alias{var,ParquetArraySeed,ANY-method}
+\alias{sd,ParquetArraySeed-method}
+\alias{mad,ParquetArraySeed-method}
 \title{ParquetArraySeed objects}
 \usage{
 ParquetArraySeed(conn, key, fact, type = NULL, ...)

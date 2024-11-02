@@ -11,6 +11,11 @@
 \alias{Ops,atomic,ParquetArray-method}
 \alias{Math,ParquetArray-method}
 \alias{Summary,ParquetArray-method}
+\alias{mean,ParquetArray-method}
+\alias{median.ParquetArray}
+\alias{var,ParquetArray,ANY-method}
+\alias{sd,ParquetArray-method}
+\alias{mad,ParquetArray-method}
 \title{Parquet datasets as DelayedArray objects}
 \usage{
 ParquetArray(conn, key, fact, type = NULL, ...)

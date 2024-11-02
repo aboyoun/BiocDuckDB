@@ -33,6 +33,11 @@
 #' Ops,atomic,ParquetArray-method
 #' Math,ParquetArray-method
 #' Summary,ParquetArray-method
+#' mean,ParquetArray-method
+#' median.ParquetArray
+#' var,ParquetArray,ANY-method
+#' sd,ParquetArray-method
+#' mad,ParquetArray-method
 #'
 #' @seealso
 #' \code{\link{ParquetArraySeed}},
@@ -91,7 +96,38 @@ setMethod("Math", "ParquetArray", function(x) {
 
 #' @export
 setMethod("Summary", "ParquetArray", function(x, ..., na.rm = FALSE) {
-    callGeneric(x@seed, ..., na.rm = na.rm)
+    callGeneric(x@seed)
+})
+
+#' @export
+#' @importFrom BiocGenerics mean
+setMethod("mean", "ParquetArray", function(x, ...) {
+    callGeneric(x@seed)
+})
+
+#' @exportS3Method stats::median
+#' @importFrom stats median
+median.ParquetArray <- function(x, na.rm = FALSE, ...) {
+    median(x@seed, na.rm = na.rm, ...)
+}
+
+#' @export
+#' @importFrom BiocGenerics var
+setMethod("var", "ParquetArray", function(x, y = NULL, na.rm = FALSE, use)  {
+    callGeneric(x@seed)
+})
+
+#' @export
+#' @importFrom BiocGenerics sd
+setMethod("sd", "ParquetArray", function(x, na.rm = FALSE) {
+    callGeneric(x@seed)
+})
+
+#' @export
+#' @importFrom BiocGenerics mad
+setMethod("mad", "ParquetArray",
+function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, high = FALSE) {
+    callGeneric(x@seed)
 })
 
 #' @export

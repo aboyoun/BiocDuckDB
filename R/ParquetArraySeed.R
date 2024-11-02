@@ -51,6 +51,11 @@
 #' Ops,atomic,ParquetArraySeed-method
 #' Math,ParquetArraySeed-method
 #' Summary,ParquetArraySeed-method
+#' mean,ParquetArraySeed-method
+#' median.ParquetArraySeed
+#' var,ParquetArraySeed,ANY-method
+#' sd,ParquetArraySeed-method
+#' mad,ParquetArraySeed-method
 #'
 #' @seealso
 #' \code{\link{ParquetArray}},
@@ -208,20 +213,39 @@ setMethod("Math", "ParquetArraySeed", function(x) {
 })
 
 #' @export
-#' @importFrom dplyr pull summarize
 setMethod("Summary", "ParquetArraySeed", function(x, ..., na.rm = FALSE) {
-    if (.Generic == "range") {
-        aggr <- list(min = call("min", x@table@fact[[1L]], na.rm = TRUE),
-                     max = call("max", x@table@fact[[1L]], na.rm = TRUE))
-        unlist(as.data.frame(summarize(x@table@conn, !!!aggr)), use.names = FALSE)
-    } else {
-        if (.Generic == "sum") {
-            aggr <- call("fsum", x@table@fact[[1L]])
-        } else {
-            aggr <- call(.Generic, x@table@fact[[1L]], na.rm = TRUE)
-        }
-        pull(summarize(x@table@conn, !!aggr))
-    }
+    callGeneric(x@table)
+})
+
+#' @export
+#' @importFrom BiocGenerics mean
+setMethod("mean", "ParquetArraySeed", function(x, ...) {
+    callGeneric(x@table)
+})
+
+#' @exportS3Method stats::median
+#' @importFrom stats median
+median.ParquetArraySeed <- function(x, na.rm = FALSE, ...) {
+    median(x@table, na.rm = na.rm, ...)
+}
+
+#' @export
+#' @importFrom BiocGenerics var
+setMethod("var", "ParquetArraySeed", function(x, y = NULL, na.rm = FALSE, use)  {
+    callGeneric(x@table)
+})
+
+#' @export
+#' @importFrom BiocGenerics sd
+setMethod("sd", "ParquetArraySeed", function(x, na.rm = FALSE) {
+    callGeneric(x@table)
+})
+
+#' @export
+#' @importFrom BiocGenerics mad
+setMethod("mad", "ParquetArraySeed",
+function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, high = FALSE) {
+    callGeneric(x@table)
 })
 
 .extract_array_index <- function(x, index) {

@@ -301,3 +301,23 @@ test_that("Math methods work as expected for a ParquetFactTable", {
     expect_error(digamma(illiteracy))
     expect_error(trigamma(illiteracy))
 })
+
+test_that("Summary methods work as expected for a ParquetFactTable", {
+    tbl <- ParquetFactTable(titanic_path, key = c("Class", "Sex", "Age", "Survived"), fact = "fate")
+    expect_identical(max(tbl), max(as.data.frame(tbl)[["fate"]]))
+    expect_identical(min(tbl), min(as.data.frame(tbl)[["fate"]]))
+    expect_identical(range(tbl), range(as.data.frame(tbl)[["fate"]]))
+    expect_equal(prod(tbl), prod(as.data.frame(tbl)[["fate"]]))
+    expect_equal(sum(tbl), sum(as.data.frame(tbl)[["fate"]]))
+    expect_identical(any(tbl == 0L), any(as.data.frame(tbl)[["fate"]] == 0L))
+    expect_identical(all(tbl == 0L), all(as.data.frame(tbl)[["fate"]] == 0L))
+})
+
+test_that("Other aggregate methods work as expected for a ParquetFactTable", {
+    tbl <- ParquetFactTable(titanic_path, key = c("Class", "Sex", "Age", "Survived"), fact = "fate")
+    expect_equal(mean(tbl), mean(as.data.frame(tbl)[["fate"]]))
+    expect_equal(median(tbl), median(as.data.frame(tbl)[["fate"]]))
+    expect_equal(var(tbl), var(as.data.frame(tbl)[["fate"]]))
+    expect_equal(sd(tbl), sd(as.data.frame(tbl)[["fate"]]))
+    expect_equal(mad(tbl), mad(as.data.frame(tbl)[["fate"]]))
+})

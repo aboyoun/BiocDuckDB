@@ -255,3 +255,12 @@ test_that("Summary methods work as expected for a ParquetArraySeed", {
     expect_identical(any(seed == 0L), any(as.array(seed) == 0L))
     expect_identical(all(seed == 0L), all(as.array(seed) == 0L))
 })
+
+test_that("Other aggregate methods work as expected for a ParquetArraySeed", {
+    seed <- ParquetArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")
+    expect_equal(mean(seed), mean(as.array(seed)))
+    expect_equal(median(seed), median(as.array(seed)))
+    expect_equal(var(seed), var(as.array(seed)))
+    expect_equal(sd(seed), sd(as.array(seed)))
+    expect_equal(mad(seed), mad(as.array(seed)))
+})

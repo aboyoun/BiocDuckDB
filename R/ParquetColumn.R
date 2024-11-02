@@ -20,6 +20,11 @@
 #' Ops,atomic,ParquetColumn-method
 #' Math,ParquetColumn-method
 #' Summary,ParquetColumn-method
+#' mean,ParquetColumn-method
+#' median.ParquetColumn
+#' var,ParquetColumn,ANY-method
+#' sd,ParquetColumn-method
+#' mad,ParquetColumn-method
 #'
 #' @name ParquetColumn
 NULL
@@ -134,7 +139,7 @@ setMethod("Ops", c(e1 = "ParquetColumn", e2 = "atomic"), function(e1, e2) {
 
 #' @export
 setMethod("Ops", c(e1 = "atomic", e2 = "ParquetColumn"), function(e1, e2) {
-    initialize(e1, table = callGeneric(e1, e2@table))
+    initialize(e2, table = callGeneric(e1, e2@table))
 })
 
 #' @export
@@ -144,7 +149,38 @@ setMethod("Math", "ParquetColumn", function(x) {
 
 #' @export
 setMethod("Summary", "ParquetColumn", function(x, ..., na.rm = FALSE) {
-    callGeneric(x@table, ..., na.rm = na.rm)
+    callGeneric(x@table)
+})
+
+#' @export
+#' @importFrom BiocGenerics mean
+setMethod("mean", "ParquetColumn", function(x, ...) {
+    callGeneric(x@table)
+})
+
+#' @exportS3Method stats::median
+#' @importFrom stats median
+median.ParquetColumn <- function(x, na.rm = FALSE, ...) {
+    median(x@table, na.rm = na.rm, ...)
+}
+
+#' @export
+#' @importFrom BiocGenerics var
+setMethod("var", "ParquetColumn", function(x, y = NULL, na.rm = FALSE, use)  {
+    callGeneric(x@table)
+})
+
+#' @export
+#' @importFrom BiocGenerics sd
+setMethod("sd", "ParquetColumn", function(x, na.rm = FALSE) {
+    callGeneric(x@table)
+})
+
+#' @export
+#' @importFrom BiocGenerics mad
+setMethod("mad", "ParquetColumn",
+function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, high = FALSE) {
+    callGeneric(x@table)
 })
 
 #' @export
