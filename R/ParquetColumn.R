@@ -15,6 +15,8 @@
 #' show,ParquetColumn-method
 #' showAsCell,ParquetColumn-method
 #' tail,ParquetColumn-method
+#' type,ParquetColumn-method
+#' type<-,ParquetColumn-method
 #' Ops,ParquetColumn,ParquetColumn-method
 #' Ops,ParquetColumn,atomic-method
 #' Ops,atomic,ParquetColumn-method
@@ -83,6 +85,18 @@ setMethod("length", "ParquetColumn", function(x) nrow(x@table))
 
 #' @export
 setMethod("names", "ParquetColumn", function(x) keydimnames(x@table)[[1L]])
+
+#' @export
+#' @importFrom BiocGenerics type
+setMethod("type", "ParquetColumn", function(x) {
+    callGeneric(x@table)
+})
+
+#' @export
+#' @importFrom BiocGenerics type<-
+setReplaceMethod("type", "ParquetColumn", function(x, value) {
+    initialize(x, table = callGeneric(x@table, value = value))
+})
 
 #' @export
 setMethod("extractROWS", "ParquetColumn", function(x, i) {

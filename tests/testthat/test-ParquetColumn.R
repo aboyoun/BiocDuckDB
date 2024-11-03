@@ -1,6 +1,18 @@
 # Tests the basic functions of a ParquetColumn.
 # library(testthat); library(ParquetDataFrame); source("setup.R"); source("test-ParquetColumn.R")
 
+test_that("ParquetColumn can be cast to a different type", {
+    df <- ParquetDataFrame(mtcars_path, key = "model")
+    cyl <- df[["cyl"]]
+
+    checkParquetColumn(cyl, as.vector(cyl))
+
+    type(cyl) <- "integer"
+    expected <- as.vector(cyl)
+    storage.mode(expected) <- "integer"
+    checkParquetColumn(cyl, expected)
+})
+
 test_that("Arith methods work as expected for a ParquetArray", {
     df <- ParquetDataFrame(mtcars_path, key = "model")
     mpg <- df[["mpg"]]

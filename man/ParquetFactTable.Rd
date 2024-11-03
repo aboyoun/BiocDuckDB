@@ -13,6 +13,8 @@
 \alias{ncol,ParquetFactTable-method}
 \alias{nrow,ParquetFactTable-method}
 \alias{rownames,ParquetFactTable-method}
+\alias{type,ParquetFactTable-method}
+\alias{type<-,ParquetFactTable-method}
 \alias{Ops,ParquetFactTable,ParquetFactTable-method}
 \alias{Ops,ParquetFactTable,atomic-method}
 \alias{Ops,atomic,ParquetFactTable-method}

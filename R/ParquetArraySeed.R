@@ -47,6 +47,7 @@
 #' extract_array,ParquetArraySeed-method
 #' t,ParquetArraySeed-method
 #' type,ParquetArraySeed-method
+#' type<-,ParquetArraySeed-method
 #' Ops,ParquetArraySeed,ParquetArraySeed-method
 #' Ops,ParquetArraySeed,atomic-method
 #' Ops,atomic,ParquetArraySeed-method
@@ -72,15 +73,12 @@ NULL
 #' @export
 #' @import methods
 #' @importClassesFrom S4Arrays Array
-setClass("ParquetArraySeed", contains = "Array", slots = c(table = "ParquetFactTable", type = "character", drop = "logical"))
+setClass("ParquetArraySeed", contains = "Array", slots = c(table = "ParquetFactTable", drop = "logical"))
 
 #' @importFrom S4Vectors isTRUEorFALSE setValidity2 isSingleString
 setValidity2("ParquetArraySeed", function(x) {
     if (ncol(x@table) != 1L) {
         return("'table' slot must be a single-column ParquetFactTable")
-    }
-    if (!isSingleString(x@type)) {
-        return("'type' slot must be a single string")
     }
     if (!isTRUEorFALSE(x@drop)) {
         return("'drop' slot must be TRUE or FALSE")
@@ -121,8 +119,16 @@ setMethod("dimnames", "ParquetArraySeed", function(x) {
 })
 
 #' @export
-#' @importFrom DelayedArray type
-setMethod("type", "ParquetArraySeed", function(x) x@type)
+#' @importFrom BiocGenerics type
+setMethod("type", "ParquetArraySeed", function(x) {
+    callGeneric(x@table)
+})
+
+#' @export
+#' @importFrom BiocGenerics type<-
+setReplaceMethod("type", "ParquetArraySeed", function(x, value) {
+    initialize(x, table = callGeneric(x@table, value = value))
+})
 
 #' @export
 #' @importFrom BiocGenerics aperm
@@ -171,14 +177,6 @@ setMethod("[", "ParquetArraySeed", function(x, i, j, ..., drop = TRUE) {
     .subset_ParquetArraySeed(x, Nindex = Nindex, drop = drop)
 })
 
-.getColumnType <- function(column) {
-    if (inherits(column, "Date")) {
-        "Date"
-    } else {
-        DelayedArray::type(column)
-    }
-}
-
 #' @export
 #' @importFrom dplyr mutate
 setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "ParquetArraySeed"), function(e1, e2) {
@@ -188,8 +186,7 @@ setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "ParquetArraySeed"), function(e
     table <- callGeneric(e1@table, e2@table)
     fact <- as.list(table@fact)
     column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
-    type <- .getColumnType(column)
-    initialize(e1, table = table, type = type)
+    initialize(e1, table = table)
 })
 
 #' @export
@@ -198,8 +195,7 @@ setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "atomic"), function(e1, e2) {
     table <- callGeneric(e1@table, e2)
     fact <- as.list(table@fact)
     column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
-    type <- .getColumnType(column)
-    initialize(e1, table = table, type = type)
+    initialize(e1, table = table)
 })
 
 #' @export
@@ -208,8 +204,7 @@ setMethod("Ops", c(e1 = "atomic", e2 = "ParquetArraySeed"), function(e1, e2) {
     table <- callGeneric(e1, e2@table)
     fact <- as.list(table@fact)
     column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
-    type <- .getColumnType(column)
-    initialize(e2, table = table, type = type)
+    initialize(e2, table = table)
 })
 
 #' @export
@@ -218,8 +213,7 @@ setMethod("Math", "ParquetArraySeed", function(x) {
     table <- callGeneric(x@table)
     fact <- as.list(table@fact)
     column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
-    type <- .getColumnType(column)
-    initialize(x, table = table, type = type)
+    initialize(x, table = table)
 })
 
 #' @export
@@ -308,7 +302,7 @@ setMethod("extract_array", "ParquetArraySeed", function(x, index) {
     table <- x@table
 
     # Initialize output array
-    fill <- switch(x@type, logical = FALSE, integer = 0L, double = 0, character = "")
+    fill <- switch(type(x), logical = FALSE, integer = 0L, double = 0, character = "")
     output <- array(fill, dim = lengths(index, use.names = FALSE))
     if (min(dim(output)) == 0L) {
         return(output)
@@ -340,9 +334,9 @@ ParquetArraySeed <- function(conn, key, fact, type = NULL, ...) {
     if (is.null(type)) {
         table <- ParquetFactTable(conn, key = key, fact = fact, ...)
         column <- as.data.frame(select(head(table@conn, 0L), !!fact))[[fact]]
-        type <- .getColumnType(column)
+        type <- .get_type(column)
     } else {
         table <- ParquetFactTable(conn, key = key, fact = fact, type = setNames(type, fact), ...)
     }
-    new2("ParquetArraySeed", table = table, type = type, drop = FALSE, check = FALSE)
+    new2("ParquetArraySeed", table = table, drop = FALSE, check = FALSE)
 }

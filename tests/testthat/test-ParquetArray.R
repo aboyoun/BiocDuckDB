@@ -21,6 +21,14 @@ test_that("basic methods work as expected for a ParquetArray", {
     expect_identical(dimnames(pqarray), dimnames(titanic_array))
 })
 
+test_that("ParquetArraySeed can be cast to a different type", {
+    pqarray <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate")
+    type(pqarray) <- "double"
+    expected <- titanic_array
+    storage.mode(expected) <- "double"
+    checkParquetArray(pqarray, expected)
+})
+
 test_that("extraction methods work as expected for a ParquetArray", {
     pqarray <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate")
 

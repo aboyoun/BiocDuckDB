@@ -29,6 +29,8 @@
 #' aperm,ParquetArray-method
 #' dbconn,ParquetArray-method
 #' t,ParquetArray-method
+#' type,ParquetArray-method
+#' type<-,ParquetArray-method
 #' Ops,ParquetArray,ParquetArray-method
 #' Ops,ParquetArray,atomic-method
 #' Ops,atomic,ParquetArray-method
@@ -74,6 +76,18 @@ setMethod("aperm", "ParquetArray", function(a, perm, ...) {
 #' @importFrom BiocGenerics t
 setMethod("t", "ParquetArray", function(x) {
     initialize(x, seed = t(x@seed))
+})
+
+#' @export
+#' @importFrom BiocGenerics type
+setMethod("type", "ParquetArray", function(x) {
+    callGeneric(x@seed)
+})
+
+#' @export
+#' @importFrom BiocGenerics type<-
+setReplaceMethod("type", "ParquetArray", function(x, value) {
+    initialize(x, seed = callGeneric(x@seed, value = value))
 })
 
 #' @export

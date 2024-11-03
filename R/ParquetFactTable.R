@@ -42,6 +42,8 @@
 #' ncol,ParquetFactTable-method
 #' nrow,ParquetFactTable-method
 #' rownames,ParquetFactTable-method
+#' type,ParquetFactTable-method
+#' type<-,ParquetFactTable-method
 #' Ops,ParquetFactTable,ParquetFactTable-method
 #' Ops,ParquetFactTable,atomic-method
 #' Ops,atomic,ParquetFactTable-method
@@ -159,6 +161,48 @@ setMethod("colnames", "ParquetFactTable", function(x, do.NULL = TRUE, prefix = "
 setReplaceMethod("colnames", "ParquetFactTable", function(x, value) {
     fact <- x@fact
     names(fact) <- value
+    initialize(x, fact = fact)
+})
+
+.get_type <- function(column) {
+    if (inherits(column, "Date")) {
+        "Date"
+    } else {
+        DelayedArray::type(column)
+    }
+}
+
+.cast_fact <- function(fact, value) {
+    if (is.null(names(value)) && (length(value) == length(fact))) {
+        names(value) <- names(fact)
+    }
+    for (j in names(value)) {
+        cast <- switch(value[j],
+                       logical = "as.logical",
+                       integer = "as.integer",
+                       double = "as.double",
+                       character = "as.character",
+                       stop("'type' must be one of 'logical', 'integer', 'double', or 'character'"))
+        fact[[j]] <- call(cast, fact[[j]])
+    }
+    fact
+}
+
+#' @export
+#' @importFrom BiocGenerics type
+setMethod("type", "ParquetFactTable", function(x) {
+    i <- sapply(keynames(x), function(x) character(), simplify = FALSE)
+    ans <- vapply(as.data.frame(x[i, , drop = FALSE])[names(x@fact)], .get_type, character(1L))
+    if (length(ans) == 1L) {
+        ans <- unname(ans)
+    }
+    ans
+})
+
+#' @export
+#' @importFrom BiocGenerics type<-
+setReplaceMethod("type", "ParquetFactTable", function(x, value) {
+    fact <- .cast_fact(x@fact, value)
     initialize(x, fact = fact)
 })
 
@@ -466,15 +510,7 @@ ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key
             if (is.null(names(type)) || length(setdiff(names(type), names(fact)))) {
                 stop("all names in 'type' must have a corresponding name in 'fact'")
             }
-            for (j in names(type)) {
-                cast <- switch(type[j],
-                               logical = "as.logical",
-                               integer = "as.integer",
-                               double = "as.double",
-                               character = "as.character",
-                               stop("'type' must be one of 'logical', 'integer', 'double', or 'character'"))
-                fact[[j]] <- call(cast, fact[[j]])
-            }
+            fact <- .cast_fact(fact, type)
         }
     }
     if (is.list(fact)) {

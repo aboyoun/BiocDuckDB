@@ -12,6 +12,7 @@
 \alias{extract_array,ParquetArraySeed-method}
 \alias{t,ParquetArraySeed-method}
 \alias{type,ParquetArraySeed-method}
+\alias{type<-,ParquetArraySeed-method}
 \alias{Ops,ParquetArraySeed,ParquetArraySeed-method}
 \alias{Ops,ParquetArraySeed,atomic-method}
 \alias{Ops,atomic,ParquetArraySeed-method}

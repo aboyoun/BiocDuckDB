@@ -65,8 +65,12 @@ test_that("key names can be modified for a ParquetFactTable", {
 
 test_that("fact columns of a ParquetFactTable can be cast to a different type", {
     tbl <- ParquetFactTable(esoph_path, key = c("agegp", "alcgp", "tobgp"), fact = c("ncases", "ncontrols"))
-    expect_is(as.data.frame(tbl)[["ncases"]], "numeric")
-    expect_is(as.data.frame(tbl)[["ncontrols"]], "numeric")
+    checkParquetFactTable(tbl, esoph_df)
+    expect_identical(type(tbl), c("ncases" = "double", "ncontrols" = "double"))
+
+    type(tbl) <- c("ncases" = "integer", "ncontrols" = "integer")
+    checkParquetFactTable(tbl, esoph_df)
+    expect_identical(type(tbl), c("ncases" = "integer", "ncontrols" = "integer"))
 
     tbl <- ParquetFactTable(esoph_path, key = c("agegp", "alcgp", "tobgp"),
                             fact = c("ncases", "ncontrols"),

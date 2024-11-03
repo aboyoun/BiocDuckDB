@@ -7,6 +7,8 @@
 \alias{aperm,ParquetArray-method}
 \alias{dbconn,ParquetArray-method}
 \alias{t,ParquetArray-method}
+\alias{type,ParquetArray-method}
+\alias{type<-,ParquetArray-method}
 \alias{Ops,ParquetArray,ParquetArray-method}
 \alias{Ops,ParquetArray,atomic-method}
 \alias{Ops,atomic,ParquetArray-method}
