@@ -89,13 +89,15 @@ setMethod("names", "ParquetColumn", function(x) keydimnames(x@table)[[1L]])
 #' @export
 #' @importFrom BiocGenerics type
 setMethod("type", "ParquetColumn", function(x) {
-    callGeneric(x@table)
+    unname(coltypes(x@table))
 })
 
 #' @export
 #' @importFrom BiocGenerics type<-
 setReplaceMethod("type", "ParquetColumn", function(x, value) {
-    initialize(x, table = callGeneric(x@table, value = value))
+    table <- x@table
+    coltypes(table) <- value
+    initialize(x, table = table)
 })
 
 #' @export

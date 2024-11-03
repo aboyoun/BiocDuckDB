@@ -38,12 +38,14 @@
 #' bindCOLS,ParquetFactTable-method
 #' colnames,ParquetFactTable-method
 #' colnames<-,ParquetFactTable-method
+#' coltypes
+#' coltypes,ParquetFactTable-method
+#' coltypes<-
+#' coltypes<-,ParquetFactTable-method
 #' dbconn,ParquetFactTable-method
 #' ncol,ParquetFactTable-method
 #' nrow,ParquetFactTable-method
 #' rownames,ParquetFactTable-method
-#' type,ParquetFactTable-method
-#' type<-,ParquetFactTable-method
 #' Ops,ParquetFactTable,ParquetFactTable-method
 #' Ops,ParquetFactTable,atomic-method
 #' Ops,atomic,ParquetFactTable-method
@@ -189,19 +191,19 @@ setReplaceMethod("colnames", "ParquetFactTable", function(x, value) {
 }
 
 #' @export
-#' @importFrom BiocGenerics type
-setMethod("type", "ParquetFactTable", function(x) {
+setGeneric("coltypes", function(x) standardGeneric("coltypes"))
+
+#' @export
+setMethod("coltypes", "ParquetFactTable", function(x) {
     i <- sapply(keynames(x), function(x) character(), simplify = FALSE)
-    ans <- vapply(as.data.frame(x[i, , drop = FALSE])[names(x@fact)], .get_type, character(1L))
-    if (length(ans) == 1L) {
-        ans <- unname(ans)
-    }
-    ans
+    vapply(as.data.frame(x[i, , drop = FALSE])[names(x@fact)], .get_type, character(1L))
 })
 
 #' @export
-#' @importFrom BiocGenerics type<-
-setReplaceMethod("type", "ParquetFactTable", function(x, value) {
+setGeneric("coltypes<-", function(x, value) standardGeneric("coltypes<-"))
+
+#' @export
+setReplaceMethod("coltypes", "ParquetFactTable", function(x, value) {
     fact <- .cast_fact(x@fact, value)
     initialize(x, fact = fact)
 })

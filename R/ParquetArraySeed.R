@@ -121,13 +121,15 @@ setMethod("dimnames", "ParquetArraySeed", function(x) {
 #' @export
 #' @importFrom BiocGenerics type
 setMethod("type", "ParquetArraySeed", function(x) {
-    callGeneric(x@table)
+    unname(coltypes(x@table))
 })
 
 #' @export
 #' @importFrom BiocGenerics type<-
 setReplaceMethod("type", "ParquetArraySeed", function(x, value) {
-    initialize(x, table = callGeneric(x@table, value = value))
+    table <- x@table
+    coltypes(table) <- value
+    initialize(x, table = table)
 })
 
 #' @export
