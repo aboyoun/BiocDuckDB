@@ -13,6 +13,13 @@ test_that("ParquetColumn can be cast to a different type", {
     checkParquetColumn(cyl, expected)
 })
 
+test_that("nonzero functions work for ParquetColumn", {
+    df <- ParquetDataFrame(mtcars_path, key = "model")
+    am <- df[["am"]]
+    checkParquetColumn(is_nonzero(am), is_nonzero(as.vector(am)))
+    expect_equal(nzcount(am), nzcount(as.vector(am)))
+})
+
 test_that("Arith methods work as expected for a ParquetArray", {
     df <- ParquetDataFrame(mtcars_path, key = "model")
     mpg <- df[["mpg"]]

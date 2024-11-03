@@ -17,6 +17,7 @@ License: MIT + file LICENSE
 Depends:
     R (>= 3.4),
     methods,
+    SparseArray (>= 1.5.42),
     DelayedArray (>= 0.31.8)
 Imports:
     stats,

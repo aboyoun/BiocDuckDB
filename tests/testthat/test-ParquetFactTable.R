@@ -89,6 +89,13 @@ test_that("ParquetFactTable column names can be modified", {
     checkParquetFactTable(tbl, expected)
 })
 
+test_that("nonzero functions work for ParquetFactTable", {
+    tbl <- ParquetFactTable(esoph_path, key = c("agegp", "alcgp", "tobgp"), fact = c("ncases", "ncontrols"))
+    expected <- cbind(esoph_df[1:3], data.frame(lapply(esoph_df[4:5], is_nonzero)))
+    checkParquetFactTable(is_nonzero(tbl), expected)
+    expect_equal(nzcount(tbl), sum(expected[, 4:5]))
+})
+
 test_that("ParquetFactTable can be bound across columns", {
     tbl <- ParquetFactTable(mtcars_path, key = "model", fact = colnames(mtcars))
 

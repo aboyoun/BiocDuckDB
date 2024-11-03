@@ -29,6 +29,12 @@ test_that("ParquetArraySeed can be cast to a different type", {
     checkParquetArray(pqarray, expected)
 })
 
+test_that("nonzero functions work for ParquetArray", {
+    pqarray <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate")
+    checkParquetArray(is_nonzero(pqarray), is_nonzero(titanic_array))
+    expect_equal(nzcount(pqarray), nzcount(titanic_array))
+})
+
 test_that("extraction methods work as expected for a ParquetArray", {
     pqarray <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate")
 

@@ -14,8 +14,10 @@
 \alias{coltypes<-}
 \alias{coltypes<-,ParquetFactTable-method}
 \alias{dbconn,ParquetFactTable-method}
+\alias{is_nonzero,ParquetFactTable-method}
 \alias{ncol,ParquetFactTable-method}
 \alias{nrow,ParquetFactTable-method}
+\alias{nzcount,ParquetFactTable-method}
 \alias{rownames,ParquetFactTable-method}
 \alias{Ops,ParquetFactTable,ParquetFactTable-method}
 \alias{Ops,ParquetFactTable,atomic-method}

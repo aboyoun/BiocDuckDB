@@ -43,8 +43,10 @@
 #' coltypes<-
 #' coltypes<-,ParquetFactTable-method
 #' dbconn,ParquetFactTable-method
+#' is_nonzero,ParquetFactTable-method
 #' ncol,ParquetFactTable-method
 #' nrow,ParquetFactTable-method
+#' nzcount,ParquetFactTable-method
 #' rownames,ParquetFactTable-method
 #' Ops,ParquetFactTable,ParquetFactTable-method
 #' Ops,ParquetFactTable,atomic-method
@@ -206,6 +208,37 @@ setGeneric("coltypes<-", function(x, value) standardGeneric("coltypes<-"))
 setReplaceMethod("coltypes", "ParquetFactTable", function(x, value) {
     fact <- .cast_fact(x@fact, value)
     initialize(x, fact = fact)
+})
+
+.zeros <- list("logical" = FALSE,
+               "integer" = 0L,
+               "double" = 0,
+               "character" = "")
+
+#' @export
+#' @importFrom SparseArray is_nonzero
+setMethod("is_nonzero", "ParquetFactTable", function(x) {
+    fact <- x@fact
+    ctypes <- coltypes(x)
+    for (j in names(ctypes)) {
+        fact[[j]] <- switch(ctypes[j],
+                            logical = fact[[j]],
+                            integer =,
+                            double =,
+                            character = call("!=", fact[[j]], .zeros[[ctypes[j]]]),
+                            TRUE)
+    }
+    initialize(x, fact = fact)
+})
+
+#' @export
+#' @importFrom SparseArray nzcount
+setMethod("nzcount", "ParquetFactTable", function(x) {
+    tbl <- is_nonzero(x)
+    coltypes(tbl) <- rep.int("integer", ncol(tbl))
+    fact <- LanguageList(nonzero = Reduce(function(x, y) call("+", x, y), tbl@fact))
+    tbl <- initialize(tbl, fact = fact)
+    sum(tbl)
 })
 
 #' @importFrom dplyr distinct filter pull select

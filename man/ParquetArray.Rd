@@ -6,6 +6,8 @@
 \alias{[,ParquetArray,ANY,ANY,ANY-method}
 \alias{aperm,ParquetArray-method}
 \alias{dbconn,ParquetArray-method}
+\alias{is_nonzero,ParquetArray-method}
+\alias{nzcount,ParquetArray-method}
 \alias{t,ParquetArray-method}
 \alias{type,ParquetArray-method}
 \alias{type<-,ParquetArray-method}

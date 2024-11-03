@@ -28,6 +28,8 @@
 #' [,ParquetArray,ANY,ANY,ANY-method
 #' aperm,ParquetArray-method
 #' dbconn,ParquetArray-method
+#' is_nonzero,ParquetArray-method
+#' nzcount,ParquetArray-method
 #' t,ParquetArray-method
 #' type,ParquetArray-method
 #' type<-,ParquetArray-method
@@ -88,6 +90,18 @@ setMethod("type", "ParquetArray", function(x) {
 #' @importFrom BiocGenerics type<-
 setReplaceMethod("type", "ParquetArray", function(x, value) {
     initialize(x, seed = callGeneric(x@seed, value = value))
+})
+
+#' @export
+#' @importFrom SparseArray is_nonzero
+setMethod("is_nonzero", "ParquetArray", function(x) {
+    initialize(x, seed = callGeneric(x@seed))
+})
+
+#' @export
+#' @importFrom SparseArray nzcount
+setMethod("nzcount", "ParquetArray", function(x) {
+    callGeneric(x@seed)
 })
 
 #' @export

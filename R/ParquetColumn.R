@@ -10,8 +10,10 @@
 #' dbconn,ParquetColumn-method
 #' extractROWS,ParquetColumn,ANY-method
 #' head,ParquetColumn-method
+#' is_nonzero,ParquetColumn-method
 #' length,ParquetColumn-method
 #' names,ParquetColumn-method
+#' nzcount,ParquetColumn-method
 #' show,ParquetColumn-method
 #' showAsCell,ParquetColumn-method
 #' tail,ParquetColumn-method
@@ -98,6 +100,18 @@ setReplaceMethod("type", "ParquetColumn", function(x, value) {
     table <- x@table
     coltypes(table) <- value
     initialize(x, table = table)
+})
+
+#' @export
+#' @importFrom SparseArray is_nonzero
+setMethod("is_nonzero", "ParquetColumn", function(x) {
+    initialize(x, table = callGeneric(x@table))
+})
+
+#' @export
+#' @importFrom SparseArray nzcount
+setMethod("nzcount", "ParquetColumn", function(x) {
+    callGeneric(x@table)
 })
 
 #' @export

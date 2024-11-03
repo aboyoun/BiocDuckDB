@@ -45,6 +45,8 @@
 #' dim,ParquetArraySeed-method
 #' dimnames,ParquetArraySeed-method
 #' extract_array,ParquetArraySeed-method
+#' is_nonzero,ParquetArraySeed-method
+#' nzcount,ParquetArraySeed-method
 #' t,ParquetArraySeed-method
 #' type,ParquetArraySeed-method
 #' type<-,ParquetArraySeed-method
@@ -130,6 +132,18 @@ setReplaceMethod("type", "ParquetArraySeed", function(x, value) {
     table <- x@table
     coltypes(table) <- value
     initialize(x, table = table)
+})
+
+#' @export
+#' @importFrom SparseArray is_nonzero
+setMethod("is_nonzero", "ParquetArraySeed", function(x) {
+    initialize(x, table = callGeneric(x@table))
+})
+
+#' @export
+#' @importFrom SparseArray nzcount
+setMethod("nzcount", "ParquetArraySeed", function(x) {
+    callGeneric(x@table)
 })
 
 #' @export

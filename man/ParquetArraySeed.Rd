@@ -10,6 +10,8 @@
 \alias{dim,ParquetArraySeed-method}
 \alias{dimnames,ParquetArraySeed-method}
 \alias{extract_array,ParquetArraySeed-method}
+\alias{is_nonzero,ParquetArraySeed-method}
+\alias{nzcount,ParquetArraySeed-method}
 \alias{t,ParquetArraySeed-method}
 \alias{type,ParquetArraySeed-method}
 \alias{type<-,ParquetArraySeed-method}

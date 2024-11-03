@@ -7,8 +7,10 @@
 \alias{dbconn,ParquetColumn-method}
 \alias{extractROWS,ParquetColumn,ANY-method}
 \alias{head,ParquetColumn-method}
+\alias{is_nonzero,ParquetColumn-method}
 \alias{length,ParquetColumn-method}
 \alias{names,ParquetColumn-method}
+\alias{nzcount,ParquetColumn-method}
 \alias{show,ParquetColumn-method}
 \alias{showAsCell,ParquetColumn-method}
 \alias{tail,ParquetColumn-method}
