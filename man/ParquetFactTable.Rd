@@ -15,6 +15,7 @@
 \alias{coltypes<-,ParquetFactTable-method}
 \alias{dbconn,ParquetFactTable-method}
 \alias{is_nonzero,ParquetFactTable-method}
+\alias{is_sparse,ParquetFactTable-method}
 \alias{ncol,ParquetFactTable-method}
 \alias{nrow,ParquetFactTable-method}
 \alias{nzcount,ParquetFactTable-method}

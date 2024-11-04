@@ -44,6 +44,7 @@
 #' coltypes<-,ParquetFactTable-method
 #' dbconn,ParquetFactTable-method
 #' is_nonzero,ParquetFactTable-method
+#' is_sparse,ParquetFactTable-method
 #' ncol,ParquetFactTable-method
 #' nrow,ParquetFactTable-method
 #' nzcount,ParquetFactTable-method
@@ -71,16 +72,15 @@ setOldClass("tbl_duckdb_connection")
 
 #' @export
 #' @importClassesFrom BiocGenerics OutOfMemoryObject
-#' @importClassesFrom IRanges CharacterList
 #' @importClassesFrom S4Vectors RectangularData
 setClass("ParquetFactTable", contains = c("RectangularData", "OutOfMemoryObject"),
-    slots = c(conn = "tbl_duckdb_connection", key = "CharacterList", fact = "LanguageList"))
+    slots = c(conn = "tbl_duckdb_connection", key = "list", fact = "LanguageList"))
 
 #' @importFrom S4Vectors setValidity2
 setValidity2("ParquetFactTable", function(x) {
     msg <- NULL
     if (is.null(names(x@key))) {
-        msg <- c(msg, "'key' slot must be a named CharacterList")
+        msg <- c(msg, "'key' slot must be a named list")
     }
     if (!all(names(x@key) %in% colnames(x@conn))) {
         msg <- c(msg, "all names in 'key' slot must match column names in 'conn'")
@@ -130,8 +130,8 @@ setMethod("keydimnames", "ParquetFactTable", function(x) lapply(x@key, names))
 
 #' @export
 setReplaceMethod("keydimnames", "ParquetFactTable", function(x, value) {
-    if (!is.list(value) || is(value, "CharacterList")) {
-        stop("'value' must be a list of character vectors")
+    if (!is.list(value)) {
+        stop("'value' must be a list of vectors")
     }
     key <- x@key
     if (is.null(names(value))) {
@@ -168,8 +168,11 @@ setReplaceMethod("colnames", "ParquetFactTable", function(x, value) {
     initialize(x, fact = fact)
 })
 
+#' @importFrom bit64 is.integer64
 .get_type <- function(column) {
-    if (inherits(column, "Date")) {
+    if (is.integer64(column)) {
+        "integer64"
+    } else if (inherits(column, "Date")) {
         "Date"
     } else {
         DelayedArray::type(column)
@@ -184,9 +187,10 @@ setReplaceMethod("colnames", "ParquetFactTable", function(x, value) {
         cast <- switch(value[j],
                        logical = "as.logical",
                        integer = "as.integer",
+                       integer64 = "as.integer64",
                        double = "as.double",
                        character = "as.character",
-                       stop("'type' must be one of 'logical', 'integer', 'double', or 'character'"))
+                       stop("'type' must be one of 'logical', 'integer', 'integer64', 'double', or 'character'"))
         fact[[j]] <- call(cast, fact[[j]])
     }
     fact
@@ -239,6 +243,12 @@ setMethod("nzcount", "ParquetFactTable", function(x) {
     fact <- LanguageList(nonzero = Reduce(function(x, y) call("+", x, y), tbl@fact))
     tbl <- initialize(tbl, fact = fact)
     sum(tbl)
+})
+
+#' @export
+#' @importFrom S4Arrays is_sparse
+setMethod("is_sparse", "ParquetFactTable", function(x) {
+    (ncol(x) == 1L) && ((nzcount(x) / nrow(x)) < 0.5)
 })
 
 #' @importFrom dplyr distinct filter pull select
@@ -492,7 +502,7 @@ setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, opt
 
     for (i in names(key)) {
         set <- key[[i]]
-        conn <- filter(conn, as.character(!!as.name(i)) %in% set)
+        conn <- filter(conn, !!as.name(i) %in% set)
     }
 
     conn <- mutate(conn, !!!fact)
@@ -512,10 +522,10 @@ setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, opt
 
 #' @export
 #' @importFrom dplyr distinct pull select
-#' @importFrom IRanges CharacterList
 #' @importFrom S4Vectors new2
 #' @rdname ParquetFactTable
 ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key)), type = NULL, ...) {
+    # Acquire the connection if it is a string
     if (is.character(conn)) {
         conn <- acquireDataset(conn, ...)
     }
@@ -523,20 +533,24 @@ ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key
         stop("'conn' must be a 'tbl_duckdb_connection' object")
     }
 
+    # Ensure 'key' is a named list of character vectors
     if (is.character(key)) {
         key <- sapply(key, function(x) NULL, simplify = FALSE)
     }
-    if (!(is(key, "CharacterList") || is.list(key)) || is.null(names(key))) {
-        stop("'key' must be a character vector or a named list of character vectors")
+    if (!is.list(key) || is.null(names(key))) {
+        stop("'key' must be a character vector or a named list of vectors")
     }
+
+    # Get distinct key dimnames
     if (is.list(key)) {
         for (k in names(key)) {
             if (is.null(key[[k]])) {
                 key[[k]] <- pull(distinct(select(conn, as.name(!!k))))
             }
         }
-        key <- CharacterList(key, compress = FALSE)
     }
+
+    # Enable renaming of keydimnames by adding names to character vectors
     for (i in seq_along(key)) {
         nms <- names(key[[i]])
         if (is.null(nms) || anyNA(nms) || any(!nzchar(nms))) {
@@ -544,6 +558,7 @@ ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key
         }
     }
 
+    # Ensure 'fact' is a named LanguageList object
     if (is.character(fact)) {
         fact <- sapply(fact, as.name, simplify = FALSE)
         if (!is.null(type)) {

@@ -82,7 +82,7 @@ acquireDataset <- function(path, ...) {
     } else {
         src <- sprintf("read_parquet('%s'%s)", path, args)
     }
-    output <- tbl(dbConnect(duckdb()), src)
+    output <- tbl(dbConnect(duckdb(bigint = "integer64")), src)
     persistent$handles[[path]] <- output
     output
 }

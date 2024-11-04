@@ -362,8 +362,8 @@ setMethod("as.data.frame", "ParquetDataFrame", function(x, row.names = NULL, opt
     df <- callNextMethod(x, row.names = row.names, optional = optional, ...)
 
     rownames <- x@key[[1L]]
-    rownames <- setNames(names(rownames), rownames)
-    rownames(df) <- rownames[df[[keynames(x)]]]
+    rownames <- setNames(names(rownames), as.character(rownames))
+    rownames(df) <- rownames[as.character(df[[keynames(x)]])]
     df[rownames(x), colnames(x), drop = FALSE]
 })
 
