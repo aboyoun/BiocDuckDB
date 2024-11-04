@@ -40,6 +40,7 @@ titanic_array <- unclass(Titanic)
 storage.mode(titanic_array) <- "integer"
 titanic_df <- do.call(expand.grid, c(dimnames(Titanic), stringsAsFactors = FALSE))
 titanic_df$fate <- as.integer(Titanic[as.matrix(titanic_df)])
+titanic_df[titanic_df$fate != 0L, ]
 titanic_path <- tempfile()
 arrow::write_parquet(titanic_df, titanic_path)
 

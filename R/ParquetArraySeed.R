@@ -45,6 +45,7 @@
 #' dim,ParquetArraySeed-method
 #' dimnames,ParquetArraySeed-method
 #' extract_array,ParquetArraySeed-method
+#' extract_sparse_array,ParquetArraySeed-method
 #' is_nonzero,ParquetArraySeed-method
 #' nzcount,ParquetArraySeed-method
 #' t,ParquetArraySeed-method
@@ -315,7 +316,6 @@ function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, h
 setMethod("extract_array", "ParquetArraySeed", function(x, index) {
     index <- .extract_array_index(x, index)
 
-    table <- x@table
 
     # Initialize output array
     fill <- switch(type(x), logical = FALSE, integer = 0L, double = 0, character = "")
@@ -326,7 +326,7 @@ setMethod("extract_array", "ParquetArraySeed", function(x, index) {
     dimnames(output) <- index
 
     # Fill output array
-    table <- table[index, ]
+    table <- x@table[index, ]
     df <- as.data.frame(table)
     keycols <- df[, keynames(table)]
     output[as.matrix(keycols)] <- df[[colnames(table)]]
@@ -335,6 +335,22 @@ setMethod("extract_array", "ParquetArraySeed", function(x, index) {
     }
 
     output
+})
+
+#' @export
+#' @importClassesFrom SparseArray SVT_SparseArray
+#' @importFrom SparseArray COO_SparseArray extract_sparse_array
+setMethod("extract_sparse_array", "ParquetArraySeed", function(x, index) {
+    index <- .extract_array_index(x, index)
+    table <- x@table[index, ]
+    df <- as.data.frame(table)
+
+    dim <- dim(x)
+    dimnames <- dimnames(x)
+    nzcoo <- sapply(names(dimnames), function(j) match(df[[j]], dimnames[[j]]))
+    nzdata <- df[[colnames(table)]]
+    coo <- COO_SparseArray(dim = dim, nzcoo = nzcoo, nzdata = nzdata, dimnames = dimnames)
+    as(coo, "SVT_SparseArray")
 })
 
 #' @export
