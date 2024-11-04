@@ -12,6 +12,7 @@
 \alias{extract_array,ParquetArraySeed-method}
 \alias{extract_sparse_array,ParquetArraySeed-method}
 \alias{is_nonzero,ParquetArraySeed-method}
+\alias{is_sparse,ParquetArraySeed-method}
 \alias{nzcount,ParquetArraySeed-method}
 \alias{t,ParquetArraySeed-method}
 \alias{type,ParquetArraySeed-method}

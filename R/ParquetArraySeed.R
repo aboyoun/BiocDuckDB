@@ -47,6 +47,7 @@
 #' extract_array,ParquetArraySeed-method
 #' extract_sparse_array,ParquetArraySeed-method
 #' is_nonzero,ParquetArraySeed-method
+#' is_sparse,ParquetArraySeed-method
 #' nzcount,ParquetArraySeed-method
 #' t,ParquetArraySeed-method
 #' type,ParquetArraySeed-method
@@ -144,6 +145,11 @@ setMethod("is_nonzero", "ParquetArraySeed", function(x) {
 #' @export
 #' @importFrom SparseArray nzcount
 setMethod("nzcount", "ParquetArraySeed", function(x) {
+    callGeneric(x@table)
+})
+#' @export
+#' @importFrom S4Arrays is_sparse
+setMethod("is_sparse", "ParquetArraySeed", function(x) {
     callGeneric(x@table)
 })
 

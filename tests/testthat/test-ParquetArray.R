@@ -4,6 +4,7 @@
 test_that("basic methods work as expected for a ParquetArray", {
     pqarray <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate")
     checkParquetArray(pqarray, titanic_array)
+    expect_false(is_sparse(pqarray))
 
     pqarray <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate", type = "double")
     expect_s4_class(pqarray, "ParquetArray")
@@ -21,10 +22,37 @@ test_that("basic methods work as expected for a ParquetArray", {
     expect_identical(dimnames(pqarray), dimnames(titanic_array))
 })
 
-test_that("ParquetArraySeed can be cast to a different type", {
+test_that("basic methods work as expected for a sparse ParquetArray", {
+    pqarray <- ParquetArray(sparse_path, key = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), fact = "value")
+    checkParquetArray(pqarray, sparse_array)
+    expect_true(is_sparse(pqarray))
+
+    pqarray <- ParquetArray(sparse_path, key = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), fact = "value", type = "double")
+    expect_s4_class(pqarray, "ParquetArray")
+    expect_identical(type(pqarray), "double")
+    expect_identical(length(pqarray), length(sparse_array))
+    expect_identical(dim(pqarray), dim(sparse_array))
+    expect_identical(dimnames(pqarray), dimnames(sparse_array))
+    expect_equal(as.array(pqarray), sparse_array)
+
+    pqarray <- ParquetArray(sparse_path, key = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), fact = "value", type = "character")
+    expect_s4_class(pqarray, "ParquetArray")
+    expect_identical(type(pqarray), "character")
+    expect_identical(length(pqarray), length(sparse_array))
+    expect_identical(dim(pqarray), dim(sparse_array))
+    expect_identical(dimnames(pqarray), dimnames(sparse_array))
+})
+
+test_that("ParquetArray can be cast to a different type", {
     pqarray <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate")
     type(pqarray) <- "double"
     expected <- titanic_array
+    storage.mode(expected) <- "double"
+    checkParquetArray(pqarray, expected)
+
+    pqarray <- ParquetArray(sparse_path, key = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), fact = "value")
+    type(pqarray) <- "double"
+    expected <- sparse_array
     storage.mode(expected) <- "double"
     checkParquetArray(pqarray, expected)
 })
@@ -33,6 +61,10 @@ test_that("nonzero functions work for ParquetArray", {
     pqarray <- ParquetArray(titanic_path, key = dimnames(titanic_array), fact = "fate")
     checkParquetArray(is_nonzero(pqarray), is_nonzero(titanic_array))
     expect_equal(nzcount(pqarray), nzcount(titanic_array))
+
+    pqarray <- ParquetArray(sparse_path, key = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), fact = "value")
+    checkParquetArray(is_nonzero(pqarray), is_nonzero(sparse_array))
+    expect_equal(nzcount(pqarray), nzcount(sparse_array))
 })
 
 test_that("extraction methods work as expected for a ParquetArray", {

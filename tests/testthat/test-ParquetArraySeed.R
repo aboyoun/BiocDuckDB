@@ -4,6 +4,7 @@
 test_that("basic methods work as expected for a ParquetArraySeed", {
     seed <- ParquetArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")
     checkParquetArraySeed(seed, titanic_array)
+    expect_false(is_sparse(seed))
 
     seed <- ParquetArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate", type = "double")
     expect_s4_class(seed, "ParquetArraySeed")
@@ -21,10 +22,37 @@ test_that("basic methods work as expected for a ParquetArraySeed", {
     expect_identical(dimnames(seed), dimnames(titanic_array))
 })
 
+test_that("basic methods work as expected for a sparse ParquetArraySeed", {
+    seed <- ParquetArraySeed(sparse_path, key = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), fact = "value")
+    checkParquetArraySeed(seed, sparse_array)
+    expect_true(is_sparse(seed))
+
+    seed <- ParquetArraySeed(sparse_path, key = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), fact = "value", type = "double")
+    expect_s4_class(seed, "ParquetArraySeed")
+    expect_identical(type(seed), "double")
+    expect_identical(length(seed), length(sparse_array))
+    expect_identical(dim(seed), dim(sparse_array))
+    expect_identical(dimnames(seed), dimnames(sparse_array))
+    expect_equal(as.array(seed), sparse_array)
+
+    seed <- ParquetArraySeed(sparse_path, key = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), fact = "value", type = "character")
+    expect_s4_class(seed, "ParquetArraySeed")
+    expect_identical(type(seed), "character")
+    expect_identical(length(seed), length(sparse_array))
+    expect_identical(dim(seed), dim(sparse_array))
+    expect_identical(dimnames(seed), dimnames(sparse_array))
+})
+
 test_that("ParquetArraySeed can be cast to a different type", {
     seed <- ParquetArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")
     type(seed) <- "double"
     expected <- titanic_array
+    storage.mode(expected) <- "double"
+    checkParquetArraySeed(seed, expected)
+
+    seed <- ParquetArraySeed(sparse_path, key = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), fact = "value")
+    type(seed) <- "double"
+    expected <- sparse_array
     storage.mode(expected) <- "double"
     checkParquetArraySeed(seed, expected)
 })
@@ -33,6 +61,10 @@ test_that("nonzero functions work for ParquetArraySeed", {
     seed <- ParquetArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")
     checkParquetArraySeed(is_nonzero(seed), is_nonzero(titanic_array))
     expect_equal(nzcount(seed), nzcount(titanic_array))
+
+    seed <- ParquetArraySeed(sparse_path, key = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), fact = "value")
+    checkParquetArraySeed(is_nonzero(seed), is_nonzero(sparse_array))
+    expect_equal(nzcount(seed), nzcount(sparse_array))
 })
 
 test_that("extraction methods work as expected for a ParquetArraySeed", {

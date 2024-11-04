@@ -44,6 +44,20 @@ titanic_df[titanic_df$fate != 0L, ]
 titanic_path <- tempfile()
 arrow::write_parquet(titanic_df, titanic_path)
 
+# Random array
+set.seed(123)
+sparse_df <- data.frame(dim1 = sample(LETTERS, 1000, replace = TRUE),
+                        dim2 = sample(letters, 1000, replace = TRUE),
+                        dim3 = sample(month.abb, 1000, replace = TRUE),
+                        value = sample(100L, 1000, replace = TRUE))
+sparse_df <- sparse_df[!duplicated(sparse_df[,1:3]), ]
+sparse_df <- sparse_df[order(sparse_df$dim1, sparse_df$dim2, sparse_df$dim3),]
+rownames(sparse_df) <- NULL
+sparse_array <- array(0L, dim = c(26L, 26L, 12L), dimnames = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb))
+sparse_array[as.matrix(sparse_df[,1:3])] <- sparse_df[["value"]]
+sparse_path <- tempfile()
+arrow::write_parquet(sparse_df, sparse_path)
+
 # Helper functions
 checkParquetFactTable <- function(object, expected) {
     expect_s4_class(object, "ParquetFactTable")
