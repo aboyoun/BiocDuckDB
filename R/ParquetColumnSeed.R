@@ -96,7 +96,11 @@ setMethod("extract_array", "ParquetColumnSeed", function(x, index) {
     }
 
     if (!is(output, x@type)) {
-        output <- as(output, x@type)
+        if (x@type == "raw") {
+            output <- sapply(output, rawToChar)
+        } else if (!(x@type == "integer" && is.double(output) && max(abs(output), na.rm=TRUE) > .Machine$integer.max)) {
+            output <- as(output, x@type)
+        }
     }
     array(output)
 })
@@ -108,8 +112,13 @@ ParquetColumnSeed <- function(path, column, type=NULL, length=NULL) {
     if (is.null(type) || is.null(length)) {
         tab <- acquireTable(path)
         col <- tab[[column]]
-        if (is.null(type)){ 
-            type <- DelayedArray::type(col$Slice(0,0)$as_vector())
+        if (is.null(type)) {
+            vec <- col$Slice(0,0)$as_vector()
+            if (inherits(vec, "arrow_binary")) {
+                type <- "raw"
+            } else {
+                type <- DelayedArray::type(vec)
+            }
         }
         if (is.null(length)) {
             length <- nrow(tab)
