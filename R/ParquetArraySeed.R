@@ -311,7 +311,7 @@ function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, h
 }
 
 #' @export
-#' @importFrom DelayedArray extract_array
+#' @importFrom S4Arrays extract_array
 setMethod("extract_array", "ParquetArraySeed", function(x, index) {
     index <- .extract_array_index(x, index)
 

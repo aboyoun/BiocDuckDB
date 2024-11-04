@@ -83,7 +83,7 @@ setMethod("[", "ParquetMatrix", function(x, i, j, ..., drop = TRUE) {
 
 #' @export
 #' @importFrom S4Vectors isSingleString new2
-#' @importFrom setNames
+#' @importFrom stats setNames
 #' @rdname ParquetMatrix
 ParquetMatrix <- function(conn, row, col, fact, key = c(row, col), type = NULL, ...) {
     if (!missing(row) && isSingleString(row)) {
