@@ -83,8 +83,15 @@ setMethod("[", "ParquetMatrix", function(x, i, j, ..., drop = TRUE) {
 
 #' @export
 #' @importFrom S4Vectors isSingleString new2
+#' @importFrom setNames
 #' @rdname ParquetMatrix
 ParquetMatrix <- function(conn, row, col, fact, key = c(row, col), type = NULL, ...) {
+    if (!missing(row) && isSingleString(row)) {
+        row <- setNames(list(NULL), row)
+    }
+    if (!missing(col) && isSingleString(col)) {
+        col <- setNames(list(NULL), col)
+    }
     if (!is(conn, "ParquetArraySeed")) {
         if (length(key) != 2L) {
             stop("'key' must contain exactly 2 elements: rows and columns")

@@ -6,6 +6,13 @@ test_that("basic methods work as expected for a ParquetFactTable", {
     tbl <- ParquetFactTable(esoph_path, key = c("agegp", "alcgp", "tobgp"))
     checkParquetFactTable(tbl, esoph_df)
 
+    tbl <- ParquetFactTable(esoph_path, key = list("agegp" = NULL, "alcgp" = levels(esoph[["alcgp"]]), "tobgp" = NULL))
+    checkParquetFactTable(tbl, esoph_df)
+
+    tbl <- ParquetFactTable(esoph_path,
+                            key = list("agegp" = levels(esoph[["agegp"]]), "alcgp" = levels(esoph[["alcgp"]]), "tobgp" = levels(esoph[["tobgp"]])))
+    checkParquetFactTable(tbl, esoph_df)
+
     tbl <- ParquetFactTable(esoph_path, key = c("agegp", "alcgp", "tobgp"), fact = c("ncases", "ncontrols"))
     checkParquetFactTable(tbl, esoph_df)
 

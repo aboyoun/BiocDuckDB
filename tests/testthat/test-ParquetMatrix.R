@@ -14,6 +14,26 @@ test_that("basic methods work as expected for a ParquetMatrix", {
     expect_setequal(colnames(pqmat), colnames(state.x77))
     expect_equal(as.matrix(pqmat)[rownames(state.x77), colnames(state.x77)], state.x77)
 
+    pqmat <- ParquetMatrix(state_path, row = dimnames(state.x77)[1L], col = "colname", fact = "value")
+    expect_s4_class(pqmat, "ParquetMatrix")
+    expect_identical(type(pqmat), "double")
+    expect_identical(type(pqmat), typeof(state.x77))
+    expect_identical(length(pqmat), length(state.x77))
+    expect_identical(dim(pqmat), dim(state.x77))
+    expect_setequal(rownames(pqmat), rownames(state.x77))
+    expect_setequal(colnames(pqmat), colnames(state.x77))
+    expect_equal(as.matrix(pqmat)[rownames(state.x77), colnames(state.x77)], state.x77)
+
+    pqmat <- ParquetMatrix(state_path, row = "rowname", col = dimnames(state.x77)[2L], fact = "value")
+    expect_s4_class(pqmat, "ParquetMatrix")
+    expect_identical(type(pqmat), "double")
+    expect_identical(type(pqmat), typeof(state.x77))
+    expect_identical(length(pqmat), length(state.x77))
+    expect_identical(dim(pqmat), dim(state.x77))
+    expect_setequal(rownames(pqmat), rownames(state.x77))
+    expect_setequal(colnames(pqmat), colnames(state.x77))
+    expect_equal(as.matrix(pqmat)[rownames(state.x77), colnames(state.x77)], state.x77)
+
     pqmat <- ParquetMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], fact = "value")
     checkParquetMatrix(pqmat, state.x77)
 

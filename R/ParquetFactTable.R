@@ -524,13 +524,18 @@ ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key
     }
 
     if (is.character(key)) {
-        key <- sapply(key, function(x) pull(distinct(select(conn, as.name(!!x)))), simplify = FALSE)
+        key <- sapply(key, function(x) NULL, simplify = FALSE)
+    }
+    if (!(is(key, "CharacterList") || is.list(key)) || is.null(names(key))) {
+        stop("'key' must be a character vector or a named list of character vectors")
     }
     if (is.list(key)) {
+        for (k in names(key)) {
+            if (is.null(key[[k]])) {
+                key[[k]] <- pull(distinct(select(conn, as.name(!!k))))
+            }
+        }
         key <- CharacterList(key, compress = FALSE)
-    }
-    if (!is(key, "CharacterList") || is.null(names(key))) {
-        stop("'key' must be a character vector or a named list of character vectors")
     }
     for (i in seq_along(key)) {
         nms <- names(key[[i]])
