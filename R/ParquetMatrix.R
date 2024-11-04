@@ -15,7 +15,7 @@
 #' @param col Either a character vector or a named list of character vectors
 #' containing the names of the columns in the Parquet data that specify the
 #' columns of the matrix.
-#' @param key Either a character vector or a named list of character vectors
+#' @param key Either a character vector or a list of character vectors
 #' containing the names of the columns in the Parquet data that specify the
 #' rows and columns of the matrix.
 #' @param fact String containing the name of the column in the Parquet data

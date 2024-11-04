@@ -6,7 +6,7 @@
 #'
 #' @param conn Either a string containing the path to the Parquet data or a
 #' \code{tbl_duckdb_connection} object.
-#' @param key Either a character vector or a named list of character vectors
+#' @param key Either a character vector or a list of character vectors
 #' containing the names of the columns in the Parquet data that specify
 #' the primary key of the array.
 #' @param fact Either a character vector containing the names of the columns
@@ -86,8 +86,8 @@ setValidity2("ParquetFactTable", function(x) {
         msg <- c(msg, "all names in 'key' slot must match column names in 'conn'")
     }
     for (i in seq_along(x@key)) {
-        if (is.null(names(x@key[[i]]))) {
-            msg <- c(msg, "all elements in 'key' slot must be named character vectors")
+        if (!is.atomic(x@key[[i]])) {
+            msg <- c(msg, "all elements in 'key' slot must be atomic")
             break
         }
     }
@@ -126,7 +126,9 @@ setMethod("ncol", "ParquetFactTable", function(x) length(x@fact))
 setMethod("keynames", "ParquetFactTable", function(x) names(x@key))
 
 #' @export
-setMethod("keydimnames", "ParquetFactTable", function(x) lapply(x@key, names))
+setMethod("keydimnames", "ParquetFactTable", function(x) {
+    lapply(x@key, function(y) names(y) %||% y)
+})
 
 #' @export
 setReplaceMethod("keydimnames", "ParquetFactTable", function(x, value) {
@@ -150,9 +152,10 @@ setReplaceMethod("keydimnames", "ParquetFactTable", function(x, value) {
 #' @importFrom BiocGenerics rownames
 setMethod("rownames", "ParquetFactTable", function(x, do.NULL = TRUE, prefix = "row") {
     if (length(x@key) == 1L) {
-        names(x@key[[1L]])
+        key1 <- x@key[[1L]]
+        names(key1) %||% key1
     } else {
-        do.call(paste, c(do.call(expand.grid, lapply(x@key, names)), list(sep = "|")))
+        stop("rownames are not available for multi-dimensional keys")
     }
 })
 
@@ -266,7 +269,9 @@ setMethod("is_sparse", "ParquetFactTable", function(x) {
         }
         for (k in intersect(names(key), names(i))) {
             sub <- i[[k]]
-            if (is.atomic(sub)) {
+            if (is.character(sub) && is.null(names(key[[k]]))) {
+                key[[k]] <- sub
+            } else if (is.atomic(sub)) {
                 key[[k]] <- key[[k]][sub]
             } else if (is(sub, "ParquetColumn") &&
                        is.logical(as.vector(head(sub, 0L))) &&
@@ -547,14 +552,6 @@ ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key
             if (is.null(key[[k]])) {
                 key[[k]] <- pull(distinct(select(conn, as.name(!!k))))
             }
-        }
-    }
-
-    # Enable renaming of keydimnames by adding names to character vectors
-    for (i in seq_along(key)) {
-        nms <- names(key[[i]])
-        if (is.null(nms) || anyNA(nms) || any(!nzchar(nms))) {
-            names(key[[i]]) <- key[[i]]
         }
     }
 

@@ -361,9 +361,16 @@ setMethod("as.data.frame", "ParquetDataFrame", function(x, row.names = NULL, opt
     # as.data.frame,ParquetFactTable-method
     df <- callNextMethod(x, row.names = row.names, optional = optional, ...)
 
-    rownames <- x@key[[1L]]
-    rownames <- setNames(names(rownames), as.character(rownames))
-    rownames(df) <- rownames[as.character(df[[keynames(x)]])]
+    # Add rownames, renaming if specified
+    if (is.null(names(x@key[[1L]]))) {
+        rnames <- df[[keynames(x)]]
+    } else {
+        rnames <- x@key[[1L]]
+        rnames <- setNames(names(rnames), rnames)
+        rnames <- rnames[as.character(df[[keynames(x)]])]
+    }
+    rownames(df) <- rnames
+
     df[rownames(x), colnames(x), drop = FALSE]
 })
 

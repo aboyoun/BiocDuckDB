@@ -31,7 +31,7 @@ ParquetDataFrame(conn, key, fact, ...)
 \item{conn}{Either a string containing the path to the Parquet data or a
 \code{tbl_duckdb_connection} object.}
 
-\item{key}{Either a character vector or a named list of character vectors
+\item{key}{Either a character vector or a list of character vectors
 containing the names of the columns in the Parquet data that specify
 the primary key of the array.}
 
