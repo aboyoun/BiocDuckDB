@@ -102,17 +102,19 @@ setMethod("show", "ParquetDataFrame", function(object) {
         x_nrow, " row", ifelse(x_nrow == 1L, "", "s"), " and ",
         x_ncol, " column", ifelse(x_ncol == 1L, "", "s"), "\n", sep = "")
     if (x_nrow != 0L && x_ncol != 0L) {
-        x_rownames <- rownames(object)
         if (x_nrow <= nhead + ntail + 1L) {
             m <- makeNakedCharacterMatrixForDisplay(object)
-            if (!is.null(x_rownames))
+            x_rownames <- rownames(object)
+            if (!is.null(x_rownames)) {
                 rownames(m) <- x_rownames
+            }
         } else {
             i <- c(seq_len(nhead), (x_nrow + 1L) - rev(seq_len(ntail)))
             df <- as.data.frame(object[i, , drop = FALSE])
             m <- rbind(makeNakedCharacterMatrixForDisplay(head(df, nhead)),
                        rbind(rep.int("...", x_ncol)),
                        makeNakedCharacterMatrixForDisplay(tail(df, ntail)))
+            x_rownames <- c(rownames(head(object, nhead)), rownames(tail(object, ntail)))
             rownames(m) <- S4Vectors:::make_rownames_for_RectangularData_display(x_rownames, x_nrow, nhead, ntail)
         }
         m <- rbind(rep.int("<ParquetColumn>", ncol(object)), m)
@@ -371,7 +373,7 @@ setMethod("as.data.frame", "ParquetDataFrame", function(x, row.names = NULL, opt
     }
     rownames(df) <- rnames
 
-    df[as.character(rownames(x)), colnames(x), drop = FALSE]
+    df[rownames(x), colnames(x), drop = FALSE]
 })
 
 #' @export

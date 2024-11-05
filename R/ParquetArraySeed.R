@@ -324,7 +324,7 @@ setMethod("extract_array", "ParquetArraySeed", function(x, index) {
 
 
     # Initialize output array
-    fill <- switch(type(x), logical = FALSE, integer = 0L, double = 0, character = "")
+    fill <- switch(type(x), logical = FALSE, integer = 0L, double = 0, character =, raw = "")
     output <- array(fill, dim = lengths(index, use.names = FALSE))
     if (min(dim(output)) == 0L) {
         return(output)

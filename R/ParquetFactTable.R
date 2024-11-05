@@ -127,7 +127,7 @@ setMethod("keynames", "ParquetFactTable", function(x) names(x@key))
 
 #' @export
 setMethod("keydimnames", "ParquetFactTable", function(x) {
-    lapply(x@key, function(y) names(y) %||% y)
+    lapply(x@key, function(y) names(y) %||% as.character(y))
 })
 
 #' @export
@@ -153,7 +153,7 @@ setReplaceMethod("keydimnames", "ParquetFactTable", function(x, value) {
 setMethod("rownames", "ParquetFactTable", function(x, do.NULL = TRUE, prefix = "row") {
     if (length(x@key) == 1L) {
         key1 <- x@key[[1L]]
-        names(key1) %||% key1
+        names(key1) %||% as.character(key1)
     } else {
         stop("rownames are not available for multi-dimensional keys")
     }
@@ -177,6 +177,8 @@ setReplaceMethod("colnames", "ParquetFactTable", function(x, value) {
         "integer64"
     } else if (inherits(column, "Date")) {
         "Date"
+    } else if (is.list(column)) {
+        "raw"
     } else {
         DelayedArray::type(column)
     }
@@ -218,10 +220,13 @@ setReplaceMethod("coltypes", "ParquetFactTable", function(x, value) {
     initialize(x, fact = fact)
 })
 
+#' @importFrom bit64 as.integer64
 .zeros <- list("logical" = FALSE,
                "integer" = 0L,
+               "integer64" = as.integer64(0L),
                "double" = 0,
-               "character" = "")
+               "character" = "",
+               "raw" = "")
 
 #' @export
 #' @importFrom SparseArray is_nonzero
@@ -232,8 +237,10 @@ setMethod("is_nonzero", "ParquetFactTable", function(x) {
         fact[[j]] <- switch(ctypes[j],
                             logical = fact[[j]],
                             integer =,
+                            integer64 =,
                             double =,
-                            character = call("!=", fact[[j]], .zeros[[ctypes[j]]]),
+                            character =,
+                            raw = call("!=", fact[[j]], .zeros[[ctypes[j]]]),
                             TRUE)
     }
     initialize(x, fact = fact)
@@ -255,7 +262,7 @@ setMethod("is_sparse", "ParquetFactTable", function(x) {
     (ncol(x) == 1L) && ((nzcount(x) / nrow(x)) < 0.5)
 })
 
-#' @importFrom dplyr distinct filter pull select
+#' @importFrom dplyr arrange distinct filter pull select
 .subset_ParquetFactTable <- function(x, i, j, ..., drop = TRUE) {
     conn <- x@conn
     fact <- x@fact
@@ -280,7 +287,7 @@ setMethod("is_sparse", "ParquetFactTable", function(x) {
                 keep <- sub@table@fact[[1L]]
                 conn <- filter(conn, !!keep)
                 for (kname in names(key)) {
-                    kdnames <- pull(distinct(select(conn, as.name(!!kname))))
+                    kdnames <- pull(arrange(distinct(select(conn, !!as.name(kname))), !!as.name(kname)))
                     key[[kname]] <- key[[kname]][match(kdnames, key[[kname]])]
                 }
             } else {
@@ -535,7 +542,7 @@ setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, opt
 })
 
 #' @export
-#' @importFrom dplyr distinct pull select
+#' @importFrom dplyr arrange distinct pull select
 #' @importFrom S4Vectors new2
 #' @rdname ParquetFactTable
 ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key)), type = NULL, ...) {
@@ -559,7 +566,7 @@ ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key
     if (is.list(key)) {
         for (k in names(key)) {
             if (is.null(key[[k]])) {
-                key[[k]] <- pull(distinct(select(conn, as.name(!!k))))
+                key[[k]] <- pull(arrange(distinct(select(conn, !!as.name(k))), !!as.name(k)))
             }
         }
     }

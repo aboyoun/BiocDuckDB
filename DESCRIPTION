@@ -24,7 +24,6 @@ Imports:
     stats,
     BiocGenerics (>= 0.51.2),
     S4Vectors,
-    IRanges,
     S4Arrays (>= 1.1.1),
     DBI,
     dplyr,
