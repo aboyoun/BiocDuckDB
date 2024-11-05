@@ -99,13 +99,13 @@ setMethod("type", "ParquetColumn", function(x) {
 setReplaceMethod("type", "ParquetColumn", function(x, value) {
     table <- x@table
     coltypes(table) <- value
-    initialize(x, table = table)
+    initialize2(x, table = table, check = FALSE)
 })
 
 #' @export
 #' @importFrom SparseArray is_nonzero
 setMethod("is_nonzero", "ParquetColumn", function(x) {
-    initialize(x, table = callGeneric(x@table))
+    initialize2(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export
@@ -120,7 +120,7 @@ setMethod("extractROWS", "ParquetColumn", function(x, i) {
         i <- i@table
     }
     i <- setNames(list(i), keynames(x@table))
-    initialize(x, table = .subset_ParquetFactTable(x@table, i = i))
+    initialize2(x, table = .subset_ParquetFactTable(x@table, i = i), check = FALSE)
 })
 
 #' @export
@@ -161,22 +161,22 @@ setMethod("tail", "ParquetColumn", function(x, n = 6L, ...) {
 
 #' @export
 setMethod("Ops", c(e1 = "ParquetColumn", e2 = "ParquetColumn"), function(e1, e2) {
-    initialize(e1, table = callGeneric(e1@table, e2@table))
+    initialize2(e1, table = callGeneric(e1@table, e2@table), check = FALSE)
 })
 
 #' @export
 setMethod("Ops", c(e1 = "ParquetColumn", e2 = "atomic"), function(e1, e2) {
-    initialize(e1, table = callGeneric(e1@table, e2))
+    initialize2(e1, table = callGeneric(e1@table, e2), check = FALSE)
 })
 
 #' @export
 setMethod("Ops", c(e1 = "atomic", e2 = "ParquetColumn"), function(e1, e2) {
-    initialize(e2, table = callGeneric(e1, e2@table))
+    initialize2(e2, table = callGeneric(e1, e2@table), check = FALSE)
 })
 
 #' @export
 setMethod("Math", "ParquetColumn", function(x) {
-    initialize(x, table = callGeneric(x@table))
+    initialize2(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export

@@ -70,6 +70,19 @@ NULL
 
 setOldClass("tbl_duckdb_connection")
 
+#' @importFrom S4Vectors isTRUEorFALSE
+initialize2 <- function(..., check = TRUE)
+{
+    if (!isTRUEorFALSE(check)) {
+        stop("'check' must be TRUE or FALSE")
+    }
+    disableValidity <- S4Vectors:::disableValidity
+    old_val <- disableValidity()
+    on.exit(disableValidity(old_val))
+    disableValidity(!check)
+    initialize(...)
+}
+
 #' @export
 #' @importClassesFrom BiocGenerics OutOfMemoryObject
 #' @importClassesFrom S4Vectors RectangularData
@@ -145,7 +158,7 @@ setReplaceMethod("keydimnames", "ParquetFactTable", function(x, value) {
     for (i in names(value)) {
         names(key[[i]]) <- value[[i]]
     }
-    initialize(x, key = key)
+    initialize2(x, key = key, check = FALSE)
 })
 
 #' @export
@@ -168,7 +181,7 @@ setMethod("colnames", "ParquetFactTable", function(x, do.NULL = TRUE, prefix = "
 setReplaceMethod("colnames", "ParquetFactTable", function(x, value) {
     fact <- x@fact
     names(fact) <- value
-    initialize(x, fact = fact)
+    initialize2(x, fact = fact, check = FALSE)
 })
 
 #' @importFrom bit64 is.integer64
@@ -217,7 +230,7 @@ setGeneric("coltypes<-", function(x, value) standardGeneric("coltypes<-"))
 #' @export
 setReplaceMethod("coltypes", "ParquetFactTable", function(x, value) {
     fact <- .cast_fact(x@fact, value)
-    initialize(x, fact = fact)
+    initialize2(x, fact = fact, check = FALSE)
 })
 
 #' @importFrom bit64 as.integer64
@@ -243,7 +256,7 @@ setMethod("is_nonzero", "ParquetFactTable", function(x) {
                             raw = call("!=", fact[[j]], .zeros[[ctypes[j]]]),
                             TRUE)
     }
-    initialize(x, fact = fact)
+    initialize2(x, fact = fact, check = FALSE)
 })
 
 #' @export
@@ -252,7 +265,7 @@ setMethod("nzcount", "ParquetFactTable", function(x) {
     tbl <- is_nonzero(x)
     coltypes(tbl) <- rep.int("integer", ncol(tbl))
     fact <- LanguageList(nonzero = Reduce(function(x, y) call("+", x, y), tbl@fact))
-    tbl <- initialize(tbl, fact = fact)
+    tbl <- initialize2(tbl, fact = fact, check = FALSE)
     sum(tbl)
 })
 
@@ -296,7 +309,7 @@ setMethod("is_sparse", "ParquetFactTable", function(x) {
         }
     }
 
-    initialize(x, conn = conn, key = key, fact = fact, ...)
+    initialize2(x, conn = conn, key = key, fact = fact, ..., check = FALSE)
 }
 
 #' @export
@@ -326,7 +339,7 @@ function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TR
         fact <- c(fact, obj@fact)
     }
     names(fact) <- make.unique(names(fact), sep = "_")
-    initialize(x, fact = fact)
+    initialize2(x, fact = fact, check = FALSE)
 })
 
 #' @exportS3Method base::all.equal
@@ -414,7 +427,7 @@ setMethod("Math", "ParquetFactTable", function(x) {
                 endoapply(x@fact, function(j) call(.Generic, j))
              },
              stop("unsupported Math operator: ", .Generic))
-    initialize(x, fact = fact)
+    initialize2(x, fact = fact, check = FALSE)
 })
 
 #' @importFrom dplyr pull summarize

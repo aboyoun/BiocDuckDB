@@ -65,19 +65,19 @@ setMethod("dbconn", "ParquetArray", function(x) callGeneric(x@seed))
 #' @export
 setMethod("[", "ParquetArray", function(x, i, j, ..., drop = TRUE) {
     Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
-    initialize(x, seed = .subset_ParquetArraySeed(x@seed, Nindex = Nindex, drop = drop))
+    initialize2(x, seed = .subset_ParquetArraySeed(x@seed, Nindex = Nindex, drop = drop), check = FALSE)
 })
 
 #' @export
 #' @importFrom BiocGenerics aperm
 setMethod("aperm", "ParquetArray", function(a, perm, ...) {
-    initialize(a, seed = aperm(a@seed, perm = perm, ...))
+    initialize2(a, seed = aperm(a@seed, perm = perm, ...), check = FALSE)
 })
 
 #' @export
 #' @importFrom BiocGenerics t
 setMethod("t", "ParquetArray", function(x) {
-    initialize(x, seed = t(x@seed))
+    initialize2(x, seed = t(x@seed), check = FALSE)
 })
 
 #' @export
@@ -89,13 +89,13 @@ setMethod("type", "ParquetArray", function(x) {
 #' @export
 #' @importFrom BiocGenerics type<-
 setReplaceMethod("type", "ParquetArray", function(x, value) {
-    initialize(x, seed = callGeneric(x@seed, value = value))
+    initialize2(x, seed = callGeneric(x@seed, value = value), check = FALSE)
 })
 
 #' @export
 #' @importFrom SparseArray is_nonzero
 setMethod("is_nonzero", "ParquetArray", function(x) {
-    initialize(x, seed = callGeneric(x@seed))
+    initialize2(x, seed = callGeneric(x@seed), check = FALSE)
 })
 
 #' @export
@@ -106,22 +106,22 @@ setMethod("nzcount", "ParquetArray", function(x) {
 
 #' @export
 setMethod("Ops", c(e1 = "ParquetArray", e2 = "ParquetArray"), function(e1, e2) {
-    initialize(e1, seed = callGeneric(e1@seed, e2@seed))
+    initialize2(e1, seed = callGeneric(e1@seed, e2@seed), check = FALSE)
 })
 
 #' @export
 setMethod("Ops", c(e1 = "ParquetArray", e2 = "atomic"), function(e1, e2) {
-    initialize(e1, seed = callGeneric(e1@seed, e2))
+    initialize2(e1, seed = callGeneric(e1@seed, e2), check = FALSE)
 })
 
 #' @export
 setMethod("Ops", c(e1 = "atomic", e2 = "ParquetArray"), function(e1, e2) {
-    initialize(e2, seed = callGeneric(e1, e2@seed))
+    initialize2(e2, seed = callGeneric(e1, e2@seed), check = FALSE)
 })
 
 #' @export
 setMethod("Math", "ParquetArray", function(x) {
-    initialize(x, seed = callGeneric(x@seed))
+    initialize2(x, seed = callGeneric(x@seed), check = FALSE)
 })
 
 #' @export

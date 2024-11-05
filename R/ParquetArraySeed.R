@@ -133,13 +133,13 @@ setMethod("type", "ParquetArraySeed", function(x) {
 setReplaceMethod("type", "ParquetArraySeed", function(x, value) {
     table <- x@table
     coltypes(table) <- value
-    initialize(x, table = table)
+    initialize2(x, table = table, check = FALSE)
 })
 
 #' @export
 #' @importFrom SparseArray is_nonzero
 setMethod("is_nonzero", "ParquetArraySeed", function(x) {
-    initialize(x, table = callGeneric(x@table))
+    initialize2(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export
@@ -190,7 +190,7 @@ setMethod("t", "ParquetArraySeed", function(x) {
         }
     }
 
-    initialize(x, table = table[Nindex, ], drop = drop)
+    initialize2(x, table = table[Nindex, ], drop = drop, check = FALSE)
 }
 
 #' @export
@@ -209,7 +209,7 @@ setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "ParquetArraySeed"), function(e
     table <- callGeneric(e1@table, e2@table)
     fact <- as.list(table@fact)
     column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
-    initialize(e1, table = table)
+    initialize2(e1, table = table, check = FALSE)
 })
 
 #' @export
@@ -218,7 +218,7 @@ setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "atomic"), function(e1, e2) {
     table <- callGeneric(e1@table, e2)
     fact <- as.list(table@fact)
     column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
-    initialize(e1, table = table)
+    initialize2(e1, table = table, check = FALSE)
 })
 
 #' @export
@@ -227,7 +227,7 @@ setMethod("Ops", c(e1 = "atomic", e2 = "ParquetArraySeed"), function(e1, e2) {
     table <- callGeneric(e1, e2@table)
     fact <- as.list(table@fact)
     column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
-    initialize(e2, table = table)
+    initialize2(e2, table = table, check = FALSE)
 })
 
 #' @export
@@ -236,7 +236,7 @@ setMethod("Math", "ParquetArraySeed", function(x) {
     table <- callGeneric(x@table)
     fact <- as.list(table@fact)
     column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
-    initialize(x, table = table)
+    initialize2(x, table = table, check = FALSE)
 })
 
 #' @export

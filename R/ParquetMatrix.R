@@ -77,7 +77,7 @@ setMethod("[", "ParquetMatrix", function(x, i, j, ..., drop = TRUE) {
     if (length(dim(seed)) == 1L) {
         ParquetArray(seed)
     } else {
-        initialize(x, seed = seed)
+        initialize2(x, seed = seed, check = FALSE)
     }
 })
 

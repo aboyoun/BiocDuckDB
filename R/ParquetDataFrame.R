@@ -350,7 +350,7 @@ cbind.ParquetDataFrame <- function(..., deparse.level = 1) {
     }
     all_metadata <- do.call(c, all_metadata)
 
-    initialize(bound, elementMetadata = all_mcols, metadata = all_metadata)
+    initialize2(bound, elementMetadata = all_mcols, metadata = all_metadata, check = FALSE)
 }
 
 #' @export
