@@ -68,7 +68,7 @@
 #' \code{\link{ParquetArray}},
 #' \code{\link[S4Arrays]{Array}}
 #'
-#' @include acquireDataset.R
+#' @include acquireTable.R
 #' @include ParquetFactTable.R
 #'
 #' @name ParquetArraySeed

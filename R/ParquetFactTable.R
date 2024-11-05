@@ -62,7 +62,7 @@
 #' mad,ParquetFactTable-method
 #'
 #' @include LanguageList.R
-#' @include acquireDataset.R
+#' @include acquireTable.R
 #' @include keynames.R
 #'
 #' @name ParquetFactTable
@@ -561,7 +561,7 @@ setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, opt
 ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key)), type = NULL, ...) {
     # Acquire the connection if it is a string
     if (is.character(conn)) {
-        conn <- acquireDataset(conn, ...)
+        conn <- acquireTable(conn, ...)
     }
     if (!inherits(conn, "tbl_duckdb_connection")) {
         stop("'conn' must be a 'tbl_duckdb_connection' object")

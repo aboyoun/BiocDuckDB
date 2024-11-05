@@ -66,7 +66,7 @@
 #'
 #' as.data.frame,ParquetDataFrame-method
 #'
-#' @include acquireDataset.R
+#' @include acquireTable.R
 #' @include ParquetColumn.R
 #' @include ParquetFactTable.R
 #'

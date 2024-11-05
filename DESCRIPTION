@@ -43,7 +43,7 @@ Encoding: UTF-8
 Collate:
     'LanguageList.R'
     'keynames.R'
-    'acquireDataset.R'
+    'acquireTable.R'
     'ParquetFactTable.R'
     'ParquetArraySeed.R'
     'ParquetArray.R'
