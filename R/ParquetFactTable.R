@@ -300,7 +300,7 @@ setMethod("is_sparse", "ParquetFactTable", function(x) {
                 keep <- sub@table@fact[[1L]]
                 conn <- filter(conn, !!keep)
                 for (kname in names(key)) {
-                    kdnames <- sort(pull(distinct(select(conn, !!as.name(kname)))))
+                    kdnames <- pull(distinct(select(conn, !!as.name(kname))))
                     key[[kname]] <- key[[kname]][match(kdnames, key[[kname]])]
                 }
             } else {
@@ -579,7 +579,7 @@ ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key
     if (is.list(key)) {
         for (k in names(key)) {
             if (is.null(key[[k]])) {
-                key[[k]] <- sort(pull(distinct(select(conn, !!as.name(k)))))
+                key[[k]] <- pull(distinct(select(conn, !!as.name(k))))
             }
         }
     }
