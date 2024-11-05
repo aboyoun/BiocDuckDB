@@ -371,7 +371,7 @@ setMethod("as.data.frame", "ParquetDataFrame", function(x, row.names = NULL, opt
     }
     rownames(df) <- rnames
 
-    df[rownames(x), colnames(x), drop = FALSE]
+    df[as.character(rownames(x)), colnames(x), drop = FALSE]
 })
 
 #' @export

@@ -205,7 +205,8 @@ setGeneric("coltypes", function(x) standardGeneric("coltypes"))
 #' @export
 setMethod("coltypes", "ParquetFactTable", function(x) {
     i <- sapply(keynames(x), function(x) character(), simplify = FALSE)
-    vapply(as.data.frame(x[i, , drop = FALSE])[names(x@fact)], .get_type, character(1L))
+    empty <- .subset_ParquetFactTable(x, i, drop = FALSE)
+    vapply(as.data.frame(empty)[names(x@fact)], .get_type, character(1L))
 })
 
 #' @export
@@ -520,6 +521,14 @@ setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, opt
     df <- as.data.frame(conn)[, c(names(key), names(fact))]
     if (anyDuplicated(df[, names(key)])) {
         stop("duplicate keys found in Parquet data")
+    }
+
+    # Coerce list of raws to character
+    tochar <- function(col) tryCatch(rawToChar(col), error = function(e) "")
+    for (j in seq_along(df)) {
+        if (is.list(df[[j]])) {
+            df[[j]] <- sapply(df[[j]], tochar, USE.NAMES = FALSE)
+        }
     }
 
     df
