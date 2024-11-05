@@ -275,7 +275,7 @@ setMethod("is_sparse", "ParquetFactTable", function(x) {
     (ncol(x) == 1L) && ((nzcount(x) / nrow(x)) < 0.5)
 })
 
-#' @importFrom dplyr arrange distinct filter pull select
+#' @importFrom dplyr distinct filter pull select
 .subset_ParquetFactTable <- function(x, i, j, ..., drop = TRUE) {
     conn <- x@conn
     fact <- x@fact
@@ -300,7 +300,7 @@ setMethod("is_sparse", "ParquetFactTable", function(x) {
                 keep <- sub@table@fact[[1L]]
                 conn <- filter(conn, !!keep)
                 for (kname in names(key)) {
-                    kdnames <- pull(arrange(distinct(select(conn, !!as.name(kname))), !!as.name(kname)))
+                    kdnames <- sort(pull(distinct(select(conn, !!as.name(kname)))))
                     key[[kname]] <- key[[kname]][match(kdnames, key[[kname]])]
                 }
             } else {
@@ -555,7 +555,7 @@ setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, opt
 })
 
 #' @export
-#' @importFrom dplyr arrange distinct pull select
+#' @importFrom dplyr distinct pull select
 #' @importFrom S4Vectors new2
 #' @rdname ParquetFactTable
 ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key)), type = NULL, ...) {
@@ -579,7 +579,7 @@ ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key
     if (is.list(key)) {
         for (k in names(key)) {
             if (is.null(key[[k]])) {
-                key[[k]] <- pull(arrange(distinct(select(conn, !!as.name(k))), !!as.name(k)))
+                key[[k]] <- sort(pull(distinct(select(conn, !!as.name(k)))))
             }
         }
     }
