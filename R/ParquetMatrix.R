@@ -48,7 +48,7 @@
 #' [,ParquetMatrix,ANY,ANY,ANY-method
 #' matrixClass,ParquetArray-method
 #'
-#' @include ParquetArraySeed.R
+#' @include DuckDBArraySeed.R
 #' @include ParquetArray.R
 #'
 #' @name ParquetMatrix
@@ -73,7 +73,7 @@ setMethod("matrixClass", "ParquetArray", function(x) "ParquetMatrix")
 #' @export
 setMethod("[", "ParquetMatrix", function(x, i, j, ..., drop = TRUE) {
     Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
-    seed <- .subset_ParquetArraySeed(x@seed, Nindex = Nindex, drop = drop)
+    seed <- .subset_DuckDBArraySeed(x@seed, Nindex = Nindex, drop = drop)
     if (length(dim(seed)) == 1L) {
         ParquetArray(seed)
     } else {
@@ -92,11 +92,11 @@ ParquetMatrix <- function(conn, row, col, fact, key = c(row, col), type = NULL, 
     if (!missing(col) && isSingleString(col)) {
         col <- setNames(list(NULL), col)
     }
-    if (!is(conn, "ParquetArraySeed")) {
+    if (!is(conn, "DuckDBArraySeed")) {
         if (length(key) != 2L) {
             stop("'key' must contain exactly 2 elements: rows and columns")
         }
-        conn <- ParquetArraySeed(conn, key = key, fact = fact, type = type, ...)
+        conn <- DuckDBArraySeed(conn, key = key, fact = fact, type = type, ...)
     }
     new2("ParquetMatrix", seed = conn, check = FALSE)
 }

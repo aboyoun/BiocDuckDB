@@ -1,10 +1,10 @@
-#' ParquetArraySeed objects
+#' DuckDBArraySeed objects
 #'
 #' @description
-#' ParquetArraySeed is a low-level helper class for representing a
-#' pointer to a Parquet dataset.
+#' DuckDBArraySeed is a low-level helper class for representing a
+#' pointer to a DuckDB table.
 #'
-#' Note that a ParquetArraySeed object is not intended to be used directly.
+#' Note that a DuckDBArraySeed object is not intended to be used directly.
 #' Most end users will typically create and manipulate a higher-level
 #' \link{ParquetArray} object instead. See \code{?\link{ParquetArray}} for
 #' more information.
@@ -33,35 +33,35 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' pqaseed <- ParquetArraySeed(tf, key = c("Class", "Sex", "Age", "Survived"), fact = "fate")
+#' pqaseed <- DuckDBArraySeed(tf, key = c("Class", "Sex", "Age", "Survived"), fact = "fate")
 #'
 #' @aliases
-#' ParquetArraySeed-class
-#' [,ParquetArraySeed,ANY,ANY,ANY-method
-#' aperm,ParquetArraySeed-method
-#' dbconn,ParquetArraySeed-method
-#' DelayedArray,ParquetArraySeed-method
-#' dim,ParquetArraySeed-method
-#' dimnames,ParquetArraySeed-method
-#' extract_array,ParquetArraySeed-method
-#' extract_sparse_array,ParquetArraySeed-method
-#' is_nonzero,ParquetArraySeed-method
-#' is_sparse,ParquetArraySeed-method
-#' nzcount,ParquetArraySeed-method
-#' t,ParquetArraySeed-method
-#' type,ParquetArraySeed-method
-#' type<-,ParquetArraySeed-method
-#' Ops,ParquetArraySeed,ParquetArraySeed-method
-#' Ops,ParquetArraySeed,atomic-method
-#' Ops,atomic,ParquetArraySeed-method
-#' Math,ParquetArraySeed-method
-#' Summary,ParquetArraySeed-method
-#' mean,ParquetArraySeed-method
-#' median.ParquetArraySeed
-#' quantile.ParquetArraySeed
-#' var,ParquetArraySeed,ANY-method
-#' sd,ParquetArraySeed-method
-#' mad,ParquetArraySeed-method
+#' DuckDBArraySeed-class
+#' [,DuckDBArraySeed,ANY,ANY,ANY-method
+#' aperm,DuckDBArraySeed-method
+#' dbconn,DuckDBArraySeed-method
+#' DelayedArray,DuckDBArraySeed-method
+#' dim,DuckDBArraySeed-method
+#' dimnames,DuckDBArraySeed-method
+#' extract_array,DuckDBArraySeed-method
+#' extract_sparse_array,DuckDBArraySeed-method
+#' is_nonzero,DuckDBArraySeed-method
+#' is_sparse,DuckDBArraySeed-method
+#' nzcount,DuckDBArraySeed-method
+#' t,DuckDBArraySeed-method
+#' type,DuckDBArraySeed-method
+#' type<-,DuckDBArraySeed-method
+#' Ops,DuckDBArraySeed,DuckDBArraySeed-method
+#' Ops,DuckDBArraySeed,atomic-method
+#' Ops,atomic,DuckDBArraySeed-method
+#' Math,DuckDBArraySeed-method
+#' Summary,DuckDBArraySeed-method
+#' mean,DuckDBArraySeed-method
+#' median.DuckDBArraySeed
+#' quantile.DuckDBArraySeed
+#' var,DuckDBArraySeed,ANY-method
+#' sd,DuckDBArraySeed-method
+#' mad,DuckDBArraySeed-method
 #'
 #' @seealso
 #' \code{\link{ParquetArray}},
@@ -70,16 +70,16 @@
 #' @include acquireTable.R
 #' @include DuckDBTable.R
 #'
-#' @name ParquetArraySeed
+#' @name DuckDBArraySeed
 NULL
 
 #' @export
 #' @import methods
 #' @importClassesFrom S4Arrays Array
-setClass("ParquetArraySeed", contains = "Array", slots = c(table = "DuckDBTable", drop = "logical"))
+setClass("DuckDBArraySeed", contains = "Array", slots = c(table = "DuckDBTable", drop = "logical"))
 
 #' @importFrom S4Vectors isTRUEorFALSE setValidity2 isSingleString
-setValidity2("ParquetArraySeed", function(x) {
+setValidity2("DuckDBArraySeed", function(x) {
     if (ncol(x@table) != 1L) {
         return("'table' slot must be a single-column DuckDBTable")
     }
@@ -91,10 +91,10 @@ setValidity2("ParquetArraySeed", function(x) {
 
 #' @export
 #' @importFrom BiocGenerics dbconn
-setMethod("dbconn", "ParquetArraySeed", function(x) callGeneric(x@table))
+setMethod("dbconn", "DuckDBArraySeed", function(x) callGeneric(x@table))
 
 #' @export
-setMethod("dim", "ParquetArraySeed", function(x) {
+setMethod("dim", "DuckDBArraySeed", function(x) {
     ans <- nkeydim(x@table)
     if (x@drop) {
         keep <- ans != 1L
@@ -108,7 +108,7 @@ setMethod("dim", "ParquetArraySeed", function(x) {
 })
 
 #' @export
-setMethod("dimnames", "ParquetArraySeed", function(x) {
+setMethod("dimnames", "DuckDBArraySeed", function(x) {
     ans <- keydimnames(x@table)
     if (x@drop) {
         keep <- lengths(ans, use.names = FALSE) != 1L
@@ -123,13 +123,13 @@ setMethod("dimnames", "ParquetArraySeed", function(x) {
 
 #' @export
 #' @importFrom BiocGenerics type
-setMethod("type", "ParquetArraySeed", function(x) {
+setMethod("type", "DuckDBArraySeed", function(x) {
     unname(coltypes(x@table))
 })
 
 #' @export
 #' @importFrom BiocGenerics type<-
-setReplaceMethod("type", "ParquetArraySeed", function(x, value) {
+setReplaceMethod("type", "DuckDBArraySeed", function(x, value) {
     table <- x@table
     coltypes(table) <- value
     initialize2(x, table = table, check = FALSE)
@@ -137,24 +137,24 @@ setReplaceMethod("type", "ParquetArraySeed", function(x, value) {
 
 #' @export
 #' @importFrom SparseArray is_nonzero
-setMethod("is_nonzero", "ParquetArraySeed", function(x) {
+setMethod("is_nonzero", "DuckDBArraySeed", function(x) {
     initialize2(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export
 #' @importFrom SparseArray nzcount
-setMethod("nzcount", "ParquetArraySeed", function(x) {
+setMethod("nzcount", "DuckDBArraySeed", function(x) {
     callGeneric(x@table)
 })
 #' @export
 #' @importFrom S4Arrays is_sparse
-setMethod("is_sparse", "ParquetArraySeed", function(x) {
+setMethod("is_sparse", "DuckDBArraySeed", function(x) {
     callGeneric(x@table)
 })
 
 #' @export
 #' @importFrom BiocGenerics aperm
-setMethod("aperm", "ParquetArraySeed", function(a, perm, ...) {
+setMethod("aperm", "DuckDBArraySeed", function(a, perm, ...) {
     k <- nkey(a@table)
     if ((length(perm) != k) || !setequal(perm, seq_len(k))) {
         stop("'perm' must be a permutation of 1:", k)
@@ -165,14 +165,14 @@ setMethod("aperm", "ParquetArraySeed", function(a, perm, ...) {
 
 #' @export
 #' @importFrom BiocGenerics t
-setMethod("t", "ParquetArraySeed", function(x) {
+setMethod("t", "DuckDBArraySeed", function(x) {
     if (nkey(x@table) != 2L) {
         stop("'t()' is only defined for 2-dimensional Parquet arrays")
     }
     aperm(x, perm = 2:1)
 })
 
-.subset_ParquetArraySeed <- function(x, Nindex, drop) {
+.subset_DuckDBArraySeed <- function(x, Nindex, drop) {
     table <- x@table
     ndim <- nkey(table)
     nsubscript <- length(Nindex)
@@ -194,13 +194,13 @@ setMethod("t", "ParquetArraySeed", function(x) {
 
 #' @export
 #' @importFrom S4Vectors isTRUEorFALSE
-setMethod("[", "ParquetArraySeed", function(x, i, j, ..., drop = TRUE) {
+setMethod("[", "DuckDBArraySeed", function(x, i, j, ..., drop = TRUE) {
     Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
-    .subset_ParquetArraySeed(x, Nindex = Nindex, drop = drop)
+    .subset_DuckDBArraySeed(x, Nindex = Nindex, drop = drop)
 })
 
 #' @export
-setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "ParquetArraySeed"), function(e1, e2) {
+setMethod("Ops", c(e1 = "DuckDBArraySeed", e2 = "DuckDBArraySeed"), function(e1, e2) {
     if (!isTRUE(all.equal(e1@table, e2@table)) || !identical(e1@drop, e2@drop)) {
         stop("can only perform arithmetic operations with compatible objects")
     }
@@ -208,59 +208,59 @@ setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "ParquetArraySeed"), function(e
 })
 
 #' @export
-setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "atomic"), function(e1, e2) {
+setMethod("Ops", c(e1 = "DuckDBArraySeed", e2 = "atomic"), function(e1, e2) {
     initialize2(e1, table = callGeneric(e1@table, e2), check = FALSE)
 })
 
 #' @export
-setMethod("Ops", c(e1 = "atomic", e2 = "ParquetArraySeed"), function(e1, e2) {
+setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBArraySeed"), function(e1, e2) {
     initialize2(e2, table = callGeneric(e1, e2@table), check = FALSE)
 })
 
 #' @export
-setMethod("Math", "ParquetArraySeed", function(x) {
+setMethod("Math", "DuckDBArraySeed", function(x) {
     initialize2(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export
-setMethod("Summary", "ParquetArraySeed", function(x, ..., na.rm = FALSE) {
+setMethod("Summary", "DuckDBArraySeed", function(x, ..., na.rm = FALSE) {
     callGeneric(x@table)
 })
 
 #' @export
 #' @importFrom BiocGenerics mean
-setMethod("mean", "ParquetArraySeed", function(x, ...) {
+setMethod("mean", "DuckDBArraySeed", function(x, ...) {
     callGeneric(x@table)
 })
 
 #' @exportS3Method stats::median
 #' @importFrom stats median
-median.ParquetArraySeed <- function(x, na.rm = FALSE, ...) {
+median.DuckDBArraySeed <- function(x, na.rm = FALSE, ...) {
     median(x@table, na.rm = na.rm, ...)
 }
 
 #' @exportS3Method stats::quantile
 #' @importFrom stats quantile
-quantile.ParquetArraySeed <-
+quantile.DuckDBArraySeed <-
 function(x, probs = seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7, digits = 7, ...) {
     quantile(x@table, probs = probs, na.rm = na.rm, names = names, type = type, digits = digits, ...)
 }
 
 #' @export
 #' @importFrom BiocGenerics var
-setMethod("var", "ParquetArraySeed", function(x, y = NULL, na.rm = FALSE, use)  {
+setMethod("var", "DuckDBArraySeed", function(x, y = NULL, na.rm = FALSE, use)  {
     callGeneric(x@table)
 })
 
 #' @export
 #' @importFrom BiocGenerics sd
-setMethod("sd", "ParquetArraySeed", function(x, na.rm = FALSE) {
+setMethod("sd", "DuckDBArraySeed", function(x, na.rm = FALSE) {
     callGeneric(x@table)
 })
 
 #' @export
 #' @importFrom BiocGenerics mad
-setMethod("mad", "ParquetArraySeed",
+setMethod("mad", "DuckDBArraySeed",
 function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, high = FALSE) {
     callGeneric(x@table)
 })
@@ -302,7 +302,7 @@ function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, h
 
 #' @export
 #' @importFrom S4Arrays extract_array
-setMethod("extract_array", "ParquetArraySeed", function(x, index) {
+setMethod("extract_array", "DuckDBArraySeed", function(x, index) {
     index <- .extract_array_index(x, index)
 
 
@@ -329,7 +329,7 @@ setMethod("extract_array", "ParquetArraySeed", function(x, index) {
 #' @export
 #' @importClassesFrom SparseArray SVT_SparseArray
 #' @importFrom SparseArray COO_SparseArray extract_sparse_array
-setMethod("extract_sparse_array", "ParquetArraySeed", function(x, index) {
+setMethod("extract_sparse_array", "DuckDBArraySeed", function(x, index) {
     index <- .extract_array_index(x, index)
     table <- x@table[index, ]
     df <- as.data.frame(table)
@@ -344,14 +344,14 @@ setMethod("extract_sparse_array", "ParquetArraySeed", function(x, index) {
 
 #' @export
 #' @importFrom DelayedArray DelayedArray
-setMethod("DelayedArray", "ParquetArraySeed", function(seed) ParquetArray(seed))
+setMethod("DelayedArray", "DuckDBArraySeed", function(seed) ParquetArray(seed))
 
 #' @export
 #' @importFrom dplyr select
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
-#' @rdname ParquetArraySeed
-ParquetArraySeed <- function(conn, key, fact, type = NULL, ...) {
+#' @rdname DuckDBArraySeed
+DuckDBArraySeed <- function(conn, key, fact, type = NULL, ...) {
     if (is.null(type)) {
         table <- DuckDBTable(conn, key = key, fact = fact, ...)
         column <- as.data.frame(select(head(table@conn, 0L), !!fact))[[fact]]
@@ -359,5 +359,5 @@ ParquetArraySeed <- function(conn, key, fact, type = NULL, ...) {
     } else {
         table <- DuckDBTable(conn, key = key, fact = fact, type = setNames(type, fact), ...)
     }
-    new2("ParquetArraySeed", table = table, drop = FALSE, check = FALSE)
+    new2("DuckDBArraySeed", table = table, drop = FALSE, check = FALSE)
 }

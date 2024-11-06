@@ -64,7 +64,7 @@ pqarray <- ParquetArray(tf, key = c("Class", "Sex", "Age", "Survived"), fact = "
 
 }
 \seealso{
-\code{\link{ParquetArraySeed}},
+\code{\link{DuckDBArraySeed}},
 \code{\link[DelayedArray]{DelayedArray}}
 }
 \author{

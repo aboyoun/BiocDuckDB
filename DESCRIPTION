@@ -45,7 +45,7 @@ Collate:
     'acquireTable.R'
     'LanguageList.R'
     'DuckDBTable.R'
-    'ParquetArraySeed.R'
+    'DuckDBArraySeed.R'
     'ParquetArray.R'
     'ParquetColumn.R'
     'ParquetDataFrame.R'

@@ -7,7 +7,7 @@
 #' All the operations available for \link[DelayedArray]{DelayedArray}
 #' objects work on ParquetArray objects.
 #'
-#' @inheritParams ParquetArraySeed
+#' @inheritParams DuckDBArraySeed
 #'
 #' @author Patrick Aboyoun
 #'
@@ -46,17 +46,17 @@
 #' mad,ParquetArray-method
 #'
 #' @seealso
-#' \code{\link{ParquetArraySeed}},
+#' \code{\link{DuckDBArraySeed}},
 #' \code{\link[DelayedArray]{DelayedArray}}
 #'
-#' @include ParquetArraySeed.R
+#' @include DuckDBArraySeed.R
 #'
 #' @name ParquetArray
 NULL
 
 #' @export
 #' @importClassesFrom DelayedArray DelayedArray
-setClass("ParquetArray", contains = "DelayedArray", slots = c(seed = "ParquetArraySeed"))
+setClass("ParquetArray", contains = "DelayedArray", slots = c(seed = "DuckDBArraySeed"))
 
 #' @export
 #' @importFrom BiocGenerics dbconn
@@ -65,7 +65,7 @@ setMethod("dbconn", "ParquetArray", function(x) callGeneric(x@seed))
 #' @export
 setMethod("[", "ParquetArray", function(x, i, j, ..., drop = TRUE) {
     Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
-    initialize2(x, seed = .subset_ParquetArraySeed(x@seed, Nindex = Nindex, drop = drop), check = FALSE)
+    initialize2(x, seed = .subset_DuckDBArraySeed(x@seed, Nindex = Nindex, drop = drop), check = FALSE)
 })
 
 #' @export
@@ -171,8 +171,8 @@ function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, h
 #' @importFrom S4Vectors new2
 #' @rdname ParquetArray
 ParquetArray <- function(conn, key, fact, type = NULL, ...) {
-    if (!is(conn, "ParquetArraySeed")) {
-        conn <- ParquetArraySeed(conn, key = key, fact = fact, type = type, ...)
+    if (!is(conn, "DuckDBArraySeed")) {
+        conn <- DuckDBArraySeed(conn, key = key, fact = fact, type = type, ...)
     }
     new2("ParquetArray", seed = conn, check = FALSE)
 }
