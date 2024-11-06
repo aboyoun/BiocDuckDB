@@ -86,13 +86,13 @@ setValidity2("DuckDBDataFrame", function(x) {
 })
 
 #' @export
-#' @importFrom S4Vectors makeNakedCharacterMatrixForDisplay
+#' @importFrom S4Vectors DataFrame makeNakedCharacterMatrixForDisplay
 setMethod("makeNakedCharacterMatrixForDisplay", "DuckDBDataFrame", function(x) {
-    callNextMethod(as.data.frame(x))
+    callGeneric(DataFrame(as.data.frame(x)))
 })
 
 #' @export
-#' @importFrom S4Vectors classNameForDisplay get_showHeadLines get_showTailLines makeNakedCharacterMatrixForDisplay
+#' @importFrom S4Vectors classNameForDisplay DataFrame get_showHeadLines get_showTailLines makeNakedCharacterMatrixForDisplay
 setMethod("show", "DuckDBDataFrame", function(object) {
     x_nrow <- nrow(object)
     x_ncol <- ncol(object)
@@ -124,7 +124,7 @@ setMethod("show", "DuckDBDataFrame", function(object) {
                            rbind(rep.int("...", x_ncol)))
             } else {
                 i <- c(seq_len(nhead), (x_nrow + 1L) - rev(seq_len(ntail)))
-                df <- as.data.frame(object[i, , drop = FALSE])
+                df <- DataFrame(as.data.frame(object[i, , drop = FALSE]))
                 m <- rbind(makeNakedCharacterMatrixForDisplay(head(df, nhead)),
                            rbind(rep.int("...", x_ncol)),
                            makeNakedCharacterMatrixForDisplay(tail(df, ntail)))
