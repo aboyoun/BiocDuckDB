@@ -1,12 +1,12 @@
-Package: ParquetDataFrame
-Version: 0.1.1
-Date: 2024-11-04
-Title: Bioconductor-friendly Bindings for Parquet
+Package: BiocDuckDB
+Version: 0.2.0
+Date: 2024-11-06
+Title: Bioconductor-friendly Bindings for DuckDB
 Description: 
-    Implements bindings for Parquet files that are compatible with Bioconductor
+    Implements bindings for DuckDB tables that are compatible with Bioconductor
     S4 data structures, namely the DataFrame and DelayedArray. This allows 
-    Parquet-derived data to be easily used inside other Bioconductor objects
-    (e.g., SummarizedExperiments) while keeping everything on disk.
+    DuckDB hosted data to be used inside other Bioconductor objects such as
+    SummarizedExperiments.
 Authors@R:
     c(
         person("Patrick", "Aboyoun", role=c("aut", "cre"), email="aboyounp@gene.com"),
@@ -36,8 +36,8 @@ Suggests:
     arrow
 biocViews: DataRepresentation, Infrastructure, Software
 VignetteBuilder: knitr
-BugReports: https://github.com/LTLA/ParquetDataFrame
-URL: https://github.com/LTLA/ParquetDataFrame
+BugReports: https://github.com/LTLA/DuckDBDataFrame
+URL: https://github.com/LTLA/DuckDBDataFrame
 RoxygenNote: 7.3.2
 Encoding: UTF-8
 Collate:
@@ -47,6 +47,6 @@ Collate:
     'DuckDBTable.R'
     'DuckDBArraySeed.R'
     'DuckDBArray.R'
-    'DuckDBMatrix.R'
     'DuckDBColumn.R'
-    'ParquetDataFrame.R'
+    'DuckDBDataFrame.R'
+    'DuckDBMatrix.R'

@@ -102,8 +102,8 @@ checkDuckDBMatrix <- function(object, expected) {
     expect_equal(as.matrix(object), expected)
 }
 
-checkParquetDataFrame <- function(object, expected) {
-    expect_s4_class(object, "ParquetDataFrame")
+checkDuckDBDataFrame <- function(object, expected) {
+    expect_s4_class(object, "DuckDBDataFrame")
     expect_identical(ncol(object), ncol(expected))
     expect_identical(nrow(object), nrow(expected))
     expect_setequal(rownames(object), rownames(expected))

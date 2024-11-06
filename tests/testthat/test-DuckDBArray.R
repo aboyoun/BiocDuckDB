@@ -1,5 +1,5 @@
 # Tests the basic functions of a DuckDBArray.
-# library(testthat); library(ParquetDataFrame); source("setup.R"); source("test-DuckDBArray.R")
+# library(testthat); library(BiocDuckDB); source("setup.R"); source("test-DuckDBArray.R")
 
 test_that("basic methods work as expected for a DuckDBArray", {
     pqarray <- DuckDBArray(titanic_path, key = dimnames(titanic_array), fact = "fate")

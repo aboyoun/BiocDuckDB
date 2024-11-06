@@ -1,5 +1,5 @@
 # Tests the basic functions of a DuckDBTable.
-# library(testthat); library(ParquetDataFrame); source("setup.R"); source("test-DuckDBTable.R")
+# library(testthat); library(BiocDuckDB); source("setup.R"); source("test-DuckDBTable.R")
 
 test_that("basic methods work as expected for a DuckDBTable", {
     # esoph dataset

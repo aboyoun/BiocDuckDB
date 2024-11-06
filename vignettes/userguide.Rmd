@@ -1,9 +1,9 @@
 ---
-title: Using Parquet-backed DataFrames
+title: Using DuckDB-backed DataFrames
 author:
 - name: Aaron Lun
   email: infinite.monkeys.with.keyboards@gmail.com
-package: ParquetDataFrame
+package: BiocDuckDB
 date: "Revised: October 9, 2023"
 output:
   BiocStyle::html_document
@@ -16,29 +16,29 @@ vignette: >
 
 ```{r, echo=FALSE}
 library(BiocStyle)
-self <- Biocpkg("ParquetDataFrame");
+self <- Biocpkg("BiocDuckDB");
 knitr::opts_chunk$set(error=FALSE, warning=FALSE, message=FALSE)
 ```
 
 # Overview
 
-The `ParquetDataFrame`, as its name suggests, is a `DataFrame` where the columns are derived from Parquet data.
+The `DuckDBDataFrame`, as its name suggests, is a `DataFrame` where the columns are derived from Parquet data.
 This is fully file-backed so no data is actually loaded into memory until requested, allowing users to represent large datasets in limited memory.
-As the `ParquetDataFrame` inherits from `r Biocpkg("S4Vectors")`' `DataFrame`, it can be used anywhere in Bioconductor's ecosystem that accepts a `DataFrame`, 
+As the `DuckDBDataFrame` inherits from `r Biocpkg("S4Vectors")`' `DataFrame`, it can be used anywhere in Bioconductor's ecosystem that accepts a `DataFrame`, 
 e.g., as the column data of a `SummarizedExperiment`, or inside a `BumpyDataFrameMatrix` from the `r Biocpkg("BumpyMatrix")` package.
 
 # Basic usage
 
-Given a path to a Parquet file, we can just supply the path to the `ParquetDataFrame` constructor:
+Given a path to a Parquet file, we can just supply the path to the `DuckDBDataFrame` constructor:
 
 ```{r}
 # Mocking up a file.
 tf <- tempfile()
 arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 
-# Creating the ParquetDataFrame.
-library(ParquetDataFrame)
-df <- ParquetDataFrame(tf, key = "model")
+# Creating the DuckDBDataFrame.
+library(BiocDuckDB)
+df <- DuckDBDataFrame(tf, key = "model")
 df
 ```
 
@@ -64,7 +64,7 @@ log(df$mpg)
 as.vector(df$mpg)
 ```
 
-These transformed columns can be assigned back to `ParquetDataFrame` objects.
+These transformed columns can be assigned back to `DuckDBDataFrame` objects.
 
 ```{r}
 copy <- df

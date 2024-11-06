@@ -1,3 +1,3 @@
 library(testthat)
-library(ParquetDataFrame)
-test_check("ParquetDataFrame")
+library(BiocDuckDB)
+test_check("BiocDuckDB")

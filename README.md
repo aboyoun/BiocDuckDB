@@ -1,16 +1,16 @@
-# Bioconductor-compatible Parquet objects
+# Bioconductor-compatible DuckDB objects
 
-This package implements Bioconductor-friendly bindings to Parquet data so that they can be used inside standard objects like `DataFrame`s and `SummarizedExperiment`s.
+This package implements Bioconductor-friendly bindings to DuckDB so that they can be used inside standard objects such as `DelayedMatrix`, `DataFrame`, and `SummarizedExperiment` object.
 Usage is pretty simple:
 
 ```r
 tf <- tempfile()
 arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 
-library(ParquetDataFrame)
-df <- ParquetDataFrame(tf, key = "model")
+library(BiocDuckDB)
+df <- DuckDBDataFrame(tf, key = "model")
 df
-## ParquetDataFrame with 32 rows and 11 columns
+## DuckDBDataFrame with 32 rows and 11 columns
 ##                               mpg             cyl            disp
 ##                   <DuckDBColumn> <DuckDBColumn> <DuckDBColumn>
 ## Mazda RX4                      21               6             160
@@ -65,14 +65,14 @@ df
 ## Volvo 142E                      4               2
 ```
 
-This produces a file-backed `ParquetDataFrame`, consisting of file-backed `DuckDBColumn` objects.
+This produces a file-backed `DuckDBDataFrame`, consisting of file-backed `DuckDBColumn` objects.
 These can be realized into memory via the usual `as.vector()` method.
 
 ```r
 class(df$mpg)
 ## [1] "DuckDBColumn"
 ## attr(,"package")
-## [1] "ParquetDataFrame"
+## [1] "DuckDBDataFrame"
 
 as.vector(df$mpg)
 ##           Mazda RX4       Mazda RX4 Wag          Datsun 710      Hornet 4 Drive 
@@ -93,7 +93,7 @@ as.vector(df$mpg)
 ##                15.8                19.7                15.0                21.4 
 ```
 
-We can now create a `SummarizedExperiment` consisting of a `ParquetDataFrame`, let's say in the `colData`:
+We can now create a `SummarizedExperiment` consisting of a `DuckDBDataFrame`, let's say in the `colData`:
 
 ```r
 library(SummarizedExperiment)
@@ -102,9 +102,9 @@ se <- SummarizedExperiment(
     colData = df
 )
 class(colData(se, withDimnames=FALSE))
-## [1] "ParquetDataFrame"
+## [1] "DuckDBDataFrame"
 ## attr(,"package")
-## [1] "ParquetDataFrame"
+## [1] "DuckDBDataFrame"
 ```
 
 This behaves properly when we operate on the parent structure.

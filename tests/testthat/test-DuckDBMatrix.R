@@ -1,5 +1,5 @@
 # Tests the basic functions of a DuckDBMatrix.
-# library(testthat); library(ParquetDataFrame); source("setup.R"); source("test-DuckDBMatrix.R")
+# library(testthat); library(BiocDuckDB); source("setup.R"); source("test-DuckDBMatrix.R")
 
 test_that("basic methods work as expected for a DuckDBMatrix", {
     names(dimnames(state.x77)) <- c("rowname", "colname")

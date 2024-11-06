@@ -1,5 +1,5 @@
 # Tests the basic functions of a DuckDBArraySeed.
-# library(testthat); library(ParquetDataFrame); source("setup.R"); source("test-DuckDBArraySeed.R")
+# library(testthat); library(BiocDuckDB); source("setup.R"); source("test-DuckDBArraySeed.R")
 
 test_that("basic methods work as expected for a DuckDBArraySeed", {
     seed <- DuckDBArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")

@@ -1,16 +1,16 @@
-#' Parquet-backed DataFrame
+#' DuckDB-backed DataFrame
 #'
-#' Create a Parquet-backed \linkS4class{DataFrame}, where the data are kept on disk until requested.
+#' Create a DuckDB-backed \linkS4class{DataFrame}
 #'
 #' @inheritParams DuckDBTable
 #'
-#' @return A ParquetDataFrame where each column is a \linkS4class{DuckDBColumn}.
+#' @return A DuckDBDataFrame where each column is a \linkS4class{DuckDBColumn}.
 #'
 #' @details
-#' The ParquetDataFrame is essentially just a \linkS4class{DataFrame} of \linkS4class{DuckDBColumn} objects.
-#' It is primarily useful for indicating that the in-memory representation is consistent with the underlying Parquet data
+#' The DuckDBDataFrame is essentially just a \linkS4class{DataFrame} of \linkS4class{DuckDBColumn} objects.
+#' It is primarily useful for indicating that the R representation is consistent with the underlying data
 #' (e.g., no delayed filter/mutate operations have been applied, no data has been added from other files).
-#' Thus, users can specialize code paths for a ParquetDataFrame to operate directly on the underlying Parquet data.
+#' Thus, users can specialize code paths for a DuckDBDataFrame to operate directly on the underlying data.
 #'
 #' @author Aaron Lun, Patrick Aboyoun
 #'
@@ -21,64 +21,64 @@
 #' arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 #'
 #' # Creating our Parquet-backed data frame:
-#' df <- ParquetDataFrame(tf, key = "model")
+#' df <- DuckDBDataFrame(tf, key = "model")
 #' df
 #'
 #' # Extraction yields a DuckDBColumn:
 #' df$carb
 #'
-#' # Slicing ParquetDataFrame objects:
+#' # Slicing DuckDBDataFrame objects:
 #' df[,1:5]
 #' df[1:5,]
 #'
-#' # Combining by ParquetDataFrame and DuckDBColumn objects:
+#' # Combining by DuckDBDataFrame and DuckDBColumn objects:
 #' combined <- cbind(df, df)
 #' class(combined)
 #' combined2 <- cbind(df, some_new_name=df[,1])
 #' class(combined2)
 #'
 #' @aliases
-#' ParquetDataFrame-class
-#' makeNakedCharacterMatrixForDisplay,ParquetDataFrame-method
-#' show,ParquetDataFrame-method
+#' DuckDBDataFrame-class
+#' makeNakedCharacterMatrixForDisplay,DuckDBDataFrame-method
+#' show,DuckDBDataFrame-method
 #'
-#' length,ParquetDataFrame-method
+#' length,DuckDBDataFrame-method
 #'
-#' names,ParquetDataFrame-method
-#' rownames<-,ParquetDataFrame-method
-#' names<-,ParquetDataFrame-method
+#' names,DuckDBDataFrame-method
+#' rownames<-,DuckDBDataFrame-method
+#' names<-,DuckDBDataFrame-method
 #'
-#' extractROWS,ParquetDataFrame,ANY-method
-#' head,ParquetDataFrame-method
-#' tail,ParquetDataFrame-method
-#' extractCOLS,ParquetDataFrame-method
-#' [,ParquetDataFrame,ANY,ANY,ANY-method
-#' [[,ParquetDataFrame-method
+#' extractROWS,DuckDBDataFrame,ANY-method
+#' head,DuckDBDataFrame-method
+#' tail,DuckDBDataFrame-method
+#' extractCOLS,DuckDBDataFrame-method
+#' [,DuckDBDataFrame,ANY,ANY,ANY-method
+#' [[,DuckDBDataFrame-method
 #'
-#' replaceROWS,ParquetDataFrame-method
-#' replaceCOLS,ParquetDataFrame-method
-#' normalizeSingleBracketReplacementValue,ParquetDataFrame-method
-#' [[<-,ParquetDataFrame-method
+#' replaceROWS,DuckDBDataFrame-method
+#' replaceCOLS,DuckDBDataFrame-method
+#' normalizeSingleBracketReplacementValue,DuckDBDataFrame-method
+#' [[<-,DuckDBDataFrame-method
 #'
-#' bindROWS,ParquetDataFrame-method
-#' cbind,ParquetDataFrame-method
-#' cbind.ParquetDataFrame
+#' bindROWS,DuckDBDataFrame-method
+#' cbind,DuckDBDataFrame-method
+#' cbind.DuckDBDataFrame
 #'
-#' as.data.frame,ParquetDataFrame-method
+#' as.data.frame,DuckDBDataFrame-method
 #'
 #' @include acquireTable.R
 #' @include DuckDBColumn.R
 #' @include DuckDBTable.R
 #'
-#' @name ParquetDataFrame
+#' @name DuckDBDataFrame
 NULL
 
 #' @export
 #' @importClassesFrom S4Vectors DataFrame
-setClass("ParquetDataFrame", contains = c("DuckDBTable", "DataFrame"))
+setClass("DuckDBDataFrame", contains = c("DuckDBTable", "DataFrame"))
 
 #' @importFrom S4Vectors setValidity2
-setValidity2("ParquetDataFrame", function(x) {
+setValidity2("DuckDBDataFrame", function(x) {
     if (nkey(x) != 1L) {
         return("'key' slot must be a named list containing a single named character vector")
     }
@@ -87,13 +87,13 @@ setValidity2("ParquetDataFrame", function(x) {
 
 #' @export
 #' @importFrom S4Vectors makeNakedCharacterMatrixForDisplay
-setMethod("makeNakedCharacterMatrixForDisplay", "ParquetDataFrame", function(x) {
+setMethod("makeNakedCharacterMatrixForDisplay", "DuckDBDataFrame", function(x) {
     callNextMethod(as.data.frame(x))
 })
 
 #' @export
 #' @importFrom S4Vectors classNameForDisplay get_showHeadLines get_showTailLines makeNakedCharacterMatrixForDisplay
-setMethod("show", "ParquetDataFrame", function(object) {
+setMethod("show", "DuckDBDataFrame", function(object) {
     x_nrow <- nrow(object)
     x_ncol <- ncol(object)
 
@@ -140,15 +140,15 @@ setMethod("show", "ParquetDataFrame", function(object) {
 })
 
 #' @export
-setMethod("length", "ParquetDataFrame", function(x) ncol(x))
+setMethod("length", "DuckDBDataFrame", function(x) ncol(x))
 
 #' @export
 #' @importFrom BiocGenerics colnames
-setMethod("names", "ParquetDataFrame", function(x) colnames(x))
+setMethod("names", "DuckDBDataFrame", function(x) colnames(x))
 
 #' @export
 #' @importFrom BiocGenerics rownames<-
-setReplaceMethod("rownames", "ParquetDataFrame", function(x, value) {
+setReplaceMethod("rownames", "DuckDBDataFrame", function(x, value) {
     keydimnames(x) <- list(value)
     x
 })
@@ -156,7 +156,7 @@ setReplaceMethod("rownames", "ParquetDataFrame", function(x, value) {
 #' @export
 #' @importFrom BiocGenerics colnames<-
 #' @importFrom S4Vectors mcols mcols<-
-setReplaceMethod("names", "ParquetDataFrame", function(x, value) {
+setReplaceMethod("names", "DuckDBDataFrame", function(x, value) {
     colnames(x) <- value
     mc <- mcols(x)
     if (!is.null(mc)) {
@@ -168,7 +168,7 @@ setReplaceMethod("names", "ParquetDataFrame", function(x, value) {
 #' @export
 #' @importFrom S4Vectors extractROWS
 #' @importFrom stats setNames
-setMethod("extractROWS", "ParquetDataFrame", function(x, i) {
+setMethod("extractROWS", "DuckDBDataFrame", function(x, i) {
     if (missing(i)) {
         return(x)
     }
@@ -185,7 +185,7 @@ setMethod("extractROWS", "ParquetDataFrame", function(x, i) {
 
 #' @export
 #' @importFrom S4Vectors head isSingleNumber
-setMethod("head", "ParquetDataFrame", function(x, n = 6L, ...) {
+setMethod("head", "DuckDBDataFrame", function(x, n = 6L, ...) {
     if (!isSingleNumber(n)) {
         stop("'n' must be a single number")
     }
@@ -206,7 +206,7 @@ setMethod("head", "ParquetDataFrame", function(x, n = 6L, ...) {
 
 #' @export
 #' @importFrom S4Vectors isSingleNumber tail
-setMethod("tail", "ParquetDataFrame", function(x, n = 6L, ...) {
+setMethod("tail", "DuckDBDataFrame", function(x, n = 6L, ...) {
     if (!isSingleNumber(n)) {
         stop("'n' must be a single number")
     }
@@ -228,21 +228,21 @@ setMethod("tail", "ParquetDataFrame", function(x, n = 6L, ...) {
 #' @export
 #' @importFrom stats setNames
 #' @importFrom S4Vectors extractCOLS mcols normalizeSingleBracketSubscript
-setMethod("extractCOLS", "ParquetDataFrame", function(x, i) {
+setMethod("extractCOLS", "DuckDBDataFrame", function(x, i) {
     if (missing(i)) {
         return(x)
     }
     xstub <- setNames(seq_along(x), names(x))
     i <- normalizeSingleBracketSubscript(i, xstub)
     if (anyDuplicated(i)) {
-        stop("cannot extract duplicate columns in a ParquetDataFrame")
+        stop("cannot extract duplicate columns in a DuckDBDataFrame")
     }
     mc <- extractROWS(mcols(x), i)
     .subset_DuckDBTable(x, j = i, elementMetadata = mc)
 })
 
 #' @export
-setMethod("[", "ParquetDataFrame", function(x, i, j, ..., drop = TRUE) {
+setMethod("[", "DuckDBDataFrame", function(x, i, j, ..., drop = TRUE) {
     if (!missing(j)) {
         x <- extractCOLS(x, j)
     }
@@ -260,13 +260,13 @@ setMethod("[", "ParquetDataFrame", function(x, i, j, ..., drop = TRUE) {
 
 #' @export
 #' @importFrom S4Vectors new2 normalizeDoubleBracketSubscript
-setMethod("[[", "ParquetDataFrame", function(x, i, j, ...) {
+setMethod("[[", "DuckDBDataFrame", function(x, i, j, ...) {
     if (!missing(j)) {
-        stop("list-style indexing of a ParquetDataFrame with non-missing 'j' is not supported")
+        stop("list-style indexing of a DuckDBDataFrame with non-missing 'j' is not supported")
     }
 
     if (missing(i) || length(i) != 1L) {
-        stop("expected a length-1 'i' for list-style indexing of a ParquetDataFrame")
+        stop("expected a length-1 'i' for list-style indexing of a DuckDBDataFrame")
     }
 
     i <- normalizeDoubleBracketSubscript(i, x)
@@ -276,15 +276,15 @@ setMethod("[[", "ParquetDataFrame", function(x, i, j, ...) {
 
 #' @export
 #' @importFrom S4Vectors replaceROWS
-setMethod("replaceROWS", "ParquetDataFrame", function(x, i, value) {
-    stop("replacement of rows in a ParquetDataFrame is not supported")
+setMethod("replaceROWS", "DuckDBDataFrame", function(x, i, value) {
+    stop("replacement of rows in a DuckDBDataFrame is not supported")
 })
 
 #' @export
 #' @importFrom S4Vectors new2 normalizeSingleBracketReplacementValue
-setMethod("normalizeSingleBracketReplacementValue", "ParquetDataFrame", function(value, x) {
+setMethod("normalizeSingleBracketReplacementValue", "DuckDBDataFrame", function(value, x) {
     if (is(value, "DuckDBColumn")) {
-        return(new2("ParquetDataFrame", value@table, check = FALSE))
+        return(new2("DuckDBDataFrame", value@table, check = FALSE))
     }
     callNextMethod()
 })
@@ -292,23 +292,23 @@ setMethod("normalizeSingleBracketReplacementValue", "ParquetDataFrame", function
 #' @export
 #' @importFrom stats setNames
 #' @importFrom S4Vectors replaceCOLS normalizeSingleBracketSubscript
-setMethod("replaceCOLS", "ParquetDataFrame", function(x, i, value) {
+setMethod("replaceCOLS", "DuckDBDataFrame", function(x, i, value) {
     xstub <- setNames(seq_along(x), names(x))
     i2 <- normalizeSingleBracketSubscript(i, xstub, allow.NAs = TRUE)
     if (!anyNA(i2)) {
-        if (is(value, "ParquetDataFrame")) {
+        if (is(value, "DuckDBDataFrame")) {
             if (isTRUE(all.equal(x, value))) {
                 x@fact[i2] <- unname(value@fact)
                 return(x)
             }
         }
     }
-    stop("not compatible ParquetDataFrame objects")
+    stop("not compatible DuckDBDataFrame objects")
 })
 
 #' @export
 #' @importFrom S4Vectors normalizeDoubleBracketSubscript
-setMethod("[[<-", "ParquetDataFrame", function(x, i, j, ..., value) {
+setMethod("[[<-", "DuckDBDataFrame", function(x, i, j, ..., value) {
     i2 <- normalizeDoubleBracketSubscript(i, x, allow.nomatch = TRUE)
     if (length(i2) == 1L && !is.na(i2)) {
         if (is(value, "DuckDBColumn")) {
@@ -318,19 +318,19 @@ setMethod("[[<-", "ParquetDataFrame", function(x, i, j, ..., value) {
             }
         }
     }
-    stop("not compatible ParquetDataFrame and DuckDBColumn objects")
+    stop("not compatible DuckDBDataFrame and DuckDBColumn objects")
 })
 
 #' @export
 #' @importFrom S4Vectors bindROWS
-setMethod("bindROWS", "ParquetDataFrame", function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TRUE) {
-    stop("binding rows to a ParquetDataFrame is not supported")
+setMethod("bindROWS", "DuckDBDataFrame", function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TRUE) {
+    stop("binding rows to a DuckDBDataFrame is not supported")
 })
 
 #' @export
 #' @importFrom dplyr rename
 #' @importFrom S4Vectors combineRows make_zero_col_DFrame mcols mcols<- metadata new2
-cbind.ParquetDataFrame <- function(..., deparse.level = 1) {
+cbind.DuckDBDataFrame <- function(..., deparse.level = 1) {
     objects <- list(...)
 
     all_mcols <- vector("list", length(objects))
@@ -348,14 +348,14 @@ cbind.ParquetDataFrame <- function(..., deparse.level = 1) {
             if (!is.null(cname)) {
                 colnames(table) <- cname
             }
-            objects[[i]] <- new2("ParquetDataFrame", table, check = FALSE)
+            objects[[i]] <- new2("DuckDBDataFrame", table, check = FALSE)
             md <- metadata(obj)
             if (length(md) > 0L) {
                 has_mcols <- TRUE
                 mc <- new2("DFrame", rownames = cname, nrows = 1L, listData = md, check = FALSE)
                 md <- list()
             }
-        } else if (is(obj, "ParquetDataFrame")) {
+        } else if (is(obj, "DuckDBDataFrame")) {
             mc <- mcols(obj, use.names = FALSE) %||% mc
             if (ncol(mc) > 0L) {
                 has_mcols <- TRUE
@@ -383,12 +383,12 @@ cbind.ParquetDataFrame <- function(..., deparse.level = 1) {
 }
 
 #' @export
-setMethod("cbind", "ParquetDataFrame", cbind.ParquetDataFrame)
+setMethod("cbind", "DuckDBDataFrame", cbind.DuckDBDataFrame)
 
 #' @export
 #' @importFrom BiocGenerics as.data.frame
 #' @importFrom stats setNames
-setMethod("as.data.frame", "ParquetDataFrame", function(x, row.names = NULL, optional = FALSE, ...) {
+setMethod("as.data.frame", "DuckDBDataFrame", function(x, row.names = NULL, optional = FALSE, ...) {
     # as.data.frame,DuckDBTable-method
     df <- callNextMethod(x, row.names = row.names, optional = optional, ...)
 
@@ -409,12 +409,12 @@ setMethod("as.data.frame", "ParquetDataFrame", function(x, row.names = NULL, opt
 #' @importFrom dplyr everything select
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
-#' @rdname ParquetDataFrame
-ParquetDataFrame <- function(conn, key, fact, ...) {
+#' @rdname DuckDBDataFrame
+DuckDBDataFrame <- function(conn, key, fact, ...) {
     if (missing(fact)) {
         tbl <- DuckDBTable(conn, key = key, ...)
     } else {
         tbl <- DuckDBTable(conn, key = key, fact = fact, ...)
     }
-    new2("ParquetDataFrame", tbl, ..., check = FALSE)
+    new2("DuckDBDataFrame", tbl, ..., check = FALSE)
 }
