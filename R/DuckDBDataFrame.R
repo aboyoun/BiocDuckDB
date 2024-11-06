@@ -20,7 +20,7 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 #'
-#' # Creating our Parquet-backed data frame:
+#' # Creating our DuckDB-backed data frame:
 #' df <- DuckDBDataFrame(tf, keycols = "model")
 #' df
 #'

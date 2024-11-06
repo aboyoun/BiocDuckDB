@@ -12,13 +12,12 @@
 #' @param conn Either a string containing the path to the data files or a
 #' \code{tbl_duckdb_connection} object.
 #' @param keycols Either a character vector or a list of character vectors
-#' containing the names of the columns that comprise the primary keycols.
-#' @param datacols String containing the name of the column in the Parquet data
+#' containing the names of the columns that comprise the primary key.
+#' @param datacols String containing the name of the column in the DuckDB table
 #' that specifies the value of the array.
-#' @param type String specifying the type of the Parquet data values;
-#' one of \code{"logical"}, \code{"integer"}, \code{"double"}, or
-#' \code{"character"}. If \code{NULL}, this is determined by inspecting
-#' the data.
+#' @param type String specifying the type of the data values; one of
+#' \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
+#' \code{"character"}. If \code{NULL}, it is determined by inspecting the data.
 #' @param ... Further arguments to be passed to \code{read_parquet}.
 #'
 #' @author Patrick Aboyoun
@@ -167,7 +166,7 @@ setMethod("aperm", "DuckDBArraySeed", function(a, perm, ...) {
 #' @importFrom BiocGenerics t
 setMethod("t", "DuckDBArraySeed", function(x) {
     if (nkey(x@table) != 2L) {
-        stop("'t()' is only defined for 2-dimensional Parquet arrays")
+        stop("'t()' is only defined for 2-dimensional DuckDBArray objects")
     }
     aperm(x, perm = 2:1)
 })

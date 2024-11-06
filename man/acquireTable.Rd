@@ -10,7 +10,7 @@ acquireTable(path, ...)
 releaseTable(path)
 }
 \arguments{
-\item{path}{String specifying a path to a Parquet data directory or file.}
+\item{path}{String specifying a path to a data directory or file.}
 
 \item{...}{Further arguments to be passed to \code{read_parquet}.}
 }
@@ -21,11 +21,11 @@ For \code{releaseTable}, any existing \code{tbl_duckdb_connection} for the \code
 If \code{path=NULL}, all cached DuckDB table connections are removed.
 }
 \description{
-Acquire a (possibly cached) DuckDB table connection created from Parquet data.
+Acquire a (possibly cached) DuckDB table connection.
 }
 \details{
 \code{acquireTable} will cache the \code{tbl_duckdb_connection} object in the current R session to avoid repeated initialization.
-This improves efficiency for repeated calls, e.g., when creating a \linkS4class{DataFrame} with multiple columns from the same Parquet data path.
+This improves efficiency for repeated calls, e.g., when creating a \linkS4class{DataFrame} with multiple columns from the same data path.
 The cached DuckDB table connection for any given \code{path} can be deleted by calling \code{releaseTable} for the same \code{path}.
 }
 \examples{

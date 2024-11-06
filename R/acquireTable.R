@@ -3,9 +3,9 @@ persistent$handles <- list()
 
 #' Acquire the DuckDB Table Connection
 #'
-#' Acquire a (possibly cached) DuckDB table connection created from Parquet data.
+#' Acquire a (possibly cached) DuckDB table connection.
 #'
-#' @param path String specifying a path to a Parquet data directory or file.
+#' @param path String specifying a path to a data directory or file.
 #' @param ... Further arguments to be passed to \code{read_parquet}.
 #'
 #' @return
@@ -18,7 +18,7 @@ persistent$handles <- list()
 #'
 #' @details
 #' \code{acquireTable} will cache the \code{tbl_duckdb_connection} object in the current R session to avoid repeated initialization.
-#' This improves efficiency for repeated calls, e.g., when creating a \linkS4class{DataFrame} with multiple columns from the same Parquet data path.
+#' This improves efficiency for repeated calls, e.g., when creating a \linkS4class{DataFrame} with multiple columns from the same data path.
 #' The cached DuckDB table connection for any given \code{path} can be deleted by calling \code{releaseTable} for the same \code{path}.
 #'
 #' @examples
@@ -49,7 +49,7 @@ acquireTable <- function(path, ...) {
         stop("'path' must be a single non-empty string")
     }
 
-    # Here we set up an LRU cache for the Parquet handles.
+    # Here we set up an LRU cache for the data handles.
     # This avoids the initialization time when reading lots of columns.
     nhandles <- length(persistent$handles)
 

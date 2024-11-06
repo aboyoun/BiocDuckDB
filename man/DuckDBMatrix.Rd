@@ -5,33 +5,32 @@
 \alias{DuckDBMatrix-class}
 \alias{[,DuckDBMatrix,ANY,ANY,ANY-method}
 \alias{matrixClass,DuckDBArray-method}
-\title{Parquet datasets as DelayedMatrix objects}
+\title{DuckDB tables as DelayedMatrix objects}
 \usage{
 DuckDBMatrix(conn, row, col, datacols, keycols = c(row, col), type = NULL, ...)
 }
 \arguments{
-\item{conn}{Either a string containing the path to the data files or a
-\code{tbl_duckdb_connection} object.}
+\item{conn}{Either a string containing the path to the underlying data files
+or a \code{tbl_duckdb_connection} object.}
 
 \item{row}{Either a character vector or a named list of character vectors
-containing the names of the columns in the Parquet data that specify the
+containing the names of the columns in the DuckDB table that specify the
 rows of the matrix.}
 
 \item{col}{Either a character vector or a named list of character vectors
-containing the names of the columns in the Parquet data that specify the
+containing the names of the columns in the DuckDB table that specify the
 columns of the matrix.}
 
-\item{datacols}{String containing the name of the column in the Parquet data
+\item{datacols}{String containing the name of the column in the DuckDB table
 that specifies the value of the matrix.}
 
 \item{keycols}{Either a character vector or a list of character vectors
-containing the names of the columns in the Parquet data that specify the
+containing the names of the columns in the DuckDB table that specify the
 rows and columns of the matrix.}
 
-\item{type}{String specifying the type of the Parquet data values;
-one of \code{"logical"}, \code{"integer"}, \code{"double"}, or
-\code{"character"}. If \code{NULL}, this is determined by inspecting
-the data.}
+\item{type}{String specifying the type of the data values; one of
+\code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
+\code{"character"}. If \code{NULL}, it is determined by inspecting the data.}
 
 \item{...}{Further arguments to be passed to \code{read_parquet}.}
 }

@@ -1,4 +1,4 @@
-#' Parquet datasets as DelayedArray objects
+#' DuckDB tables as DelayedArray objects
 #'
 #' @description
 #' The DuckDBArray class is a \link[DelayedArray]{DelayedArray} subclass

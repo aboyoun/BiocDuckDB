@@ -28,14 +28,15 @@
 DuckDBDataFrame(conn, keycols, datacols, ...)
 }
 \arguments{
-\item{conn}{Either a string containing the path to the data files or a
-\code{tbl_duckdb_connection} object.}
+\item{conn}{Either a string containing the path to the underlying data files
+or a \code{tbl_duckdb_connection} object.}
 
-\item{keycols}{Either a character vector or a list of character vectors
-containing the names of the columns that comprise the primary keycols.}
+\item{keycols}{An optional character vector or a list of character vectors
+containing the names of the columns that comprise the primary key. If missing,
+a \code{row_number} column is created as an identifier.}
 
 \item{datacols}{Either a character vector containing the names of the columns
-in the Parquet data that specify the facts}
+in the DuckDB table that specify the data columns.}
 
 \item{...}{Further arguments to be passed to \code{read_parquet}.}
 }
@@ -57,7 +58,7 @@ tf <- tempfile()
 on.exit(unlink(tf))
 arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 
-# Creating our Parquet-backed data frame:
+# Creating our DuckDB-backed data frame:
 df <- DuckDBDataFrame(tf, keycols = "model")
 df
 

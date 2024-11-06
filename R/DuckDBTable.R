@@ -4,15 +4,17 @@
 #' DuckDBTable is a low-level helper class for representing a
 #' pointer to a \code{tbl_duckdb_connection} object.
 #'
-#' @param conn Either a string containing the path to the data files or a
-#' \code{tbl_duckdb_connection} object.
-#' @param keycols Either a character vector or a list of character vectors
-#' containing the names of the columns that comprise the primary keycols.
+#' @param conn Either a string containing the path to the underlying data files
+#' or a \code{tbl_duckdb_connection} object.
+#' @param keycols An optional character vector or a list of character vectors
+#' containing the names of the columns that comprise the primary key. If missing,
+#' a \code{row_number} column is created as an identifier.
 #' @param datacols Either a character vector containing the names of the columns
-#' in the Parquet data that specify the facts
+#' in the DuckDB table that specify the data columns.
 #' @param type An optional named character vector where the names specify the
 #' column names and the values specify the column type; one of
-#' \code{"logical"}, \code{"integer"}, \code{"double"}, or \code{"character"}.
+#' \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
+#' \code{"character"}.
 #' @param ... Further arguments to be passed to \code{read_parquet}.
 #'
 #' @author Patrick Aboyoun
@@ -579,7 +581,7 @@ setMethod("as.data.frame", "DuckDBTable", function(x, row.names = NULL, optional
 
     df <- as.data.frame(conn)[, c(names(keycols), names(datacols))]
     if (anyDuplicated(df[, names(keycols)])) {
-        stop("duplicate keys found in Parquet data")
+        stop("duplicate keys found in the DuckDB table")
     }
 
     # Coerce list of raws to character

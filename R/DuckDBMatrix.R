@@ -1,4 +1,4 @@
-#' Parquet datasets as DelayedMatrix objects
+#' DuckDB tables as DelayedMatrix objects
 #'
 #' @description
 #' The DuckDBMatrix class is a \link[DelayedArray]{DelayedMatrix} subclass
@@ -7,23 +7,22 @@
 #' All the operations available for \link[DelayedArray]{DelayedMatrix}
 #' objects work on DuckDBMatrix objects.
 #'
-#' @param conn Either a string containing the path to the data files or a
-#' \code{tbl_duckdb_connection} object.
+#' @param conn Either a string containing the path to the underlying data files
+#' or a \code{tbl_duckdb_connection} object.
 #' @param row Either a character vector or a named list of character vectors
-#' containing the names of the columns in the Parquet data that specify the
+#' containing the names of the columns in the DuckDB table that specify the
 #' rows of the matrix.
 #' @param col Either a character vector or a named list of character vectors
-#' containing the names of the columns in the Parquet data that specify the
+#' containing the names of the columns in the DuckDB table that specify the
 #' columns of the matrix.
 #' @param keycols Either a character vector or a list of character vectors
-#' containing the names of the columns in the Parquet data that specify the
+#' containing the names of the columns in the DuckDB table that specify the
 #' rows and columns of the matrix.
-#' @param datacols String containing the name of the column in the Parquet data
+#' @param datacols String containing the name of the column in the DuckDB table
 #' that specifies the value of the matrix.
-#' @param type String specifying the type of the Parquet data values;
-#' one of \code{"logical"}, \code{"integer"}, \code{"double"}, or
-#' \code{"character"}. If \code{NULL}, this is determined by inspecting
-#' the data.
+#' @param type String specifying the type of the data values; one of
+#' \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
+#' \code{"character"}. If \code{NULL}, it is determined by inspecting the data.
 #' @param ... Further arguments to be passed to \code{read_parquet}.
 #'
 #' @author Patrick Aboyoun

@@ -37,15 +37,14 @@ DuckDBArraySeed(conn, keycols, datacols, type = NULL, ...)
 \code{tbl_duckdb_connection} object.}
 
 \item{keycols}{Either a character vector or a list of character vectors
-containing the names of the columns that comprise the primary keycols.}
+containing the names of the columns that comprise the primary key.}
 
-\item{datacols}{String containing the name of the column in the Parquet data
+\item{datacols}{String containing the name of the column in the DuckDB table
 that specifies the value of the array.}
 
-\item{type}{String specifying the type of the Parquet data values;
-one of \code{"logical"}, \code{"integer"}, \code{"double"}, or
-\code{"character"}. If \code{NULL}, this is determined by inspecting
-the data.}
+\item{type}{String specifying the type of the data values; one of
+\code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
+\code{"character"}. If \code{NULL}, it is determined by inspecting the data.}
 
 \item{...}{Further arguments to be passed to \code{read_parquet}.}
 }
