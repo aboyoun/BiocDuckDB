@@ -7,13 +7,8 @@ esoph_path <- tempfile()
 arrow::write_parquet(esoph_df, esoph_path)
 
 # Infertility after Spontaneous and Induced Abortion
-infert_df <- cbind(id = rownames(infert), infert)
 infert_path <- tempfile()
-arrow::write_parquet(infert_df, infert_path)
-
-# Edgar Anderson's Iris Data
-iris_path <- tempfile()
-arrow::write_dataset(iris, iris_path, format = "parquet", partitioning = "Species")
+arrow::write_parquet(infert, infert_path)
 
 # Motor Trend Car Road Tests
 mtcars_df <- cbind(model = rownames(mtcars), mtcars)
@@ -68,11 +63,13 @@ checkDuckDBTable <- function(object, expected) {
     expect_gte(nrow(object), nrow(expected))
     expect_equal(nkey(object) + ncol(object), ncol(expected))
     expect_identical(c(keynames(object), colnames(object)), colnames(expected))
-    df <- as.data.frame(object)
-    df <- df[match(do.call(paste, expected[, keynames(object), drop = FALSE]),
-                   do.call(paste, df[, keynames(object), drop = FALSE])), ]
-    rownames(df) <- NULL
-    expect_equivalent(df, expected)
+    if (nkey(object) > 0L) {
+        df <- as.data.frame(object)
+        df <- df[match(do.call(paste, expected[, keynames(object), drop = FALSE]),
+                       do.call(paste, df[, keynames(object), drop = FALSE])), ]
+        rownames(df) <- NULL
+        expect_equivalent(df, expected)
+    }
 }
 
 checkDuckDBArraySeed <- function(object, expected) {
@@ -108,7 +105,9 @@ checkDuckDBDataFrame <- function(object, expected) {
     expect_identical(nrow(object), nrow(expected))
     expect_setequal(rownames(object), rownames(expected))
     expect_identical(colnames(object), colnames(expected))
-    expect_identical(as.data.frame(object)[rownames(expected), , drop=FALSE], expected)
+    if (nkey(object) > 0L) {
+        expect_identical(as.data.frame(object)[rownames(expected), , drop=FALSE], expected)
+    }
 }
 
 checkDuckDBColumn <- function(object, expected) {

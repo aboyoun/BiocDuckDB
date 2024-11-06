@@ -138,7 +138,9 @@ setValidity2("DuckDBTable", function(x) {
 setMethod("dbconn", "DuckDBTable", function(x) x@conn)
 
 #' @export
-setMethod("nkey", "DuckDBTable", function(x) length(x@keycols))
+setMethod("nkey", "DuckDBTable", function(x) {
+    if (.has.row_number(x)) 0L else length(x@keycols)
+})
 
 #' @export
 setMethod("nkeydim", "DuckDBTable", function(x) {
@@ -166,7 +168,9 @@ setMethod("nrow", "DuckDBTable", function(x) {
 setMethod("ncol", "DuckDBTable", function(x) length(x@datacols))
 
 #' @export
-setMethod("keynames", "DuckDBTable", function(x) names(x@keycols))
+setMethod("keynames", "DuckDBTable", function(x) {
+    if (.has.row_number(x)) character(0L) else names(x@keycols)
+})
 
 #' @export
 #' @importFrom dplyr pull select

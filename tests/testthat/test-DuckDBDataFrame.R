@@ -9,6 +9,12 @@ test_that("basic methods work for a DuckDBDataFrame", {
     checkDuckDBDataFrame(df, mtcars)
     expect_identical(rownames(df), rownames(mtcars))
     expect_identical(as.data.frame(df), mtcars)
+
+    df <- DuckDBDataFrame(infert_path)
+    checkDuckDBDataFrame(df, infert)
+
+    df <- DuckDBDataFrame(infert_path, datacols = colnames(infert))
+    checkDuckDBDataFrame(df, infert)
 })
 
 test_that("renaming columns creates a new DuckDBDataFrame", {

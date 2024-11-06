@@ -393,12 +393,13 @@ setMethod("as.data.frame", "DuckDBDataFrame", function(x, row.names = NULL, opti
     df <- callNextMethod(x, row.names = row.names, optional = optional, ...)
 
     # Add rownames, renaming if specified
+    keyname <- names(x@keycols)
     if (is.null(names(x@keycols[[1L]]))) {
-        rnames <- df[[keynames(x)]]
+        rnames <- df[[keyname]]
     } else {
         rnames <- x@keycols[[1L]]
         rnames <- setNames(names(rnames), rnames)
-        rnames <- rnames[as.character(df[[keynames(x)]])]
+        rnames <- rnames[as.character(df[[keyname]])]
     }
     rownames(df) <- rnames
 

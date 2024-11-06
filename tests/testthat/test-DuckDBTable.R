@@ -16,6 +16,13 @@ test_that("basic methods work as expected for a DuckDBTable", {
     tbl <- DuckDBTable(esoph_path, keycols = c("agegp", "alcgp", "tobgp"), datacols = c("ncases", "ncontrols"))
     checkDuckDBTable(tbl, esoph_df)
 
+    # infert dataset
+    tbl <- DuckDBTable(infert_path)
+    checkDuckDBTable(tbl, infert)
+
+    tbl <- DuckDBTable(infert_path, datacols = colnames(infert))
+    checkDuckDBTable(tbl, infert)
+
     # mtcars dataset
     tbl <- DuckDBTable(mtcars_path, keycols = "model")
     checkDuckDBTable(tbl, mtcars_df)

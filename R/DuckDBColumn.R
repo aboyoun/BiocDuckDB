@@ -56,10 +56,11 @@ setMethod("show", "DuckDBColumn", function(object) {
     len <- length(object)
     cat(sprintf("%s of length %s\n", classNameForDisplay(object), len))
     if (.has.row_number(object@table)) {
-        n1 <- 4L
+        n1 <- 5L
         n2 <- 0L
     } else {
-        n1 <- n2 <- 2L
+        n1 <- 3L
+        n2 <- 2L
     }
     if (len <= n1 + n2 + 1L) {
         vec <- as.vector(object)
@@ -246,7 +247,7 @@ function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, h
 #' @importFrom stats setNames
 setMethod("as.vector", "DuckDBColumn", function(x, mode = "any") {
     df <- as.data.frame(x@table)
-    vec <- setNames(df[[colnames(x@table)]], df[[keynames(x@table)[[1L]]]])
+    vec <- setNames(df[[colnames(x@table)]], df[[names(x@table@keycols)]])
     vec <- vec[rownames(x@table)]
     if (mode != "any") {
         storage.mode(vec) <- mode
