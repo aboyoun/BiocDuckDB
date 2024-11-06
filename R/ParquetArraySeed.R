@@ -9,11 +9,10 @@
 #' \link{ParquetArray} object instead. See \code{?\link{ParquetArray}} for
 #' more information.
 #'
-#' @param conn Either a string containing the path to the Parquet data or a
+#' @param conn Either a string containing the path to the data files or a
 #' \code{tbl_duckdb_connection} object.
 #' @param key Either a character vector or a list of character vectors
-#' containing the names of the columns in the Parquet data that specify
-#' the primary key of the array.
+#' containing the names of the columns that comprise the primary key.
 #' @param fact String containing the name of the column in the Parquet data
 #' that specifies the value of the array.
 #' @param type String specifying the type of the Parquet data values;
@@ -69,7 +68,7 @@
 #' \code{\link[S4Arrays]{Array}}
 #'
 #' @include acquireTable.R
-#' @include ParquetFactTable.R
+#' @include DuckDBTable.R
 #'
 #' @name ParquetArraySeed
 NULL
@@ -77,12 +76,12 @@ NULL
 #' @export
 #' @import methods
 #' @importClassesFrom S4Arrays Array
-setClass("ParquetArraySeed", contains = "Array", slots = c(table = "ParquetFactTable", drop = "logical"))
+setClass("ParquetArraySeed", contains = "Array", slots = c(table = "DuckDBTable", drop = "logical"))
 
 #' @importFrom S4Vectors isTRUEorFALSE setValidity2 isSingleString
 setValidity2("ParquetArraySeed", function(x) {
     if (ncol(x@table) != 1L) {
-        return("'table' slot must be a single-column ParquetFactTable")
+        return("'table' slot must be a single-column DuckDBTable")
     }
     if (!isTRUEorFALSE(x@drop)) {
         return("'drop' slot must be TRUE or FALSE")
@@ -354,11 +353,11 @@ setMethod("DelayedArray", "ParquetArraySeed", function(seed) ParquetArray(seed))
 #' @rdname ParquetArraySeed
 ParquetArraySeed <- function(conn, key, fact, type = NULL, ...) {
     if (is.null(type)) {
-        table <- ParquetFactTable(conn, key = key, fact = fact, ...)
+        table <- DuckDBTable(conn, key = key, fact = fact, ...)
         column <- as.data.frame(select(head(table@conn, 0L), !!fact))[[fact]]
         type <- .get_type(column)
     } else {
-        table <- ParquetFactTable(conn, key = key, fact = fact, type = setNames(type, fact), ...)
+        table <- DuckDBTable(conn, key = key, fact = fact, type = setNames(type, fact), ...)
     }
     new2("ParquetArraySeed", table = table, drop = FALSE, check = FALSE)
 }

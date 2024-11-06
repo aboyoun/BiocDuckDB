@@ -2,7 +2,7 @@
 #'
 #' @author Patrick Aboyoun
 #'
-#' @include ParquetFactTable.R
+#' @include DuckDBTable.R
 #'
 #' @aliases
 #' ParquetColumn-class
@@ -36,13 +36,13 @@ NULL
 
 #' @export
 #' @importClassesFrom S4Vectors Vector
-setClass("ParquetColumn", contains = "Vector", slots = c(table = "ParquetFactTable"))
+setClass("ParquetColumn", contains = "Vector", slots = c(table = "DuckDBTable"))
 
 #' @importFrom S4Vectors isTRUEorFALSE setValidity2
 setValidity2("ParquetColumn", function(x) {
     table <- x@table
     if (ncol(table) != 1L) {
-        return("'table' slot must be a single-column ParquetFactTable")
+        return("'table' slot must be a single-column DuckDBTable")
     }
     if (nkey(table) != 1L) {
         return("'table' slot must have a 'key' with a named list containing a single named character vector")
@@ -133,7 +133,7 @@ setMethod("extractROWS", "ParquetColumn", function(x, i) {
         i <- i@table
     }
     i <- setNames(list(i), keynames(x@table))
-    initialize2(x, table = .subset_ParquetFactTable(x@table, i = i), check = FALSE)
+    initialize2(x, table = .subset_DuckDBTable(x@table, i = i), check = FALSE)
 })
 
 #' @export

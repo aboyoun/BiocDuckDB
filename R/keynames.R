@@ -24,11 +24,11 @@
 #' nkey
 #' nkeydim
 #'
-#' keynames,ParquetFactTable-method
-#' keydimnames,ParquetFactTable-method
-#' keydimnames<-,ParquetFactTable-method
-#' nkey,ParquetFactTable-method
-#' nkeydim,ParquetFactTable-method
+#' keynames,DuckDBTable-method
+#' keydimnames,DuckDBTable-method
+#' keydimnames<-,DuckDBTable-method
+#' nkey,DuckDBTable-method
+#' nkeydim,DuckDBTable-method
 #'
 #' @name keynames
 NULL

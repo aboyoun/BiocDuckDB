@@ -2,7 +2,7 @@
 #'
 #' Create a Parquet-backed \linkS4class{DataFrame}, where the data are kept on disk until requested.
 #'
-#' @inheritParams ParquetFactTable
+#' @inheritParams DuckDBTable
 #'
 #' @return A ParquetDataFrame where each column is a \linkS4class{ParquetColumn}.
 #'
@@ -68,14 +68,14 @@
 #'
 #' @include acquireTable.R
 #' @include ParquetColumn.R
-#' @include ParquetFactTable.R
+#' @include DuckDBTable.R
 #'
 #' @name ParquetDataFrame
 NULL
 
 #' @export
 #' @importClassesFrom S4Vectors DataFrame
-setClass("ParquetDataFrame", contains = c("ParquetFactTable", "DataFrame"))
+setClass("ParquetDataFrame", contains = c("DuckDBTable", "DataFrame"))
 
 #' @importFrom S4Vectors setValidity2
 setValidity2("ParquetDataFrame", function(x) {
@@ -173,7 +173,7 @@ setMethod("extractROWS", "ParquetDataFrame", function(x, i) {
         return(x)
     }
     i <- setNames(list(i), keynames(x))
-    .subset_ParquetFactTable(x, i = i)
+    .subset_DuckDBTable(x, i = i)
 })
 
 .head_conn <- function(x, n) {
@@ -238,7 +238,7 @@ setMethod("extractCOLS", "ParquetDataFrame", function(x, i) {
         stop("cannot extract duplicate columns in a ParquetDataFrame")
     }
     mc <- extractROWS(mcols(x), i)
-    .subset_ParquetFactTable(x, j = i, elementMetadata = mc)
+    .subset_DuckDBTable(x, j = i, elementMetadata = mc)
 })
 
 #' @export
@@ -271,7 +271,7 @@ setMethod("[[", "ParquetDataFrame", function(x, i, j, ...) {
 
     i <- normalizeDoubleBracketSubscript(i, x)
     column <- extractCOLS(x, i)
-    new2("ParquetColumn", table = as(column, "ParquetFactTable"), metadata = as.list(mcols(column)), check = FALSE)
+    new2("ParquetColumn", table = as(column, "DuckDBTable"), metadata = as.list(mcols(column)), check = FALSE)
 })
 
 #' @export
@@ -312,7 +312,7 @@ setMethod("[[<-", "ParquetDataFrame", function(x, i, j, ..., value) {
     i2 <- normalizeDoubleBracketSubscript(i, x, allow.nomatch = TRUE)
     if (length(i2) == 1L && !is.na(i2)) {
         if (is(value, "ParquetColumn")) {
-            if (isTRUE(all.equal(as(x, "ParquetFactTable"), value@table))) {
+            if (isTRUE(all.equal(as(x, "DuckDBTable"), value@table))) {
                 x@fact[[i2]] <- value@table@fact[[1L]]
                 return(x)
             }
@@ -389,7 +389,7 @@ setMethod("cbind", "ParquetDataFrame", cbind.ParquetDataFrame)
 #' @importFrom BiocGenerics as.data.frame
 #' @importFrom stats setNames
 setMethod("as.data.frame", "ParquetDataFrame", function(x, row.names = NULL, optional = FALSE, ...) {
-    # as.data.frame,ParquetFactTable-method
+    # as.data.frame,DuckDBTable-method
     df <- callNextMethod(x, row.names = row.names, optional = optional, ...)
 
     # Add rownames, renaming if specified
@@ -412,9 +412,9 @@ setMethod("as.data.frame", "ParquetDataFrame", function(x, row.names = NULL, opt
 #' @rdname ParquetDataFrame
 ParquetDataFrame <- function(conn, key, fact, ...) {
     if (missing(fact)) {
-        tbl <- ParquetFactTable(conn, key = key, ...)
+        tbl <- DuckDBTable(conn, key = key, ...)
     } else {
-        tbl <- ParquetFactTable(conn, key = key, fact = fact, ...)
+        tbl <- DuckDBTable(conn, key = key, fact = fact, ...)
     }
     new2("ParquetDataFrame", tbl, ..., check = FALSE)
 }

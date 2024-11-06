@@ -33,12 +33,11 @@
 ParquetArraySeed(conn, key, fact, type = NULL, ...)
 }
 \arguments{
-\item{conn}{Either a string containing the path to the Parquet data or a
+\item{conn}{Either a string containing the path to the data files or a
 \code{tbl_duckdb_connection} object.}
 
 \item{key}{Either a character vector or a list of character vectors
-containing the names of the columns in the Parquet data that specify
-the primary key of the array.}
+containing the names of the columns that comprise the primary key.}
 
 \item{fact}{String containing the name of the column in the Parquet data
 that specifies the value of the array.}

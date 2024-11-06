@@ -6,11 +6,11 @@
 \alias{keydimnames<-}
 \alias{nkey}
 \alias{nkeydim}
-\alias{keynames,ParquetFactTable-method}
-\alias{keydimnames,ParquetFactTable-method}
-\alias{keydimnames<-,ParquetFactTable-method}
-\alias{nkey,ParquetFactTable-method}
-\alias{nkeydim,ParquetFactTable-method}
+\alias{keynames,DuckDBTable-method}
+\alias{keydimnames,DuckDBTable-method}
+\alias{keydimnames<-,DuckDBTable-method}
+\alias{nkey,DuckDBTable-method}
+\alias{nkeydim,DuckDBTable-method}
 \title{Key Names and Key Count}
 \usage{
 keynames(x)

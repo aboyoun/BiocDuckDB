@@ -7,7 +7,7 @@
 #' All the operations available for \link[DelayedArray]{DelayedMatrix}
 #' objects work on ParquetMatrix objects.
 #'
-#' @param conn Either a string containing the path to the Parquet data or a
+#' @param conn Either a string containing the path to the data files or a
 #' \code{tbl_duckdb_connection} object.
 #' @param row Either a character vector or a named list of character vectors
 #' containing the names of the columns in the Parquet data that specify the

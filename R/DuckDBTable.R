@@ -1,14 +1,13 @@
-#' ParquetFactTable objects
+#' DuckDBTable objects
 #'
 #' @description
-#' ParquetFactTable is a low-level helper class for representing a
-#' pointer to a Parquet fact table.
+#' DuckDBTable is a low-level helper class for representing a
+#' pointer to a \code{tbl_duckdb_connection} object.
 #'
-#' @param conn Either a string containing the path to the Parquet data or a
+#' @param conn Either a string containing the path to the data files or a
 #' \code{tbl_duckdb_connection} object.
 #' @param key Either a character vector or a list of character vectors
-#' containing the names of the columns in the Parquet data that specify
-#' the primary key of the array.
+#' containing the names of the columns that comprise the primary key.
 #' @param fact Either a character vector containing the names of the columns
 #' in the Parquet data that specify the facts
 #' @param type An optional named character vector where the names specify the
@@ -28,44 +27,44 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' tbl <- ParquetFactTable(tf, key = c("Class", "Sex", "Age", "Survived"), fact = "fate")
+#' tbl <- DuckDBTable(tf, key = c("Class", "Sex", "Age", "Survived"), fact = "fate")
 #'
 #' @aliases
-#' ParquetFactTable-class
-#' [,ParquetFactTable,ANY,ANY,ANY-method
-#' all.equal.ParquetFactTable
-#' as.data.frame,ParquetFactTable-method
-#' bindCOLS,ParquetFactTable-method
-#' colnames,ParquetFactTable-method
-#' colnames<-,ParquetFactTable-method
+#' DuckDBTable-class
+#' [,DuckDBTable,ANY,ANY,ANY-method
+#' all.equal.DuckDBTable
+#' as.data.frame,DuckDBTable-method
+#' bindCOLS,DuckDBTable-method
+#' colnames,DuckDBTable-method
+#' colnames<-,DuckDBTable-method
 #' coltypes
-#' coltypes,ParquetFactTable-method
+#' coltypes,DuckDBTable-method
 #' coltypes<-
-#' coltypes<-,ParquetFactTable-method
-#' dbconn,ParquetFactTable-method
-#' is_nonzero,ParquetFactTable-method
-#' is_sparse,ParquetFactTable-method
-#' ncol,ParquetFactTable-method
-#' nrow,ParquetFactTable-method
-#' nzcount,ParquetFactTable-method
-#' rownames,ParquetFactTable-method
-#' Ops,ParquetFactTable,ParquetFactTable-method
-#' Ops,ParquetFactTable,atomic-method
-#' Ops,atomic,ParquetFactTable-method
-#' Math,ParquetFactTable-method
-#' Summary,ParquetFactTable-method
-#' mean,ParquetFactTable-method
-#' median.ParquetFactTable
-#' quantile.ParquetFactTable
-#' var,ParquetFactTable,ANY-method
-#' sd,ParquetFactTable-method
-#' mad,ParquetFactTable-method
+#' coltypes<-,DuckDBTable-method
+#' dbconn,DuckDBTable-method
+#' is_nonzero,DuckDBTable-method
+#' is_sparse,DuckDBTable-method
+#' ncol,DuckDBTable-method
+#' nrow,DuckDBTable-method
+#' nzcount,DuckDBTable-method
+#' rownames,DuckDBTable-method
+#' Ops,DuckDBTable,DuckDBTable-method
+#' Ops,DuckDBTable,atomic-method
+#' Ops,atomic,DuckDBTable-method
+#' Math,DuckDBTable-method
+#' Summary,DuckDBTable-method
+#' mean,DuckDBTable-method
+#' median.DuckDBTable
+#' quantile.DuckDBTable
+#' var,DuckDBTable,ANY-method
+#' sd,DuckDBTable-method
+#' mad,DuckDBTable-method
 #'
 #' @include LanguageList.R
 #' @include acquireTable.R
 #' @include keynames.R
 #'
-#' @name ParquetFactTable
+#' @name DuckDBTable
 NULL
 
 setOldClass("tbl_duckdb_connection")
@@ -102,11 +101,11 @@ initialize2 <- function(..., check = TRUE)
 #' @export
 #' @importClassesFrom BiocGenerics OutOfMemoryObject
 #' @importClassesFrom S4Vectors RectangularData
-setClass("ParquetFactTable", contains = c("RectangularData", "OutOfMemoryObject"),
+setClass("DuckDBTable", contains = c("RectangularData", "OutOfMemoryObject"),
     slots = c(conn = "tbl_duckdb_connection", key = "list", fact = "LanguageList"))
 
 #' @importFrom S4Vectors setValidity2
-setValidity2("ParquetFactTable", function(x) {
+setValidity2("DuckDBTable", function(x) {
     msg <- NULL
     if (is.null(names(x@key))) {
         msg <- c(msg, "'key' slot must be a named list")
@@ -135,13 +134,13 @@ setValidity2("ParquetFactTable", function(x) {
 
 #' @export
 #' @importFrom BiocGenerics dbconn
-setMethod("dbconn", "ParquetFactTable", function(x) x@conn)
+setMethod("dbconn", "DuckDBTable", function(x) x@conn)
 
 #' @export
-setMethod("nkey", "ParquetFactTable", function(x) length(x@key))
+setMethod("nkey", "DuckDBTable", function(x) length(x@key))
 
 #' @export
-setMethod("nkeydim", "ParquetFactTable", function(x) {
+setMethod("nkeydim", "DuckDBTable", function(x) {
     if (.has.row_number(x)) {
         abs(x@key[[1L]][2L])
     } else {
@@ -152,7 +151,7 @@ setMethod("nkeydim", "ParquetFactTable", function(x) {
 #' @export
 #' @importFrom BiocGenerics nrow
 #' @importFrom bit64 as.integer64
-setMethod("nrow", "ParquetFactTable", function(x) {
+setMethod("nrow", "DuckDBTable", function(x) {
     nr <- prod(as.integer64(nkeydim(x)))
     if (nr <= as.integer64(.Machine$integer.max)) {
         as.integer(nr)
@@ -163,14 +162,14 @@ setMethod("nrow", "ParquetFactTable", function(x) {
 
 #' @export
 #' @importFrom BiocGenerics ncol
-setMethod("ncol", "ParquetFactTable", function(x) length(x@fact))
+setMethod("ncol", "DuckDBTable", function(x) length(x@fact))
 
 #' @export
-setMethod("keynames", "ParquetFactTable", function(x) names(x@key))
+setMethod("keynames", "DuckDBTable", function(x) names(x@key))
 
 #' @export
 #' @importFrom dplyr pull select
-setMethod("keydimnames", "ParquetFactTable", function(x) {
+setMethod("keydimnames", "DuckDBTable", function(x) {
     if (.has.row_number(x)) {
         list(as.character(pull(select(x@conn, !!as.name(names(x@key))))))
     } else {
@@ -179,7 +178,7 @@ setMethod("keydimnames", "ParquetFactTable", function(x) {
 })
 
 #' @export
-setReplaceMethod("keydimnames", "ParquetFactTable", function(x, value) {
+setReplaceMethod("keydimnames", "DuckDBTable", function(x, value) {
     if (!is.list(value)) {
         stop("'value' must be a list of vectors")
     }
@@ -198,7 +197,7 @@ setReplaceMethod("keydimnames", "ParquetFactTable", function(x, value) {
 
 #' @export
 #' @importFrom BiocGenerics rownames
-setMethod("rownames", "ParquetFactTable", function(x, do.NULL = TRUE, prefix = "row") {
+setMethod("rownames", "DuckDBTable", function(x, do.NULL = TRUE, prefix = "row") {
     if (length(x@key) == 1L) {
         keydimnames(x)[[1L]]
     } else {
@@ -208,11 +207,11 @@ setMethod("rownames", "ParquetFactTable", function(x, do.NULL = TRUE, prefix = "
 
 #' @export
 #' @importFrom BiocGenerics colnames
-setMethod("colnames", "ParquetFactTable", function(x, do.NULL = TRUE, prefix = "col") names(x@fact))
+setMethod("colnames", "DuckDBTable", function(x, do.NULL = TRUE, prefix = "col") names(x@fact))
 
 #' @export
 #' @importFrom BiocGenerics colnames<-
-setReplaceMethod("colnames", "ParquetFactTable", function(x, value) {
+setReplaceMethod("colnames", "DuckDBTable", function(x, value) {
     fact <- x@fact
     names(fact) <- value
     initialize2(x, fact = fact, check = FALSE)
@@ -252,9 +251,9 @@ setReplaceMethod("colnames", "ParquetFactTable", function(x, value) {
 setGeneric("coltypes", function(x) standardGeneric("coltypes"))
 
 #' @export
-setMethod("coltypes", "ParquetFactTable", function(x) {
+setMethod("coltypes", "DuckDBTable", function(x) {
     i <- sapply(keynames(x), function(x) character(), simplify = FALSE)
-    empty <- .subset_ParquetFactTable(x, i, drop = FALSE)
+    empty <- .subset_DuckDBTable(x, i, drop = FALSE)
     vapply(as.data.frame(empty)[names(x@fact)], .get_type, character(1L))
 })
 
@@ -262,7 +261,7 @@ setMethod("coltypes", "ParquetFactTable", function(x) {
 setGeneric("coltypes<-", function(x, value) standardGeneric("coltypes<-"))
 
 #' @export
-setReplaceMethod("coltypes", "ParquetFactTable", function(x, value) {
+setReplaceMethod("coltypes", "DuckDBTable", function(x, value) {
     fact <- .cast_fact(x@fact, value)
     initialize2(x, fact = fact, check = FALSE)
 })
@@ -277,7 +276,7 @@ setReplaceMethod("coltypes", "ParquetFactTable", function(x, value) {
 
 #' @export
 #' @importFrom SparseArray is_nonzero
-setMethod("is_nonzero", "ParquetFactTable", function(x) {
+setMethod("is_nonzero", "DuckDBTable", function(x) {
     fact <- x@fact
     ctypes <- coltypes(x)
     for (j in names(ctypes)) {
@@ -295,7 +294,7 @@ setMethod("is_nonzero", "ParquetFactTable", function(x) {
 
 #' @export
 #' @importFrom SparseArray nzcount
-setMethod("nzcount", "ParquetFactTable", function(x) {
+setMethod("nzcount", "DuckDBTable", function(x) {
     tbl <- is_nonzero(x)
     coltypes(tbl) <- rep.int("integer", ncol(tbl))
     fact <- LanguageList(nonzero = Reduce(function(x, y) call("+", x, y), tbl@fact))
@@ -305,12 +304,12 @@ setMethod("nzcount", "ParquetFactTable", function(x) {
 
 #' @export
 #' @importFrom S4Arrays is_sparse
-setMethod("is_sparse", "ParquetFactTable", function(x) {
+setMethod("is_sparse", "DuckDBTable", function(x) {
     (ncol(x) == 1L) && ((nzcount(x) / nrow(x)) < 0.5)
 })
 
 #' @importFrom dplyr distinct filter pull select
-.subset_ParquetFactTable <- function(x, i, j, ..., drop = TRUE) {
+.subset_DuckDBTable <- function(x, i, j, ..., drop = TRUE) {
     conn <- x@conn
     fact <- x@fact
     if (!missing(j)) {
@@ -330,7 +329,7 @@ setMethod("is_sparse", "ParquetFactTable", function(x) {
                 key[[k]] <- key[[k]][sub]
             } else if (is(sub, "ParquetColumn") &&
                        is.logical(as.vector(head(sub, 0L))) &&
-                       isTRUE(all.equal(as(x, "ParquetFactTable"), sub@table))) {
+                       isTRUE(all.equal(as(x, "DuckDBTable"), sub@table))) {
                 keep <- sub@table@fact[[1L]]
                 conn <- filter(conn, !!keep)
                 if (.has.row_number(x)) {
@@ -351,21 +350,21 @@ setMethod("is_sparse", "ParquetFactTable", function(x) {
 }
 
 #' @export
-setMethod("[", "ParquetFactTable", .subset_ParquetFactTable)
+setMethod("[", "DuckDBTable", .subset_DuckDBTable)
 
 #' @export
 #' @importFrom S4Vectors bindCOLS
-setMethod("bindCOLS", "ParquetFactTable",
+setMethod("bindCOLS", "DuckDBTable",
 function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TRUE) {
     fact <- x@fact
 
     for (i in seq_along(objects)) {
         obj <- objects[[i]]
-        if (!is(obj, "ParquetFactTable")) {
-            stop("all objects must be of class 'ParquetFactTable'")
+        if (!is(obj, "DuckDBTable")) {
+            stop("all objects must be of class 'DuckDBTable'")
         }
         if (!isTRUE(all.equal(x, obj))) {
-            stop("all objects must share a compatible 'ParquetFactTable' structure")
+            stop("all objects must share a compatible 'DuckDBTable' structure")
         }
         newname <- names(objects)[i]
         if (!is.null(newname) && nzchar(newname)) {
@@ -381,12 +380,12 @@ function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TR
 })
 
 #' @exportS3Method base::all.equal
-all.equal.ParquetFactTable <- function(target, current, check.fact = FALSE, ...) {
-    if (!is(current, "ParquetFactTable")) {
-        return("current is not a ParquetFactTable")
+all.equal.DuckDBTable <- function(target, current, check.fact = FALSE, ...) {
+    if (!is(current, "DuckDBTable")) {
+        return("current is not a DuckDBTable")
     }
-    target <- as(target, "ParquetFactTable")
-    current <- as(current, "ParquetFactTable")
+    target <- as(target, "DuckDBTable")
+    current <- as(current, "DuckDBTable")
     if (!check.fact) {
         target <- target[, integer()]
         current <- current[, integer()]
@@ -396,13 +395,13 @@ all.equal.ParquetFactTable <- function(target, current, check.fact = FALSE, ...)
 
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
-.Ops.ParquetFactTable <- function(.Generic, conn, key, fin1, fin2, fout) {
+.Ops.DuckDBTable <- function(.Generic, conn, key, fin1, fin2, fout) {
     fact <- LanguageList(setNames(Map(function(x, y) call(.Generic, x, y), fin1, fin2), fout))
-    new2("ParquetFactTable", conn = conn, key = key, fact = fact, check = FALSE)
+    new2("DuckDBTable", conn = conn, key = key, fact = fact, check = FALSE)
 }
 
 #' @export
-setMethod("Ops", c(e1 = "ParquetFactTable", e2 = "ParquetFactTable"), function(e1, e2) {
+setMethod("Ops", c(e1 = "DuckDBTable", e2 = "DuckDBTable"), function(e1, e2) {
     if (!isTRUE(all.equal(e1, e2)) || ((ncol(e1) > 1L) && (ncol(e2) > 1L) && (ncol(e1) != ncol(e2)))) {
         stop("can only perform arithmetic operations with compatible objects")
     }
@@ -414,28 +413,28 @@ setMethod("Ops", c(e1 = "ParquetFactTable", e2 = "ParquetFactTable"), function(e
     } else {
         fout <- colnames(e2)
     }
-    .Ops.ParquetFactTable(.Generic, conn = comb@conn, key = comb@key, fin1 = fin1, fin2 = fin2, fout = fout)
+    .Ops.DuckDBTable(.Generic, conn = comb@conn, key = comb@key, fin1 = fin1, fin2 = fin2, fout = fout)
 })
 
 #' @export
-setMethod("Ops", c(e1 = "ParquetFactTable", e2 = "atomic"), function(e1, e2) {
+setMethod("Ops", c(e1 = "DuckDBTable", e2 = "atomic"), function(e1, e2) {
     if (length(e2) != 1L) {
         stop("can only perform binary operations with a scalar value")
     }
-    .Ops.ParquetFactTable(.Generic, conn = e1@conn, key = e1@key, fin1 = e1@fact, fin2 = e2, fout = colnames(e1))
+    .Ops.DuckDBTable(.Generic, conn = e1@conn, key = e1@key, fin1 = e1@fact, fin2 = e2, fout = colnames(e1))
 })
 
 #' @export
-setMethod("Ops", c(e1 = "atomic", e2 = "ParquetFactTable"), function(e1, e2) {
+setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBTable"), function(e1, e2) {
     if (length(e1) != 1L) {
         stop("can only perform binary operations with a scalar value")
     }
-    .Ops.ParquetFactTable(.Generic, conn = e2@conn, key = e2@key, fin1 = e1, fin2 = e2@fact, fout = colnames(e2))
+    .Ops.DuckDBTable(.Generic, conn = e2@conn, key = e2@key, fin1 = e1, fin2 = e2@fact, fout = colnames(e2))
 })
 
 #' @export
 #' @importFrom S4Vectors endoapply
-setMethod("Math", "ParquetFactTable", function(x) {
+setMethod("Math", "DuckDBTable", function(x) {
     fact <-
       switch(.Generic,
              abs =,
@@ -482,7 +481,7 @@ setMethod("Math", "ParquetFactTable", function(x) {
 }
 
 #' @export
-setMethod("Summary", "ParquetFactTable", function(x, ..., na.rm = FALSE) {
+setMethod("Summary", "DuckDBTable", function(x, ..., na.rm = FALSE) {
     if (.Generic == "range") {
         if (length(x@fact) != 1L) {
             stop("aggregation requires a single fact")
@@ -499,13 +498,13 @@ setMethod("Summary", "ParquetFactTable", function(x, ..., na.rm = FALSE) {
 
 #' @export
 #' @importFrom BiocGenerics mean
-setMethod("mean", "ParquetFactTable", function(x, ...) {
+setMethod("mean", "DuckDBTable", function(x, ...) {
     .pull.aggregagte(x, "mean", na.rm = TRUE)
 })
 
 #' @exportS3Method stats::median
 #' @importFrom stats median
-median.ParquetFactTable <- function(x, na.rm = FALSE, ...) {
+median.DuckDBTable <- function(x, na.rm = FALSE, ...) {
     .pull.aggregagte(x, "median", na.rm = TRUE)
 }
 
@@ -513,7 +512,7 @@ median.ParquetFactTable <- function(x, na.rm = FALSE, ...) {
 #' @importFrom dplyr summarize
 #' @importFrom S4Vectors isSingleNumber
 #' @importFrom stats quantile
-quantile.ParquetFactTable <-
+quantile.DuckDBTable <-
 function(x, probs = seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7, digits = 7, ...) {
     if (length(x@fact) != 1L) {
         stop("aggregation requires a single fact")
@@ -536,7 +535,7 @@ function(x, probs = seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7, digi
 
 #' @export
 #' @importFrom BiocGenerics var
-setMethod("var", "ParquetFactTable", function(x, y = NULL, na.rm = FALSE, use)  {
+setMethod("var", "DuckDBTable", function(x, y = NULL, na.rm = FALSE, use)  {
     if (!is.null(y)) {
         stop("covariance is not supported")
     }
@@ -545,13 +544,13 @@ setMethod("var", "ParquetFactTable", function(x, y = NULL, na.rm = FALSE, use)  
 
 #' @export
 #' @importFrom BiocGenerics sd
-setMethod("sd", "ParquetFactTable", function(x, na.rm = FALSE) {
+setMethod("sd", "DuckDBTable", function(x, na.rm = FALSE) {
     .pull.aggregagte(x, "sd", na.rm = TRUE)
 })
 
 #' @export
 #' @importFrom BiocGenerics mad
-setMethod("mad", "ParquetFactTable",
+setMethod("mad", "DuckDBTable",
 function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, high = FALSE) {
     constant * .pull.aggregagte(x, "mad")
 })
@@ -559,7 +558,7 @@ function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, h
 #' @export
 #' @importFrom BiocGenerics as.data.frame
 #' @importFrom dplyr filter mutate select
-setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, optional = FALSE, ...) {
+setMethod("as.data.frame", "DuckDBTable", function(x, row.names = NULL, optional = FALSE, ...) {
     conn <- x@conn
     key <- x@key
     fact <- as.list(x@fact)
@@ -598,8 +597,8 @@ setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, opt
 #' @importFrom dplyr distinct mutate pull select
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
-#' @rdname ParquetFactTable
-ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key)), type = NULL, ...) {
+#' @rdname DuckDBTable
+DuckDBTable <- function(conn, key, fact = setdiff(colnames(conn), names(key)), type = NULL, ...) {
     # Acquire the connection if it is a string
     if (is.character(conn)) {
         conn <- acquireTable(conn, ...)
@@ -643,5 +642,5 @@ ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key
         stop("'fact' must be a named LanguageList object")
     }
 
-    new2("ParquetFactTable", conn = conn, key = key, fact = fact, check = FALSE)
+    new2("DuckDBTable", conn = conn, key = key, fact = fact, check = FALSE)
 }

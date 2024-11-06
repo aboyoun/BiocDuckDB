@@ -10,7 +10,7 @@
 ParquetMatrix(conn, row, col, fact, key = c(row, col), type = NULL, ...)
 }
 \arguments{
-\item{conn}{Either a string containing the path to the Parquet data or a
+\item{conn}{Either a string containing the path to the data files or a
 \code{tbl_duckdb_connection} object.}
 
 \item{row}{Either a character vector or a named list of character vectors
