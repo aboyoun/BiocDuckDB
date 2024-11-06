@@ -43,7 +43,6 @@ Encoding: UTF-8
 Collate:
     'keynames.R'
     'acquireTable.R'
-    'LanguageList.R'
     'DuckDBTable.R'
     'DuckDBArraySeed.R'
     'DuckDBArray.R'

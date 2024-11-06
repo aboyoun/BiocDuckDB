@@ -60,7 +60,6 @@
 #' sd,DuckDBTable-method
 #' mad,DuckDBTable-method
 #'
-#' @include LanguageList.R
 #' @include acquireTable.R
 #' @include keynames.R
 #'
@@ -102,7 +101,7 @@ initialize2 <- function(..., check = TRUE)
 #' @importClassesFrom BiocGenerics OutOfMemoryObject
 #' @importClassesFrom S4Vectors RectangularData
 setClass("DuckDBTable", contains = c("RectangularData", "OutOfMemoryObject"),
-    slots = c(conn = "tbl_duckdb_connection", keycols = "list", datacols = "LanguageList"))
+    slots = c(conn = "tbl_duckdb_connection", keycols = "list", datacols = "expression"))
 
 #' @importFrom S4Vectors setValidity2
 setValidity2("DuckDBTable", function(x) {
@@ -120,7 +119,7 @@ setValidity2("DuckDBTable", function(x) {
         }
     }
     if (is.null(names(x@datacols))) {
-        msg <- c(msg, "'datacols' slot must be a named LanguageList object")
+        msg <- c(msg, "'datacols' slot must be a named expression")
     }
     if (length(intersect(names(x@keycols), names(x@datacols)))) {
         msg <- c(msg, "names in 'keycols' and 'datacols' slots must be unique")
@@ -294,10 +293,11 @@ setMethod("is_nonzero", "DuckDBTable", function(x) {
 
 #' @export
 #' @importFrom SparseArray nzcount
+#' @importFrom stats setNames
 setMethod("nzcount", "DuckDBTable", function(x) {
     tbl <- is_nonzero(x)
     coltypes(tbl) <- rep.int("integer", ncol(tbl))
-    datacols <- LanguageList(nonzero = Reduce(function(x, y) call("+", x, y), tbl@datacols))
+    datacols <- setNames(as.expression(Reduce(function(x, y) call("+", x, y), tbl@datacols)), "nonzero")
     tbl <- initialize2(tbl, datacols = datacols, check = FALSE)
     sum(tbl)
 })
@@ -396,7 +396,7 @@ all.equal.DuckDBTable <- function(target, current, check.datacols = FALSE, ...) 
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
 .Ops.DuckDBTable <- function(.Generic, conn, keycols, fin1, fin2, fout) {
-    datacols <- LanguageList(setNames(Map(function(x, y) call(.Generic, x, y), fin1, fin2), fout))
+    datacols <- setNames(as.expression(Map(function(x, y) call(.Generic, x, y), fin1, fin2)), fout)
     new2("DuckDBTable", conn = conn, keycols = keycols, datacols = datacols, check = FALSE)
 }
 
@@ -625,7 +625,7 @@ DuckDBTable <- function(conn, keycols, datacols = setdiff(colnames(conn), names(
         }
     }
 
-    # Ensure 'datacols' is a named LanguageList object
+    # Ensure 'datacols' is a named expression
     if (is.character(datacols)) {
         datacols <- sapply(datacols, as.name, simplify = FALSE)
         if (!is.null(type)) {
@@ -635,11 +635,9 @@ DuckDBTable <- function(conn, keycols, datacols = setdiff(colnames(conn), names(
             datacols <- .cast_fact(datacols, type)
         }
     }
-    if (is.list(datacols)) {
-        datacols <- LanguageList(datacols)
-    }
+    datacols <- as.expression(datacols)
     if (is.null(names(datacols))) {
-        stop("'datacols' must be a named LanguageList object")
+        stop("'datacols' must be a named expression")
     }
 
     new2("DuckDBTable", conn = conn, keycols = keycols, datacols = datacols, check = FALSE)
