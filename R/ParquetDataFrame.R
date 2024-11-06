@@ -4,10 +4,10 @@
 #'
 #' @inheritParams DuckDBTable
 #'
-#' @return A ParquetDataFrame where each column is a \linkS4class{ParquetColumn}.
+#' @return A ParquetDataFrame where each column is a \linkS4class{DuckDBColumn}.
 #'
 #' @details
-#' The ParquetDataFrame is essentially just a \linkS4class{DataFrame} of \linkS4class{ParquetColumn} objects.
+#' The ParquetDataFrame is essentially just a \linkS4class{DataFrame} of \linkS4class{DuckDBColumn} objects.
 #' It is primarily useful for indicating that the in-memory representation is consistent with the underlying Parquet data
 #' (e.g., no delayed filter/mutate operations have been applied, no data has been added from other files).
 #' Thus, users can specialize code paths for a ParquetDataFrame to operate directly on the underlying Parquet data.
@@ -24,14 +24,14 @@
 #' df <- ParquetDataFrame(tf, key = "model")
 #' df
 #'
-#' # Extraction yields a ParquetColumn:
+#' # Extraction yields a DuckDBColumn:
 #' df$carb
 #'
 #' # Slicing ParquetDataFrame objects:
 #' df[,1:5]
 #' df[1:5,]
 #'
-#' # Combining by ParquetDataFrame and ParquetColumn objects:
+#' # Combining by ParquetDataFrame and DuckDBColumn objects:
 #' combined <- cbind(df, df)
 #' class(combined)
 #' combined2 <- cbind(df, some_new_name=df[,1])
@@ -67,7 +67,7 @@
 #' as.data.frame,ParquetDataFrame-method
 #'
 #' @include acquireTable.R
-#' @include ParquetColumn.R
+#' @include DuckDBColumn.R
 #' @include DuckDBTable.R
 #'
 #' @name ParquetDataFrame
@@ -132,7 +132,7 @@ setMethod("show", "ParquetDataFrame", function(object) {
             }
             rownames(m) <- S4Vectors:::make_rownames_for_RectangularData_display(x_rownames, x_nrow, nhead, ntail)
         }
-        m <- rbind(rep.int("<ParquetColumn>", ncol(object)), m)
+        m <- rbind(rep.int("<DuckDBColumn>", ncol(object)), m)
         print(m, quote = FALSE, right = TRUE)
     }
 
@@ -271,7 +271,7 @@ setMethod("[[", "ParquetDataFrame", function(x, i, j, ...) {
 
     i <- normalizeDoubleBracketSubscript(i, x)
     column <- extractCOLS(x, i)
-    new2("ParquetColumn", table = as(column, "DuckDBTable"), metadata = as.list(mcols(column)), check = FALSE)
+    new2("DuckDBColumn", table = as(column, "DuckDBTable"), metadata = as.list(mcols(column)), check = FALSE)
 })
 
 #' @export
@@ -283,7 +283,7 @@ setMethod("replaceROWS", "ParquetDataFrame", function(x, i, value) {
 #' @export
 #' @importFrom S4Vectors new2 normalizeSingleBracketReplacementValue
 setMethod("normalizeSingleBracketReplacementValue", "ParquetDataFrame", function(value, x) {
-    if (is(value, "ParquetColumn")) {
+    if (is(value, "DuckDBColumn")) {
         return(new2("ParquetDataFrame", value@table, check = FALSE))
     }
     callNextMethod()
@@ -311,14 +311,14 @@ setMethod("replaceCOLS", "ParquetDataFrame", function(x, i, value) {
 setMethod("[[<-", "ParquetDataFrame", function(x, i, j, ..., value) {
     i2 <- normalizeDoubleBracketSubscript(i, x, allow.nomatch = TRUE)
     if (length(i2) == 1L && !is.na(i2)) {
-        if (is(value, "ParquetColumn")) {
+        if (is(value, "DuckDBColumn")) {
             if (isTRUE(all.equal(as(x, "DuckDBTable"), value@table))) {
                 x@fact[[i2]] <- value@table@fact[[1L]]
                 return(x)
             }
         }
     }
-    stop("not compatible ParquetDataFrame and ParquetColumn objects")
+    stop("not compatible ParquetDataFrame and DuckDBColumn objects")
 })
 
 #' @export
@@ -342,7 +342,7 @@ cbind.ParquetDataFrame <- function(..., deparse.level = 1) {
 
         md <- list()
         mc <- make_zero_col_DFrame(NCOL(obj))
-        if (is(obj, "ParquetColumn")) {
+        if (is(obj, "DuckDBColumn")) {
             table <- obj@table
             cname <- names(objects)[i]
             if (!is.null(cname)) {

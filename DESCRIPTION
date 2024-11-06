@@ -48,5 +48,5 @@ Collate:
     'DuckDBArraySeed.R'
     'DuckDBArray.R'
     'DuckDBMatrix.R'
-    'ParquetColumn.R'
+    'DuckDBColumn.R'
     'ParquetDataFrame.R'

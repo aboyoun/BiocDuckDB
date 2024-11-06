@@ -111,8 +111,8 @@ checkParquetDataFrame <- function(object, expected) {
     expect_identical(as.data.frame(object)[rownames(expected), , drop=FALSE], expected)
 }
 
-checkParquetColumn <- function(object, expected) {
-    expect_s4_class(object, "ParquetColumn")
+checkDuckDBColumn <- function(object, expected) {
+    expect_s4_class(object, "DuckDBColumn")
     expect_identical(length(object), length(expected))
     expect_identical(names(object), names(expected))
     expect_equal(as.vector(object), expected)

@@ -1,45 +1,45 @@
-#' ParquetColumn objects
+#' DuckDBColumn objects
 #'
 #' @author Patrick Aboyoun
 #'
 #' @include DuckDBTable.R
 #'
 #' @aliases
-#' ParquetColumn-class
-#' as.vector,ParquetColumn-method
-#' dbconn,ParquetColumn-method
-#' extractROWS,ParquetColumn,ANY-method
-#' head,ParquetColumn-method
-#' is_nonzero,ParquetColumn-method
-#' length,ParquetColumn-method
-#' names,ParquetColumn-method
-#' nzcount,ParquetColumn-method
-#' show,ParquetColumn-method
-#' showAsCell,ParquetColumn-method
-#' tail,ParquetColumn-method
-#' type,ParquetColumn-method
-#' type<-,ParquetColumn-method
-#' Ops,ParquetColumn,ParquetColumn-method
-#' Ops,ParquetColumn,atomic-method
-#' Ops,atomic,ParquetColumn-method
-#' Math,ParquetColumn-method
-#' Summary,ParquetColumn-method
-#' mean,ParquetColumn-method
-#' median.ParquetColumn
-#' quantile.ParquetColumn
-#' var,ParquetColumn,ANY-method
-#' sd,ParquetColumn-method
-#' mad,ParquetColumn-method
+#' DuckDBColumn-class
+#' as.vector,DuckDBColumn-method
+#' dbconn,DuckDBColumn-method
+#' extractROWS,DuckDBColumn,ANY-method
+#' head,DuckDBColumn-method
+#' is_nonzero,DuckDBColumn-method
+#' length,DuckDBColumn-method
+#' names,DuckDBColumn-method
+#' nzcount,DuckDBColumn-method
+#' show,DuckDBColumn-method
+#' showAsCell,DuckDBColumn-method
+#' tail,DuckDBColumn-method
+#' type,DuckDBColumn-method
+#' type<-,DuckDBColumn-method
+#' Ops,DuckDBColumn,DuckDBColumn-method
+#' Ops,DuckDBColumn,atomic-method
+#' Ops,atomic,DuckDBColumn-method
+#' Math,DuckDBColumn-method
+#' Summary,DuckDBColumn-method
+#' mean,DuckDBColumn-method
+#' median.DuckDBColumn
+#' quantile.DuckDBColumn
+#' var,DuckDBColumn,ANY-method
+#' sd,DuckDBColumn-method
+#' mad,DuckDBColumn-method
 #'
-#' @name ParquetColumn
+#' @name DuckDBColumn
 NULL
 
 #' @export
 #' @importClassesFrom S4Vectors Vector
-setClass("ParquetColumn", contains = "Vector", slots = c(table = "DuckDBTable"))
+setClass("DuckDBColumn", contains = "Vector", slots = c(table = "DuckDBTable"))
 
 #' @importFrom S4Vectors isTRUEorFALSE setValidity2
-setValidity2("ParquetColumn", function(x) {
+setValidity2("DuckDBColumn", function(x) {
     table <- x@table
     if (ncol(table) != 1L) {
         return("'table' slot must be a single-column DuckDBTable")
@@ -52,7 +52,7 @@ setValidity2("ParquetColumn", function(x) {
 
 #' @export
 #' @importFrom S4Vectors classNameForDisplay
-setMethod("show", "ParquetColumn", function(object) {
+setMethod("show", "DuckDBColumn", function(object) {
     len <- length(object)
     cat(sprintf("%s of length %s\n", classNameForDisplay(object), len))
     if (.has.row_number(object@table)) {
@@ -87,29 +87,29 @@ setMethod("show", "ParquetColumn", function(object) {
 
 #' @export
 #' @importFrom S4Vectors showAsCell
-setMethod("showAsCell", "ParquetColumn", function(object) {
+setMethod("showAsCell", "DuckDBColumn", function(object) {
     callGeneric(as.vector(object@table))
 })
 
 #' @export
 #' @importFrom BiocGenerics dbconn
-setMethod("dbconn", "ParquetColumn", function(x) callGeneric(x@table))
+setMethod("dbconn", "DuckDBColumn", function(x) callGeneric(x@table))
 
 #' @export
-setMethod("length", "ParquetColumn", function(x) nrow(x@table))
+setMethod("length", "DuckDBColumn", function(x) nrow(x@table))
 
 #' @export
-setMethod("names", "ParquetColumn", function(x) keydimnames(x@table)[[1L]])
+setMethod("names", "DuckDBColumn", function(x) keydimnames(x@table)[[1L]])
 
 #' @export
 #' @importFrom BiocGenerics type
-setMethod("type", "ParquetColumn", function(x) {
+setMethod("type", "DuckDBColumn", function(x) {
     unname(coltypes(x@table))
 })
 
 #' @export
 #' @importFrom BiocGenerics type<-
-setReplaceMethod("type", "ParquetColumn", function(x, value) {
+setReplaceMethod("type", "DuckDBColumn", function(x, value) {
     table <- x@table
     coltypes(table) <- value
     initialize2(x, table = table, check = FALSE)
@@ -117,19 +117,19 @@ setReplaceMethod("type", "ParquetColumn", function(x, value) {
 
 #' @export
 #' @importFrom SparseArray is_nonzero
-setMethod("is_nonzero", "ParquetColumn", function(x) {
+setMethod("is_nonzero", "DuckDBColumn", function(x) {
     initialize2(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export
 #' @importFrom SparseArray nzcount
-setMethod("nzcount", "ParquetColumn", function(x) {
+setMethod("nzcount", "DuckDBColumn", function(x) {
     callGeneric(x@table)
 })
 
 #' @export
-setMethod("extractROWS", "ParquetColumn", function(x, i) {
-    if (is(i, "ParquetColumn")) {
+setMethod("extractROWS", "DuckDBColumn", function(x, i) {
+    if (is(i, "DuckDBColumn")) {
         i <- i@table
     }
     i <- setNames(list(i), keynames(x@table))
@@ -138,7 +138,7 @@ setMethod("extractROWS", "ParquetColumn", function(x, i) {
 
 #' @export
 #' @importFrom S4Vectors head isSingleNumber
-setMethod("head", "ParquetColumn", function(x, n = 6L, ...) {
+setMethod("head", "DuckDBColumn", function(x, n = 6L, ...) {
     if (!isSingleNumber(n)) {
         stop("'n' must be a single number")
     }
@@ -159,7 +159,7 @@ setMethod("head", "ParquetColumn", function(x, n = 6L, ...) {
 
 #' @export
 #' @importFrom S4Vectors isSingleNumber tail
-setMethod("tail", "ParquetColumn", function(x, n = 6L, ...) {
+setMethod("tail", "DuckDBColumn", function(x, n = 6L, ...) {
     if (!isSingleNumber(n)) {
         stop("'n' must be a single number")
     }
@@ -179,64 +179,64 @@ setMethod("tail", "ParquetColumn", function(x, n = 6L, ...) {
 })
 
 #' @export
-setMethod("Ops", c(e1 = "ParquetColumn", e2 = "ParquetColumn"), function(e1, e2) {
+setMethod("Ops", c(e1 = "DuckDBColumn", e2 = "DuckDBColumn"), function(e1, e2) {
     initialize2(e1, table = callGeneric(e1@table, e2@table), check = FALSE)
 })
 
 #' @export
-setMethod("Ops", c(e1 = "ParquetColumn", e2 = "atomic"), function(e1, e2) {
+setMethod("Ops", c(e1 = "DuckDBColumn", e2 = "atomic"), function(e1, e2) {
     initialize2(e1, table = callGeneric(e1@table, e2), check = FALSE)
 })
 
 #' @export
-setMethod("Ops", c(e1 = "atomic", e2 = "ParquetColumn"), function(e1, e2) {
+setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBColumn"), function(e1, e2) {
     initialize2(e2, table = callGeneric(e1, e2@table), check = FALSE)
 })
 
 #' @export
-setMethod("Math", "ParquetColumn", function(x) {
+setMethod("Math", "DuckDBColumn", function(x) {
     initialize2(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export
-setMethod("Summary", "ParquetColumn", function(x, ..., na.rm = FALSE) {
+setMethod("Summary", "DuckDBColumn", function(x, ..., na.rm = FALSE) {
     callGeneric(x@table)
 })
 
 #' @export
 #' @importFrom BiocGenerics mean
-setMethod("mean", "ParquetColumn", function(x, ...) {
+setMethod("mean", "DuckDBColumn", function(x, ...) {
     callGeneric(x@table)
 })
 
 #' @exportS3Method stats::median
 #' @importFrom stats median
-median.ParquetColumn <- function(x, na.rm = FALSE, ...) {
+median.DuckDBColumn <- function(x, na.rm = FALSE, ...) {
     median(x@table, na.rm = na.rm, ...)
 }
 
 #' @exportS3Method stats::quantile
 #' @importFrom stats quantile
-quantile.ParquetColumn <-
+quantile.DuckDBColumn <-
 function(x, probs = seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7, digits = 7, ...) {
     quantile(x@table, probs = probs, na.rm = na.rm, names = names, type = type, digits = digits, ...)
 }
 
 #' @export
 #' @importFrom BiocGenerics var
-setMethod("var", "ParquetColumn", function(x, y = NULL, na.rm = FALSE, use)  {
+setMethod("var", "DuckDBColumn", function(x, y = NULL, na.rm = FALSE, use)  {
     callGeneric(x@table)
 })
 
 #' @export
 #' @importFrom BiocGenerics sd
-setMethod("sd", "ParquetColumn", function(x, na.rm = FALSE) {
+setMethod("sd", "DuckDBColumn", function(x, na.rm = FALSE) {
     callGeneric(x@table)
 })
 
 #' @export
 #' @importFrom BiocGenerics mad
-setMethod("mad", "ParquetColumn",
+setMethod("mad", "DuckDBColumn",
 function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, high = FALSE) {
     callGeneric(x@table)
 })
@@ -244,7 +244,7 @@ function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, h
 #' @export
 #' @importFrom BiocGenerics as.vector
 #' @importFrom stats setNames
-setMethod("as.vector", "ParquetColumn", function(x, mode = "any") {
+setMethod("as.vector", "DuckDBColumn", function(x, mode = "any") {
     df <- as.data.frame(x@table)
     vec <- setNames(df[[colnames(x@table)]], df[[keynames(x@table)[[1L]]]])
     vec <- vec[rownames(x@table)]

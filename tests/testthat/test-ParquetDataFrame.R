@@ -73,14 +73,14 @@ test_that("slicing by columns preserves type of a ParquetDataFrame", {
     expect_identical(mcols(copy), mtcars_mcols[c(2, 4, 6, 1), , drop = FALSE])
 })
 
-test_that("extraction of a column yields a ParquetColumn", {
+test_that("extraction of a column yields a DuckDBColumn", {
     df <- ParquetDataFrame(mtcars_path, key = list(model = rownames(mtcars)))
 
     keep <- 5
-    checkParquetColumn(df[,keep], setNames(mtcars[,keep], rownames(mtcars)))
+    checkDuckDBColumn(df[,keep], setNames(mtcars[,keep], rownames(mtcars)))
 
     keep <- colnames(df)[5]
-    checkParquetColumn(df[,keep], setNames(mtcars[,keep], rownames(mtcars)))
+    checkDuckDBColumn(df[,keep], setNames(mtcars[,keep], rownames(mtcars)))
 })
 
 test_that("conditional slicing by rows preserves type of a ParquetDataFrame", {

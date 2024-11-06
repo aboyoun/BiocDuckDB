@@ -12,7 +12,7 @@ df <- ParquetDataFrame(tf, key = "model")
 df
 ## ParquetDataFrame with 32 rows and 11 columns
 ##                               mpg             cyl            disp
-##                   <ParquetColumn> <ParquetColumn> <ParquetColumn>
+##                   <DuckDBColumn> <DuckDBColumn> <DuckDBColumn>
 ## Mazda RX4                      21               6             160
 ## Mazda RX4 Wag                  21               6             160
 ## Datsun 710                   22.8               4             108
@@ -25,7 +25,7 @@ df
 ## Maserati Bora                  15               8             301
 ## Volvo 142E                   21.4               4             121
 ##                                hp            drat              wt
-##                   <ParquetColumn> <ParquetColumn> <ParquetColumn>
+##                   <DuckDBColumn> <DuckDBColumn> <DuckDBColumn>
 ## Mazda RX4                     110             3.9            2.62
 ## Mazda RX4 Wag                 110             3.9           2.875
 ## Datsun 710                     93            3.85            2.32
@@ -38,7 +38,7 @@ df
 ## Maserati Bora                 335            3.54            3.57
 ## Volvo 142E                    109            4.11            2.78
 ##                              qsec              vs              am
-##                   <ParquetColumn> <ParquetColumn> <ParquetColumn>
+##                   <DuckDBColumn> <DuckDBColumn> <DuckDBColumn>
 ## Mazda RX4                   16.46               0               1
 ## Mazda RX4 Wag               17.02               0               1
 ## Datsun 710                  18.61               1               1
@@ -51,7 +51,7 @@ df
 ## Maserati Bora                14.6               0               1
 ## Volvo 142E                   18.6               1               1
 ##                              gear            carb
-##                   <ParquetColumn> <ParquetColumn>
+##                   <DuckDBColumn> <DuckDBColumn>
 ## Mazda RX4                       4               4
 ## Mazda RX4 Wag                   4               4
 ## Datsun 710                      4               1
@@ -65,12 +65,12 @@ df
 ## Volvo 142E                      4               2
 ```
 
-This produces a file-backed `ParquetDataFrame`, consisting of file-backed `ParquetColumn` objects.
+This produces a file-backed `ParquetDataFrame`, consisting of file-backed `DuckDBColumn` objects.
 These can be realized into memory via the usual `as.vector()` method.
 
 ```r
 class(df$mpg)
-## [1] "ParquetColumn"
+## [1] "DuckDBColumn"
 ## attr(,"package")
 ## [1] "ParquetDataFrame"
 

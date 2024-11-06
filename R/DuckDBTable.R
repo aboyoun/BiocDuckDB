@@ -327,7 +327,7 @@ setMethod("is_sparse", "DuckDBTable", function(x) {
                 key[[k]] <- sub
             } else if (is.atomic(sub)) {
                 key[[k]] <- key[[k]][sub]
-            } else if (is(sub, "ParquetColumn") &&
+            } else if (is(sub, "DuckDBColumn") &&
                        is.logical(as.vector(head(sub, 0L))) &&
                        isTRUE(all.equal(as(x, "DuckDBTable"), sub@table))) {
                 keep <- sub@table@fact[[1L]]

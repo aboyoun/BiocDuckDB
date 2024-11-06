@@ -40,13 +40,13 @@ in the Parquet data that specify the facts}
 \item{...}{Further arguments to be passed to \code{read_parquet}.}
 }
 \value{
-A ParquetDataFrame where each column is a \linkS4class{ParquetColumn}.
+A ParquetDataFrame where each column is a \linkS4class{DuckDBColumn}.
 }
 \description{
 Create a Parquet-backed \linkS4class{DataFrame}, where the data are kept on disk until requested.
 }
 \details{
-The ParquetDataFrame is essentially just a \linkS4class{DataFrame} of \linkS4class{ParquetColumn} objects.
+The ParquetDataFrame is essentially just a \linkS4class{DataFrame} of \linkS4class{DuckDBColumn} objects.
 It is primarily useful for indicating that the in-memory representation is consistent with the underlying Parquet data
 (e.g., no delayed filter/mutate operations have been applied, no data has been added from other files).
 Thus, users can specialize code paths for a ParquetDataFrame to operate directly on the underlying Parquet data.
@@ -61,14 +61,14 @@ arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 df <- ParquetDataFrame(tf, key = "model")
 df
 
-# Extraction yields a ParquetColumn:
+# Extraction yields a DuckDBColumn:
 df$carb
 
 # Slicing ParquetDataFrame objects:
 df[,1:5]
 df[1:5,]
 
-# Combining by ParquetDataFrame and ParquetColumn objects:
+# Combining by ParquetDataFrame and DuckDBColumn objects:
 combined <- cbind(df, df)
 class(combined)
 combined2 <- cbind(df, some_new_name=df[,1])

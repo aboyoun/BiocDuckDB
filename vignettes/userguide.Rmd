@@ -50,7 +50,7 @@ colnames(df)
 class(as.data.frame(df))
 ```
 
-We extract individual columns as `ParquetColumn` objects.
+We extract individual columns as `DuckDBColumn` objects.
 These are 1-dimensional file-backed `DelayedArray`s that pull a single column's data from the Parquet file on demand.
 
 ```{r}
