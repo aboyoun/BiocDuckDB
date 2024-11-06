@@ -201,42 +201,26 @@ setMethod("[", "ParquetArraySeed", function(x, i, j, ..., drop = TRUE) {
 })
 
 #' @export
-#' @importFrom dplyr mutate
 setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "ParquetArraySeed"), function(e1, e2) {
     if (!isTRUE(all.equal(e1@table, e2@table)) || !identical(e1@drop, e2@drop)) {
         stop("can only perform arithmetic operations with compatible objects")
     }
-    table <- callGeneric(e1@table, e2@table)
-    fact <- as.list(table@fact)
-    column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
-    initialize2(e1, table = table, check = FALSE)
+    initialize2(e1, table = callGeneric(e1@table, e2@table), check = FALSE)
 })
 
 #' @export
-#' @importFrom dplyr mutate
 setMethod("Ops", c(e1 = "ParquetArraySeed", e2 = "atomic"), function(e1, e2) {
-    table <- callGeneric(e1@table, e2)
-    fact <- as.list(table@fact)
-    column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
-    initialize2(e1, table = table, check = FALSE)
+    initialize2(e1, table = callGeneric(e1@table, e2), check = FALSE)
 })
 
 #' @export
-#' @importFrom dplyr mutate
 setMethod("Ops", c(e1 = "atomic", e2 = "ParquetArraySeed"), function(e1, e2) {
-    table <- callGeneric(e1, e2@table)
-    fact <- as.list(table@fact)
-    column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
-    initialize2(e2, table = table, check = FALSE)
+    initialize2(e2, table = callGeneric(e1, e2@table), check = FALSE)
 })
 
 #' @export
-#' @importFrom dplyr mutate
 setMethod("Math", "ParquetArraySeed", function(x) {
-    table <- callGeneric(x@table)
-    fact <- as.list(table@fact)
-    column <- as.data.frame(mutate(head(table@conn, 0L), !!!fact))[[names(fact)]]
-    initialize2(x, table = table, check = FALSE)
+    initialize2(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export
