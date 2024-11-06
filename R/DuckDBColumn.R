@@ -45,7 +45,7 @@ setValidity2("DuckDBColumn", function(x) {
         return("'table' slot must be a single-column DuckDBTable")
     }
     if (nkey(table) != 1L) {
-        return("'table' slot must have a 'key' with a named list containing a single named character vector")
+        return("'table' slot must have a 'keycols' with a named list containing a single named character vector")
     }
     TRUE
 })
@@ -164,7 +164,7 @@ setMethod("tail", "DuckDBColumn", function(x, n = 6L, ...) {
         stop("'n' must be a single number")
     }
     if ((n > 0L) && .has.row_number(x)) {
-        stop("tail requires a key to be efficient")
+        stop("tail requires a keycols to be efficient")
     }
     n <- as.integer(n)
     len <- length(x)

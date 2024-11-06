@@ -6,9 +6,9 @@
 #'
 #' @param conn Either a string containing the path to the data files or a
 #' \code{tbl_duckdb_connection} object.
-#' @param key Either a character vector or a list of character vectors
-#' containing the names of the columns that comprise the primary key.
-#' @param fact Either a character vector containing the names of the columns
+#' @param keycols Either a character vector or a list of character vectors
+#' containing the names of the columns that comprise the primary keycols.
+#' @param datacols Either a character vector containing the names of the columns
 #' in the Parquet data that specify the facts
 #' @param type An optional named character vector where the names specify the
 #' column names and the values specify the column type; one of
@@ -27,7 +27,7 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' tbl <- DuckDBTable(tf, key = c("Class", "Sex", "Age", "Survived"), fact = "fate")
+#' tbl <- DuckDBTable(tf, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
 #'
 #' @aliases
 #' DuckDBTable-class
@@ -84,8 +84,8 @@ initialize2 <- function(..., check = TRUE)
 
 #' @importFrom bit64 as.integer64 is.integer64
 .has.row_number <- function(x) {
-    if (length(x@key) == 1L) {
-        key1 <- x@key[[1L]]
+    if (length(x@keycols) == 1L) {
+        key1 <- x@keycols[[1L]]
         is.integer64(key1) && (length(key1) == 2L) && is.na(key1[1L]) && (key1[2L] <= as.integer64(0L))
     } else {
         FALSE
@@ -94,7 +94,7 @@ initialize2 <- function(..., check = TRUE)
 
 #' @importFrom bit64 NA_integer64_
 #' @importFrom dplyr n pull summarize
-.key.row_number <- function(conn) {
+.keycols.row_number <- function(conn) {
     c(NA_integer64_, - pull(summarize(conn, n = n())))
 }
 
@@ -102,28 +102,28 @@ initialize2 <- function(..., check = TRUE)
 #' @importClassesFrom BiocGenerics OutOfMemoryObject
 #' @importClassesFrom S4Vectors RectangularData
 setClass("DuckDBTable", contains = c("RectangularData", "OutOfMemoryObject"),
-    slots = c(conn = "tbl_duckdb_connection", key = "list", fact = "LanguageList"))
+    slots = c(conn = "tbl_duckdb_connection", keycols = "list", datacols = "LanguageList"))
 
 #' @importFrom S4Vectors setValidity2
 setValidity2("DuckDBTable", function(x) {
     msg <- NULL
-    if (is.null(names(x@key))) {
-        msg <- c(msg, "'key' slot must be a named list")
+    if (is.null(names(x@keycols))) {
+        msg <- c(msg, "'keycols' slot must be a named list")
     }
-    if (!all(names(x@key) %in% colnames(x@conn))) {
-        msg <- c(msg, "all names in 'key' slot must match column names in 'conn'")
+    if (!all(names(x@keycols) %in% colnames(x@conn))) {
+        msg <- c(msg, "all names in 'keycols' slot must match column names in 'conn'")
     }
-    for (i in seq_along(x@key)) {
-        if (!is.atomic(x@key[[i]])) {
-            msg <- c(msg, "all elements in 'key' slot must be atomic")
+    for (i in seq_along(x@keycols)) {
+        if (!is.atomic(x@keycols[[i]])) {
+            msg <- c(msg, "all elements in 'keycols' slot must be atomic")
             break
         }
     }
-    if (is.null(names(x@fact))) {
-        msg <- c(msg, "'fact' slot must be a named LanguageList object")
+    if (is.null(names(x@datacols))) {
+        msg <- c(msg, "'datacols' slot must be a named LanguageList object")
     }
-    if (length(intersect(names(x@key), names(x@fact)))) {
-        msg <- c(msg, "names in 'key' and 'fact' slots must be unique")
+    if (length(intersect(names(x@keycols), names(x@datacols)))) {
+        msg <- c(msg, "names in 'keycols' and 'datacols' slots must be unique")
     }
     if (is.null(msg)) {
         TRUE
@@ -137,14 +137,14 @@ setValidity2("DuckDBTable", function(x) {
 setMethod("dbconn", "DuckDBTable", function(x) x@conn)
 
 #' @export
-setMethod("nkey", "DuckDBTable", function(x) length(x@key))
+setMethod("nkey", "DuckDBTable", function(x) length(x@keycols))
 
 #' @export
 setMethod("nkeydim", "DuckDBTable", function(x) {
     if (.has.row_number(x)) {
-        abs(x@key[[1L]][2L])
+        abs(x@keycols[[1L]][2L])
     } else {
-        lengths(x@key, use.names = FALSE)
+        lengths(x@keycols, use.names = FALSE)
     }
 })
 
@@ -162,18 +162,18 @@ setMethod("nrow", "DuckDBTable", function(x) {
 
 #' @export
 #' @importFrom BiocGenerics ncol
-setMethod("ncol", "DuckDBTable", function(x) length(x@fact))
+setMethod("ncol", "DuckDBTable", function(x) length(x@datacols))
 
 #' @export
-setMethod("keynames", "DuckDBTable", function(x) names(x@key))
+setMethod("keynames", "DuckDBTable", function(x) names(x@keycols))
 
 #' @export
 #' @importFrom dplyr pull select
 setMethod("keydimnames", "DuckDBTable", function(x) {
     if (.has.row_number(x)) {
-        list(as.character(pull(select(x@conn, !!as.name(names(x@key))))))
+        list(as.character(pull(select(x@conn, !!as.name(names(x@keycols))))))
     } else {
-        lapply(x@key, function(y) names(y) %||% as.character(y))
+        lapply(x@keycols, function(y) names(y) %||% as.character(y))
     }
 })
 
@@ -182,23 +182,23 @@ setReplaceMethod("keydimnames", "DuckDBTable", function(x, value) {
     if (!is.list(value)) {
         stop("'value' must be a list of vectors")
     }
-    key <- x@key
+    keycols <- x@keycols
     if (is.null(names(value))) {
-        if (length(value) != length(key)) {
-            stop("if 'value' is unnamed, then it must match length of 'key'")
+        if (length(value) != length(keycols)) {
+            stop("if 'value' is unnamed, then it must match length of 'keycols'")
         }
-        names(value) <- names(key)
+        names(value) <- names(keycols)
     }
     for (i in names(value)) {
-        names(key[[i]]) <- value[[i]]
+        names(keycols[[i]]) <- value[[i]]
     }
-    initialize2(x, key = key, check = FALSE)
+    initialize2(x, keycols = keycols, check = FALSE)
 })
 
 #' @export
 #' @importFrom BiocGenerics rownames
 setMethod("rownames", "DuckDBTable", function(x, do.NULL = TRUE, prefix = "row") {
-    if (length(x@key) == 1L) {
+    if (length(x@keycols) == 1L) {
         keydimnames(x)[[1L]]
     } else {
         stop("rownames is not supported for multi-dimensional keys")
@@ -207,14 +207,14 @@ setMethod("rownames", "DuckDBTable", function(x, do.NULL = TRUE, prefix = "row")
 
 #' @export
 #' @importFrom BiocGenerics colnames
-setMethod("colnames", "DuckDBTable", function(x, do.NULL = TRUE, prefix = "col") names(x@fact))
+setMethod("colnames", "DuckDBTable", function(x, do.NULL = TRUE, prefix = "col") names(x@datacols))
 
 #' @export
 #' @importFrom BiocGenerics colnames<-
 setReplaceMethod("colnames", "DuckDBTable", function(x, value) {
-    fact <- x@fact
-    names(fact) <- value
-    initialize2(x, fact = fact, check = FALSE)
+    datacols <- x@datacols
+    names(datacols) <- value
+    initialize2(x, datacols = datacols, check = FALSE)
 })
 
 #' @importFrom bit64 is.integer64
@@ -230,9 +230,9 @@ setReplaceMethod("colnames", "DuckDBTable", function(x, value) {
     }
 }
 
-.cast_fact <- function(fact, value) {
-    if (is.null(names(value)) && (length(value) == length(fact))) {
-        names(value) <- names(fact)
+.cast_fact <- function(datacols, value) {
+    if (is.null(names(value)) && (length(value) == length(datacols))) {
+        names(value) <- names(datacols)
     }
     for (j in names(value)) {
         cast <- switch(value[j],
@@ -242,9 +242,9 @@ setReplaceMethod("colnames", "DuckDBTable", function(x, value) {
                        double = "as.double",
                        character = "as.character",
                        stop("'type' must be one of 'logical', 'integer', 'integer64', 'double', or 'character'"))
-        fact[[j]] <- call(cast, fact[[j]])
+        datacols[[j]] <- call(cast, datacols[[j]])
     }
-    fact
+    datacols
 }
 
 #' @export
@@ -254,7 +254,7 @@ setGeneric("coltypes", function(x) standardGeneric("coltypes"))
 setMethod("coltypes", "DuckDBTable", function(x) {
     i <- sapply(keynames(x), function(x) character(), simplify = FALSE)
     empty <- .subset_DuckDBTable(x, i, drop = FALSE)
-    vapply(as.data.frame(empty)[names(x@fact)], .get_type, character(1L))
+    vapply(as.data.frame(empty)[names(x@datacols)], .get_type, character(1L))
 })
 
 #' @export
@@ -262,8 +262,8 @@ setGeneric("coltypes<-", function(x, value) standardGeneric("coltypes<-"))
 
 #' @export
 setReplaceMethod("coltypes", "DuckDBTable", function(x, value) {
-    fact <- .cast_fact(x@fact, value)
-    initialize2(x, fact = fact, check = FALSE)
+    datacols <- .cast_fact(x@datacols, value)
+    initialize2(x, datacols = datacols, check = FALSE)
 })
 
 #' @importFrom bit64 as.integer64
@@ -277,19 +277,19 @@ setReplaceMethod("coltypes", "DuckDBTable", function(x, value) {
 #' @export
 #' @importFrom SparseArray is_nonzero
 setMethod("is_nonzero", "DuckDBTable", function(x) {
-    fact <- x@fact
+    datacols <- x@datacols
     ctypes <- coltypes(x)
     for (j in names(ctypes)) {
-        fact[[j]] <- switch(ctypes[j],
-                            logical = fact[[j]],
+        datacols[[j]] <- switch(ctypes[j],
+                            logical = datacols[[j]],
                             integer =,
                             integer64 =,
                             double =,
                             character =,
-                            raw = call("!=", fact[[j]], .zeros[[ctypes[j]]]),
+                            raw = call("!=", datacols[[j]], .zeros[[ctypes[j]]]),
                             TRUE)
     }
-    initialize2(x, fact = fact, check = FALSE)
+    initialize2(x, datacols = datacols, check = FALSE)
 })
 
 #' @export
@@ -297,8 +297,8 @@ setMethod("is_nonzero", "DuckDBTable", function(x) {
 setMethod("nzcount", "DuckDBTable", function(x) {
     tbl <- is_nonzero(x)
     coltypes(tbl) <- rep.int("integer", ncol(tbl))
-    fact <- LanguageList(nonzero = Reduce(function(x, y) call("+", x, y), tbl@fact))
-    tbl <- initialize2(tbl, fact = fact, check = FALSE)
+    datacols <- LanguageList(nonzero = Reduce(function(x, y) call("+", x, y), tbl@datacols))
+    tbl <- initialize2(tbl, datacols = datacols, check = FALSE)
     sum(tbl)
 })
 
@@ -311,33 +311,33 @@ setMethod("is_sparse", "DuckDBTable", function(x) {
 #' @importFrom dplyr distinct filter pull select
 .subset_DuckDBTable <- function(x, i, j, ..., drop = TRUE) {
     conn <- x@conn
-    fact <- x@fact
+    datacols <- x@datacols
     if (!missing(j)) {
-        fact <- fact[j]
+        datacols <- datacols[j]
     }
 
-    key <- x@key
+    keycols <- x@keycols
     if (!missing(i)) {
         if (!is.list(i) || is.null(names(i))) {
             stop("'i' must be a named list")
         }
-        for (k in intersect(names(key), names(i))) {
+        for (k in intersect(names(keycols), names(i))) {
             sub <- i[[k]]
-            if (is.character(sub) && is.null(names(key[[k]]))) {
-                key[[k]] <- sub
+            if (is.character(sub) && is.null(names(keycols[[k]]))) {
+                keycols[[k]] <- sub
             } else if (is.atomic(sub)) {
-                key[[k]] <- key[[k]][sub]
+                keycols[[k]] <- keycols[[k]][sub]
             } else if (is(sub, "DuckDBColumn") &&
                        is.logical(as.vector(head(sub, 0L))) &&
                        isTRUE(all.equal(as(x, "DuckDBTable"), sub@table))) {
-                keep <- sub@table@fact[[1L]]
+                keep <- sub@table@datacols[[1L]]
                 conn <- filter(conn, !!keep)
                 if (.has.row_number(x)) {
-                    key[[1L]] <- .key.row_number(conn)
+                    keycols[[1L]] <- .keycols.row_number(conn)
                 } else {
-                    for (kname in names(key)) {
+                    for (kname in names(keycols)) {
                         kdnames <- pull(distinct(select(conn, !!as.name(kname))))
-                        key[[kname]] <- key[[kname]][match(kdnames, key[[kname]])]
+                        keycols[[kname]] <- keycols[[kname]][match(kdnames, keycols[[kname]])]
                     }
                 }
             } else {
@@ -346,7 +346,7 @@ setMethod("is_sparse", "DuckDBTable", function(x) {
         }
     }
 
-    initialize2(x, conn = conn, key = key, fact = fact, ..., check = FALSE)
+    initialize2(x, conn = conn, keycols = keycols, datacols = datacols, ..., check = FALSE)
 }
 
 #' @export
@@ -356,7 +356,7 @@ setMethod("[", "DuckDBTable", .subset_DuckDBTable)
 #' @importFrom S4Vectors bindCOLS
 setMethod("bindCOLS", "DuckDBTable",
 function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TRUE) {
-    fact <- x@fact
+    datacols <- x@datacols
 
     for (i in seq_along(objects)) {
         obj <- objects[[i]]
@@ -373,20 +373,20 @@ function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TR
             }
             colnames(obj) <- newname
         }
-        fact <- c(fact, obj@fact)
+        datacols <- c(datacols, obj@datacols)
     }
-    names(fact) <- make.unique(names(fact), sep = "_")
-    initialize2(x, fact = fact, check = FALSE)
+    names(datacols) <- make.unique(names(datacols), sep = "_")
+    initialize2(x, datacols = datacols, check = FALSE)
 })
 
 #' @exportS3Method base::all.equal
-all.equal.DuckDBTable <- function(target, current, check.fact = FALSE, ...) {
+all.equal.DuckDBTable <- function(target, current, check.datacols = FALSE, ...) {
     if (!is(current, "DuckDBTable")) {
         return("current is not a DuckDBTable")
     }
     target <- as(target, "DuckDBTable")
     current <- as(current, "DuckDBTable")
-    if (!check.fact) {
+    if (!check.datacols) {
         target <- target[, integer()]
         current <- current[, integer()]
     }
@@ -395,9 +395,9 @@ all.equal.DuckDBTable <- function(target, current, check.fact = FALSE, ...) {
 
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
-.Ops.DuckDBTable <- function(.Generic, conn, key, fin1, fin2, fout) {
-    fact <- LanguageList(setNames(Map(function(x, y) call(.Generic, x, y), fin1, fin2), fout))
-    new2("DuckDBTable", conn = conn, key = key, fact = fact, check = FALSE)
+.Ops.DuckDBTable <- function(.Generic, conn, keycols, fin1, fin2, fout) {
+    datacols <- LanguageList(setNames(Map(function(x, y) call(.Generic, x, y), fin1, fin2), fout))
+    new2("DuckDBTable", conn = conn, keycols = keycols, datacols = datacols, check = FALSE)
 }
 
 #' @export
@@ -406,14 +406,14 @@ setMethod("Ops", c(e1 = "DuckDBTable", e2 = "DuckDBTable"), function(e1, e2) {
         stop("can only perform arithmetic operations with compatible objects")
     }
     comb <- cbind(e1, e2)
-    fin1 <- head(comb@fact, ncol(e1))
-    fin2 <- tail(comb@fact, ncol(e2))
+    fin1 <- head(comb@datacols, ncol(e1))
+    fin2 <- tail(comb@datacols, ncol(e2))
     if (ncol(e1) >= ncol(e2)) {
         fout <- colnames(e1)
     } else {
         fout <- colnames(e2)
     }
-    .Ops.DuckDBTable(.Generic, conn = comb@conn, key = comb@key, fin1 = fin1, fin2 = fin2, fout = fout)
+    .Ops.DuckDBTable(.Generic, conn = comb@conn, keycols = comb@keycols, fin1 = fin1, fin2 = fin2, fout = fout)
 })
 
 #' @export
@@ -421,7 +421,7 @@ setMethod("Ops", c(e1 = "DuckDBTable", e2 = "atomic"), function(e1, e2) {
     if (length(e2) != 1L) {
         stop("can only perform binary operations with a scalar value")
     }
-    .Ops.DuckDBTable(.Generic, conn = e1@conn, key = e1@key, fin1 = e1@fact, fin2 = e2, fout = colnames(e1))
+    .Ops.DuckDBTable(.Generic, conn = e1@conn, keycols = e1@keycols, fin1 = e1@datacols, fin2 = e2, fout = colnames(e1))
 })
 
 #' @export
@@ -429,13 +429,13 @@ setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBTable"), function(e1, e2) {
     if (length(e1) != 1L) {
         stop("can only perform binary operations with a scalar value")
     }
-    .Ops.DuckDBTable(.Generic, conn = e2@conn, key = e2@key, fin1 = e1, fin2 = e2@fact, fout = colnames(e2))
+    .Ops.DuckDBTable(.Generic, conn = e2@conn, keycols = e2@keycols, fin1 = e1, fin2 = e2@datacols, fout = colnames(e2))
 })
 
 #' @export
 #' @importFrom S4Vectors endoapply
 setMethod("Math", "DuckDBTable", function(x) {
-    fact <-
+    datacols <-
       switch(.Generic,
              abs =,
              sign =,
@@ -461,21 +461,21 @@ setMethod("Math", "DuckDBTable", function(x) {
              tanh =,
              gamma =,
              lgamma = {
-                endoapply(x@fact, function(j) call(.Generic, j))
+                endoapply(x@datacols, function(j) call(.Generic, j))
              },
              stop("unsupported Math operator: ", .Generic))
-    initialize2(x, fact = fact, check = FALSE)
+    initialize2(x, datacols = datacols, check = FALSE)
 })
 
 #' @importFrom dplyr pull summarize
 .pull.aggregagte <- function(x, fun, na.rm = FALSE) {
-    if (length(x@fact) != 1L) {
-        stop("aggregation requires a single fact")
+    if (length(x@datacols) != 1L) {
+        stop("aggregation requires a single datacols")
     }
     if (na.rm) {
-        aggr <- call(fun, x@fact[[1L]], na.rm = TRUE)
+        aggr <- call(fun, x@datacols[[1L]], na.rm = TRUE)
     } else {
-        aggr <- call(fun, x@fact[[1L]])
+        aggr <- call(fun, x@datacols[[1L]])
     }
     pull(summarize(x@conn, !!aggr))
 }
@@ -483,11 +483,11 @@ setMethod("Math", "DuckDBTable", function(x) {
 #' @export
 setMethod("Summary", "DuckDBTable", function(x, ..., na.rm = FALSE) {
     if (.Generic == "range") {
-        if (length(x@fact) != 1L) {
-            stop("aggregation requires a single fact")
+        if (length(x@datacols) != 1L) {
+            stop("aggregation requires a single datacols")
         }
-        aggr <- list(min = call("min", x@fact[[1L]], na.rm = TRUE),
-                     max = call("max", x@fact[[1L]], na.rm = TRUE))
+        aggr <- list(min = call("min", x@datacols[[1L]], na.rm = TRUE),
+                     max = call("max", x@datacols[[1L]], na.rm = TRUE))
         unlist(as.data.frame(summarize(x@conn, !!!aggr)), use.names = FALSE)
     } else if (.Generic == "sum") {
         .pull.aggregagte(x, "fsum")
@@ -514,8 +514,8 @@ median.DuckDBTable <- function(x, na.rm = FALSE, ...) {
 #' @importFrom stats quantile
 quantile.DuckDBTable <-
 function(x, probs = seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7, digits = 7, ...) {
-    if (length(x@fact) != 1L) {
-        stop("aggregation requires a single fact")
+    if (length(x@datacols) != 1L) {
+        stop("aggregation requires a single datacols")
     }
     if (!isSingleNumber(type) || !(type %in% c(1L, 7L))) {
         stop("'type' must be 1 or 7")
@@ -524,7 +524,7 @@ function(x, probs = seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7, digi
     } else {
         fun <- "quantile_cont"
     }
-    aggr <- lapply(probs, function(p) call(fun, x@fact[[1L]], p))
+    aggr <- lapply(probs, function(p) call(fun, x@datacols[[1L]], p))
     ans <- unlist(as.data.frame(summarize(x@conn, !!!aggr)), use.names = FALSE)
     if (names) {
         stopifnot(isSingleNumber(digits), digits >= 1)
@@ -560,25 +560,25 @@ function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, h
 #' @importFrom dplyr filter mutate select
 setMethod("as.data.frame", "DuckDBTable", function(x, row.names = NULL, optional = FALSE, ...) {
     conn <- x@conn
-    key <- x@key
-    fact <- as.list(x@fact)
+    keycols <- x@keycols
+    datacols <- as.list(x@datacols)
 
     if (!.has.row_number(x)) {
-        for (i in names(key)) {
-            set <- key[[i]]
+        for (i in names(keycols)) {
+            set <- keycols[[i]]
             conn <- filter(conn, !!as.name(i) %in% set)
         }
     }
 
-    conn <- mutate(conn, !!!fact)
-    conn <- select(conn, c(names(key), names(fact)))
+    conn <- mutate(conn, !!!datacols)
+    conn <- select(conn, c(names(keycols), names(datacols)))
 
     # Allow for 1 extra row to check for duplicate keys
     length <- nrow(x) + 1L
     conn <- head(conn, n = length)
 
-    df <- as.data.frame(conn)[, c(names(key), names(fact))]
-    if (anyDuplicated(df[, names(key)])) {
+    df <- as.data.frame(conn)[, c(names(keycols), names(datacols))]
+    if (anyDuplicated(df[, names(keycols)])) {
         stop("duplicate keys found in Parquet data")
     }
 
@@ -598,7 +598,7 @@ setMethod("as.data.frame", "DuckDBTable", function(x, row.names = NULL, optional
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
 #' @rdname DuckDBTable
-DuckDBTable <- function(conn, key, fact = setdiff(colnames(conn), names(key)), type = NULL, ...) {
+DuckDBTable <- function(conn, keycols, datacols = setdiff(colnames(conn), names(keycols)), type = NULL, ...) {
     # Acquire the connection if it is a string
     if (is.character(conn)) {
         conn <- acquireTable(conn, ...)
@@ -607,40 +607,40 @@ DuckDBTable <- function(conn, key, fact = setdiff(colnames(conn), names(key)), t
         stop("'conn' must be a 'tbl_duckdb_connection' object")
     }
 
-    # Ensure 'key' is a named list of vectors
-    if (missing(key)) {
-        key <- tail(make.unique(c(colnames(conn), "row_number"), sep = "_"), 1L)
-        key <- setNames(list(call("row_number")), key)
-        conn <- mutate(conn, !!!key)
-        key[[1L]] <- .key.row_number(conn)
-    } else if (is.character(key)) {
-        key <- sapply(key, function(x) NULL, simplify = FALSE)
+    # Ensure 'keycols' is a named list of vectors
+    if (missing(keycols)) {
+        keycols <- tail(make.unique(c(colnames(conn), "row_number"), sep = "_"), 1L)
+        keycols <- setNames(list(call("row_number")), keycols)
+        conn <- mutate(conn, !!!keycols)
+        keycols[[1L]] <- .keycols.row_number(conn)
+    } else if (is.character(keycols)) {
+        keycols <- sapply(keycols, function(x) NULL, simplify = FALSE)
     }
-    if (!is.list(key) || is.null(names(key))) {
-        stop("'key' must be a character vector or a named list of vectors")
+    if (!is.list(keycols) || is.null(names(keycols))) {
+        stop("'keycols' must be a character vector or a named list of vectors")
     }
-    for (k in names(key)) {
-        if (is.null(key[[k]])) {
-            key[[k]] <- pull(distinct(select(conn, !!as.name(k))))
+    for (k in names(keycols)) {
+        if (is.null(keycols[[k]])) {
+            keycols[[k]] <- pull(distinct(select(conn, !!as.name(k))))
         }
     }
 
-    # Ensure 'fact' is a named LanguageList object
-    if (is.character(fact)) {
-        fact <- sapply(fact, as.name, simplify = FALSE)
+    # Ensure 'datacols' is a named LanguageList object
+    if (is.character(datacols)) {
+        datacols <- sapply(datacols, as.name, simplify = FALSE)
         if (!is.null(type)) {
-            if (is.null(names(type)) || length(setdiff(names(type), names(fact)))) {
-                stop("all names in 'type' must have a corresponding name in 'fact'")
+            if (is.null(names(type)) || length(setdiff(names(type), names(datacols)))) {
+                stop("all names in 'type' must have a corresponding name in 'datacols'")
             }
-            fact <- .cast_fact(fact, type)
+            datacols <- .cast_fact(datacols, type)
         }
     }
-    if (is.list(fact)) {
-        fact <- LanguageList(fact)
+    if (is.list(datacols)) {
+        datacols <- LanguageList(datacols)
     }
-    if (is.null(names(fact))) {
-        stop("'fact' must be a named LanguageList object")
+    if (is.null(names(datacols))) {
+        stop("'datacols' must be a named LanguageList object")
     }
 
-    new2("DuckDBTable", conn = conn, key = key, fact = fact, check = FALSE)
+    new2("DuckDBTable", conn = conn, keycols = keycols, datacols = datacols, check = FALSE)
 }

@@ -1,9 +1,9 @@
 #' Key Names and Key Count
 #'
-#' Get the key names, key dimension names, or key count of an object.
+#' Get the keycols names, keycols dimension names, or keycols count of an object.
 #'
-#' @param x An object to get the key related information.
-#' @param value A character vector of key dimension names.
+#' @param x An object to get the keycols related information.
+#' @param value A character vector of keycols dimension names.
 #'
 #' @author Patrick Aboyoun
 #'

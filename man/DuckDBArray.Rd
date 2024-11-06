@@ -24,16 +24,16 @@
 \alias{mad,DuckDBArray-method}
 \title{Parquet datasets as DelayedArray objects}
 \usage{
-DuckDBArray(conn, key, fact, type = NULL, ...)
+DuckDBArray(conn, keycols, datacols, type = NULL, ...)
 }
 \arguments{
 \item{conn}{Either a string containing the path to the data files or a
 \code{tbl_duckdb_connection} object.}
 
-\item{key}{Either a character vector or a list of character vectors
-containing the names of the columns that comprise the primary key.}
+\item{keycols}{Either a character vector or a list of character vectors
+containing the names of the columns that comprise the primary keycols.}
 
-\item{fact}{String containing the name of the column in the Parquet data
+\item{datacols}{String containing the name of the column in the Parquet data
 that specifies the value of the array.}
 
 \item{type}{String specifying the type of the Parquet data values;
@@ -60,7 +60,7 @@ tf <- tempfile()
 on.exit(unlink(tf))
 arrow::write_parquet(df, tf)
 
-pqarray <- DuckDBArray(tf, key = c("Class", "Sex", "Age", "Survived"), fact = "fate")
+pqarray <- DuckDBArray(tf, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
 
 }
 \seealso{

@@ -8,7 +8,7 @@ tf <- tempfile()
 arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 
 library(BiocDuckDB)
-df <- DuckDBDataFrame(tf, key = "model")
+df <- DuckDBDataFrame(tf, keycols = "model")
 df
 ## DuckDBDataFrame with 32 rows and 11 columns
 ##                               mpg             cyl            disp

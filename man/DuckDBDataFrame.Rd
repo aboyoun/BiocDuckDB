@@ -25,16 +25,16 @@
 \alias{as.data.frame,DuckDBDataFrame-method}
 \title{DuckDB-backed DataFrame}
 \usage{
-DuckDBDataFrame(conn, key, fact, ...)
+DuckDBDataFrame(conn, keycols, datacols, ...)
 }
 \arguments{
 \item{conn}{Either a string containing the path to the data files or a
 \code{tbl_duckdb_connection} object.}
 
-\item{key}{Either a character vector or a list of character vectors
-containing the names of the columns that comprise the primary key.}
+\item{keycols}{Either a character vector or a list of character vectors
+containing the names of the columns that comprise the primary keycols.}
 
-\item{fact}{Either a character vector containing the names of the columns
+\item{datacols}{Either a character vector containing the names of the columns
 in the Parquet data that specify the facts}
 
 \item{...}{Further arguments to be passed to \code{read_parquet}.}
@@ -58,7 +58,7 @@ on.exit(unlink(tf))
 arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 
 # Creating our Parquet-backed data frame:
-df <- DuckDBDataFrame(tf, key = "model")
+df <- DuckDBDataFrame(tf, keycols = "model")
 df
 
 # Extraction yields a DuckDBColumn:

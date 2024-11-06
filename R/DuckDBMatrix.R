@@ -15,10 +15,10 @@
 #' @param col Either a character vector or a named list of character vectors
 #' containing the names of the columns in the Parquet data that specify the
 #' columns of the matrix.
-#' @param key Either a character vector or a list of character vectors
+#' @param keycols Either a character vector or a list of character vectors
 #' containing the names of the columns in the Parquet data that specify the
 #' rows and columns of the matrix.
-#' @param fact String containing the name of the column in the Parquet data
+#' @param datacols String containing the name of the column in the Parquet data
 #' that specifies the value of the matrix.
 #' @param type String specifying the type of the Parquet data values;
 #' one of \code{"logical"}, \code{"integer"}, \code{"double"}, or
@@ -41,7 +41,7 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' pqmat <- DuckDBMatrix(tf, row = "rowname", col = "colname", fact = "value")
+#' pqmat <- DuckDBMatrix(tf, row = "rowname", col = "colname", datacols = "value")
 #'
 #' @aliases
 #' DuckDBMatrix-class
@@ -61,7 +61,7 @@ setClass("DuckDBMatrix", contains = c("DuckDBArray", "DelayedMatrix"))
 #' @importFrom S4Vectors setValidity2
 setValidity2("DuckDBMatrix", function(x) {
     if (nkey(x@seed@table) != 2L) {
-        return("'key' seed slot must be a two element named list of character vectors")
+        return("'keycols' seed slot must be a two element named list of character vectors")
     }
     TRUE
 })
@@ -85,7 +85,7 @@ setMethod("[", "DuckDBMatrix", function(x, i, j, ..., drop = TRUE) {
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
 #' @rdname DuckDBMatrix
-DuckDBMatrix <- function(conn, row, col, fact, key = c(row, col), type = NULL, ...) {
+DuckDBMatrix <- function(conn, row, col, datacols, keycols = c(row, col), type = NULL, ...) {
     if (!missing(row) && isSingleString(row)) {
         row <- setNames(list(NULL), row)
     }
@@ -93,10 +93,10 @@ DuckDBMatrix <- function(conn, row, col, fact, key = c(row, col), type = NULL, .
         col <- setNames(list(NULL), col)
     }
     if (!is(conn, "DuckDBArraySeed")) {
-        if (length(key) != 2L) {
-            stop("'key' must contain exactly 2 elements: rows and columns")
+        if (length(keycols) != 2L) {
+            stop("'keycols' must contain exactly 2 elements: rows and columns")
         }
-        conn <- DuckDBArraySeed(conn, key = key, fact = fact, type = type, ...)
+        conn <- DuckDBArraySeed(conn, keycols = keycols, datacols = datacols, type = type, ...)
     }
     new2("DuckDBMatrix", seed = conn, check = FALSE)
 }

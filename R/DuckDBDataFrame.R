@@ -21,7 +21,7 @@
 #' arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 #'
 #' # Creating our Parquet-backed data frame:
-#' df <- DuckDBDataFrame(tf, key = "model")
+#' df <- DuckDBDataFrame(tf, keycols = "model")
 #' df
 #'
 #' # Extraction yields a DuckDBColumn:
@@ -80,7 +80,7 @@ setClass("DuckDBDataFrame", contains = c("DuckDBTable", "DataFrame"))
 #' @importFrom S4Vectors setValidity2
 setValidity2("DuckDBDataFrame", function(x) {
     if (nkey(x) != 1L) {
-        return("'key' slot must be a named list containing a single named character vector")
+        return("'keycols' slot must be a named list containing a single named character vector")
     }
     TRUE
 })
@@ -178,9 +178,9 @@ setMethod("extractROWS", "DuckDBDataFrame", function(x, i) {
 
 .head_conn <- function(x, n) {
     conn <- head(x@conn, n)
-    key <- x@key
-    key[[1L]] <- .key.row_number(conn)
-    initialize2(x, conn = conn, key = key, check = FALSE)
+    keycols <- x@keycols
+    keycols[[1L]] <- .keycols.row_number(conn)
+    initialize2(x, conn = conn, keycols = keycols, check = FALSE)
 }
 
 #' @export
@@ -211,7 +211,7 @@ setMethod("tail", "DuckDBDataFrame", function(x, n = 6L, ...) {
         stop("'n' must be a single number")
     }
     if ((n > 0L) && .has.row_number(x)) {
-        stop("tail requires a key to be efficient")
+        stop("tail requires a keycols to be efficient")
     }
     n <- as.integer(n)
     nr <- nrow(x)
@@ -298,7 +298,7 @@ setMethod("replaceCOLS", "DuckDBDataFrame", function(x, i, value) {
     if (!anyNA(i2)) {
         if (is(value, "DuckDBDataFrame")) {
             if (isTRUE(all.equal(x, value))) {
-                x@fact[i2] <- unname(value@fact)
+                x@datacols[i2] <- unname(value@datacols)
                 return(x)
             }
         }
@@ -313,7 +313,7 @@ setMethod("[[<-", "DuckDBDataFrame", function(x, i, j, ..., value) {
     if (length(i2) == 1L && !is.na(i2)) {
         if (is(value, "DuckDBColumn")) {
             if (isTRUE(all.equal(as(x, "DuckDBTable"), value@table))) {
-                x@fact[[i2]] <- value@table@fact[[1L]]
+                x@datacols[[i2]] <- value@table@datacols[[1L]]
                 return(x)
             }
         }
@@ -393,10 +393,10 @@ setMethod("as.data.frame", "DuckDBDataFrame", function(x, row.names = NULL, opti
     df <- callNextMethod(x, row.names = row.names, optional = optional, ...)
 
     # Add rownames, renaming if specified
-    if (is.null(names(x@key[[1L]]))) {
+    if (is.null(names(x@keycols[[1L]]))) {
         rnames <- df[[keynames(x)]]
     } else {
-        rnames <- x@key[[1L]]
+        rnames <- x@keycols[[1L]]
         rnames <- setNames(names(rnames), rnames)
         rnames <- rnames[as.character(df[[keynames(x)]])]
     }
@@ -410,11 +410,11 @@ setMethod("as.data.frame", "DuckDBDataFrame", function(x, row.names = NULL, opti
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
 #' @rdname DuckDBDataFrame
-DuckDBDataFrame <- function(conn, key, fact, ...) {
-    if (missing(fact)) {
-        tbl <- DuckDBTable(conn, key = key, ...)
+DuckDBDataFrame <- function(conn, keycols, datacols, ...) {
+    if (missing(datacols)) {
+        tbl <- DuckDBTable(conn, keycols = keycols, ...)
     } else {
-        tbl <- DuckDBTable(conn, key = key, fact = fact, ...)
+        tbl <- DuckDBTable(conn, keycols = keycols, datacols = datacols, ...)
     }
     new2("DuckDBDataFrame", tbl, ..., check = FALSE)
 }

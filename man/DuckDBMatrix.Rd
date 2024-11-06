@@ -7,7 +7,7 @@
 \alias{matrixClass,DuckDBArray-method}
 \title{Parquet datasets as DelayedMatrix objects}
 \usage{
-DuckDBMatrix(conn, row, col, fact, key = c(row, col), type = NULL, ...)
+DuckDBMatrix(conn, row, col, datacols, keycols = c(row, col), type = NULL, ...)
 }
 \arguments{
 \item{conn}{Either a string containing the path to the data files or a
@@ -21,10 +21,10 @@ rows of the matrix.}
 containing the names of the columns in the Parquet data that specify the
 columns of the matrix.}
 
-\item{fact}{String containing the name of the column in the Parquet data
+\item{datacols}{String containing the name of the column in the Parquet data
 that specifies the value of the matrix.}
 
-\item{key}{Either a character vector or a list of character vectors
+\item{keycols}{Either a character vector or a list of character vectors
 containing the names of the columns in the Parquet data that specify the
 rows and columns of the matrix.}
 
@@ -55,7 +55,7 @@ tf <- tempfile()
 on.exit(unlink(tf))
 arrow::write_parquet(df, tf)
 
-pqmat <- DuckDBMatrix(tf, row = "rowname", col = "colname", fact = "value")
+pqmat <- DuckDBMatrix(tf, row = "rowname", col = "colname", datacols = "value")
 
 }
 \author{

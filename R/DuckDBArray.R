@@ -21,7 +21,7 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' pqarray <- DuckDBArray(tf, key = c("Class", "Sex", "Age", "Survived"), fact = "fate")
+#' pqarray <- DuckDBArray(tf, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
 #'
 #' @aliases
 #' DuckDBArray-class
@@ -170,9 +170,9 @@ function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, h
 #' @export
 #' @importFrom S4Vectors new2
 #' @rdname DuckDBArray
-DuckDBArray <- function(conn, key, fact, type = NULL, ...) {
+DuckDBArray <- function(conn, keycols, datacols, type = NULL, ...) {
     if (!is(conn, "DuckDBArraySeed")) {
-        conn <- DuckDBArraySeed(conn, key = key, fact = fact, type = type, ...)
+        conn <- DuckDBArraySeed(conn, keycols = keycols, datacols = datacols, type = type, ...)
     }
     new2("DuckDBArray", seed = conn, check = FALSE)
 }

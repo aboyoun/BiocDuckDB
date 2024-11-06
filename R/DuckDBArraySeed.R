@@ -11,9 +11,9 @@
 #'
 #' @param conn Either a string containing the path to the data files or a
 #' \code{tbl_duckdb_connection} object.
-#' @param key Either a character vector or a list of character vectors
-#' containing the names of the columns that comprise the primary key.
-#' @param fact String containing the name of the column in the Parquet data
+#' @param keycols Either a character vector or a list of character vectors
+#' containing the names of the columns that comprise the primary keycols.
+#' @param datacols String containing the name of the column in the Parquet data
 #' that specifies the value of the array.
 #' @param type String specifying the type of the Parquet data values;
 #' one of \code{"logical"}, \code{"integer"}, \code{"double"}, or
@@ -33,7 +33,7 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' pqaseed <- DuckDBArraySeed(tf, key = c("Class", "Sex", "Age", "Survived"), fact = "fate")
+#' pqaseed <- DuckDBArraySeed(tf, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
 #'
 #' @aliases
 #' DuckDBArraySeed-class
@@ -159,7 +159,7 @@ setMethod("aperm", "DuckDBArraySeed", function(a, perm, ...) {
     if ((length(perm) != k) || !setequal(perm, seq_len(k))) {
         stop("'perm' must be a permutation of 1:", k)
     }
-    a@table@key <- a@table@key[perm]
+    a@table@keycols <- a@table@keycols[perm]
     a
 })
 
@@ -284,16 +284,16 @@ function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, h
         for (i in names(index)) {
             idx <- index[[i]]
             if (is.null(idx)) {
-                index[[i]] <- table@key[[i]]
+                index[[i]] <- table@keycols[[i]]
             } else {
-                index[[i]] <- table@key[[i]][idx]
+                index[[i]] <- table@keycols[[i]][idx]
             }
         }
         # Add dropped dimensions if data are present
         if ((length(index) < nkey(table)) && all(lengths(index, use.names = FALSE) > 0L)) {
-            key <- keydimnames(table)
-            key[names(index)] <- index
-            index <- key
+            keycols <- keydimnames(table)
+            keycols[names(index)] <- index
+            index <- keycols
         }
     }
 
@@ -351,13 +351,13 @@ setMethod("DelayedArray", "DuckDBArraySeed", function(seed) DuckDBArray(seed))
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
 #' @rdname DuckDBArraySeed
-DuckDBArraySeed <- function(conn, key, fact, type = NULL, ...) {
+DuckDBArraySeed <- function(conn, keycols, datacols, type = NULL, ...) {
     if (is.null(type)) {
-        table <- DuckDBTable(conn, key = key, fact = fact, ...)
-        column <- as.data.frame(select(head(table@conn, 0L), !!fact))[[fact]]
+        table <- DuckDBTable(conn, keycols = keycols, datacols = datacols, ...)
+        column <- as.data.frame(select(head(table@conn, 0L), !!datacols))[[datacols]]
         type <- .get_type(column)
     } else {
-        table <- DuckDBTable(conn, key = key, fact = fact, type = setNames(type, fact), ...)
+        table <- DuckDBTable(conn, keycols = keycols, datacols = datacols, type = setNames(type, datacols), ...)
     }
     new2("DuckDBArraySeed", table = table, drop = FALSE, check = FALSE)
 }

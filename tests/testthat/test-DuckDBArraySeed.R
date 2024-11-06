@@ -2,11 +2,11 @@
 # library(testthat); library(BiocDuckDB); source("setup.R"); source("test-DuckDBArraySeed.R")
 
 test_that("basic methods work as expected for a DuckDBArraySeed", {
-    seed <- DuckDBArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")
+    seed <- DuckDBArraySeed(titanic_path, keycols = dimnames(titanic_array), datacols = "fate")
     checkDuckDBArraySeed(seed, titanic_array)
     expect_false(is_sparse(seed))
 
-    seed <- DuckDBArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate", type = "double")
+    seed <- DuckDBArraySeed(titanic_path, keycols = dimnames(titanic_array), datacols = "fate", type = "double")
     expect_s4_class(seed, "DuckDBArraySeed")
     expect_identical(type(seed), "double")
     expect_identical(length(seed), length(titanic_array))
@@ -14,7 +14,7 @@ test_that("basic methods work as expected for a DuckDBArraySeed", {
     expect_identical(dimnames(seed), dimnames(titanic_array))
     expect_equal(as.array(seed), titanic_array)
 
-    seed <- DuckDBArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate", type = "character")
+    seed <- DuckDBArraySeed(titanic_path, keycols = dimnames(titanic_array), datacols = "fate", type = "character")
     expect_s4_class(seed, "DuckDBArraySeed")
     expect_identical(type(seed), "character")
     expect_identical(length(seed), length(titanic_array))
@@ -23,11 +23,11 @@ test_that("basic methods work as expected for a DuckDBArraySeed", {
 })
 
 test_that("basic methods work as expected for a sparse DuckDBArraySeed", {
-    seed <- DuckDBArraySeed(sparse_path, key = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), fact = "value")
+    seed <- DuckDBArraySeed(sparse_path, keycols = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), datacols = "value")
     checkDuckDBArraySeed(seed, sparse_array)
     expect_true(is_sparse(seed))
 
-    seed <- DuckDBArraySeed(sparse_path, key = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), fact = "value", type = "double")
+    seed <- DuckDBArraySeed(sparse_path, keycols = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), datacols = "value", type = "double")
     expect_s4_class(seed, "DuckDBArraySeed")
     expect_identical(type(seed), "double")
     expect_identical(length(seed), length(sparse_array))
@@ -35,7 +35,7 @@ test_that("basic methods work as expected for a sparse DuckDBArraySeed", {
     expect_identical(dimnames(seed), dimnames(sparse_array))
     expect_equal(as.array(seed), sparse_array)
 
-    seed <- DuckDBArraySeed(sparse_path, key = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), fact = "value", type = "character")
+    seed <- DuckDBArraySeed(sparse_path, keycols = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), datacols = "value", type = "character")
     expect_s4_class(seed, "DuckDBArraySeed")
     expect_identical(type(seed), "character")
     expect_identical(length(seed), length(sparse_array))
@@ -44,13 +44,13 @@ test_that("basic methods work as expected for a sparse DuckDBArraySeed", {
 })
 
 test_that("DuckDBArraySeed can be cast to a different type", {
-    seed <- DuckDBArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")
+    seed <- DuckDBArraySeed(titanic_path, keycols = dimnames(titanic_array), datacols = "fate")
     type(seed) <- "double"
     expected <- titanic_array
     storage.mode(expected) <- "double"
     checkDuckDBArraySeed(seed, expected)
 
-    seed <- DuckDBArraySeed(sparse_path, key = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), fact = "value")
+    seed <- DuckDBArraySeed(sparse_path, keycols = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), datacols = "value")
     type(seed) <- "double"
     expected <- sparse_array
     storage.mode(expected) <- "double"
@@ -58,17 +58,17 @@ test_that("DuckDBArraySeed can be cast to a different type", {
 })
 
 test_that("nonzero functions work for DuckDBArraySeed", {
-    seed <- DuckDBArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")
+    seed <- DuckDBArraySeed(titanic_path, keycols = dimnames(titanic_array), datacols = "fate")
     checkDuckDBArraySeed(is_nonzero(seed), is_nonzero(titanic_array))
     expect_equal(nzcount(seed), nzcount(titanic_array))
 
-    seed <- DuckDBArraySeed(sparse_path, key = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), fact = "value")
+    seed <- DuckDBArraySeed(sparse_path, keycols = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), datacols = "value")
     checkDuckDBArraySeed(is_nonzero(seed), is_nonzero(sparse_array))
     expect_equal(nzcount(seed), nzcount(sparse_array))
 })
 
 test_that("extraction methods work as expected for a DuckDBArraySeed", {
-    seed <- DuckDBArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")
+    seed <- DuckDBArraySeed(titanic_path, keycols = dimnames(titanic_array), datacols = "fate")
 
     expect_error(seed[,])
 
@@ -101,14 +101,14 @@ test_that("extraction methods work as expected for a DuckDBArraySeed", {
 })
 
 test_that("aperm and t methods work as expected for a DuckDBArraySeed", {
-    seed <- DuckDBArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")
+    seed <- DuckDBArraySeed(titanic_path, keycols = dimnames(titanic_array), datacols = "fate")
 
     object <- aperm(seed, c(4, 2, 1, 3))
     expected <- aperm(titanic_array, c(4, 2, 1, 3))
     checkDuckDBArraySeed(object, expected)
 
     names(dimnames(state.x77)) <- c("rowname", "colname")
-    seed <- DuckDBArraySeed(state_path, key = dimnames(state.x77), fact = "value")
+    seed <- DuckDBArraySeed(state_path, keycols = dimnames(state.x77), datacols = "value")
 
     object <- t(seed)
     expected <- t(state.x77)
@@ -122,7 +122,7 @@ test_that("aperm and t methods work as expected for a DuckDBArraySeed", {
 })
 
 test_that("Arith methods work as expected for a DuckDBArraySeed", {
-    seed <- DuckDBArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")
+    seed <- DuckDBArraySeed(titanic_path, keycols = dimnames(titanic_array), datacols = "fate")
 
     ## "+"
     checkDuckDBArraySeed(seed + sqrt(seed), as.array(seed) + sqrt(as.array(seed)))
@@ -169,7 +169,7 @@ test_that("Arith methods work as expected for a DuckDBArraySeed", {
 })
 
 test_that("Compare methods work as expected for a DuckDBArraySeed", {
-    seed <- DuckDBArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")
+    seed <- DuckDBArraySeed(titanic_path, keycols = dimnames(titanic_array), datacols = "fate")
 
     ## "=="
     checkDuckDBArraySeed(seed == sqrt(seed), as.array(seed) == sqrt(as.array(seed)))
@@ -215,7 +215,7 @@ test_that("Compare methods work as expected for a DuckDBArraySeed", {
 })
 
 test_that("Logic methods work as expected for a DuckDBArraySeed", {
-    seed <- DuckDBArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")
+    seed <- DuckDBArraySeed(titanic_path, keycols = dimnames(titanic_array), datacols = "fate")
 
     ## "&"
     x <- seed > 70
@@ -230,7 +230,7 @@ test_that("Logic methods work as expected for a DuckDBArraySeed", {
 
 test_that("Math methods work as expected for a DuckDBArraySeed", {
     names(dimnames(state.x77)) <- c("rowname", "colname")
-    seed <- DuckDBArraySeed(state_path, key = dimnames(state.x77), fact = "value")
+    seed <- DuckDBArraySeed(state_path, keycols = dimnames(state.x77), datacols = "value")
 
     income <- seed[, "Income"]
     ikeep <-
@@ -292,7 +292,7 @@ test_that("Math methods work as expected for a DuckDBArraySeed", {
 })
 
 test_that("Summary methods work as expected for a DuckDBArraySeed", {
-    seed <- DuckDBArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")
+    seed <- DuckDBArraySeed(titanic_path, keycols = dimnames(titanic_array), datacols = "fate")
     expect_identical(max(seed), max(as.array(seed)))
     expect_identical(min(seed), min(as.array(seed)))
     expect_identical(range(seed), range(as.array(seed)))
@@ -303,7 +303,7 @@ test_that("Summary methods work as expected for a DuckDBArraySeed", {
 })
 
 test_that("Other aggregate methods work as expected for a DuckDBArraySeed", {
-    seed <- DuckDBArraySeed(titanic_path, key = dimnames(titanic_array), fact = "fate")
+    seed <- DuckDBArraySeed(titanic_path, keycols = dimnames(titanic_array), datacols = "fate")
     expect_equal(mean(seed), mean(as.array(seed)))
     expect_equal(median(seed), median(as.array(seed)))
     expect_equal(var(seed), var(as.array(seed)))

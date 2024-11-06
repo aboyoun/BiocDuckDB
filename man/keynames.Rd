@@ -24,12 +24,12 @@ nkey(x)
 nkeydim(x)
 }
 \arguments{
-\item{x}{An object to get the key related information.}
+\item{x}{An object to get the keycols related information.}
 
-\item{value}{A character vector of key dimension names.}
+\item{value}{A character vector of keycols dimension names.}
 }
 \description{
-Get the key names, key dimension names, or key count of an object.
+Get the keycols names, keycols dimension names, or keycols count of an object.
 }
 \examples{
 keynames

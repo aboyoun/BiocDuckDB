@@ -35,8 +35,8 @@
 \usage{
 DuckDBTable(
   conn,
-  key,
-  fact = setdiff(colnames(conn), names(key)),
+  keycols,
+  datacols = setdiff(colnames(conn), names(keycols)),
   type = NULL,
   ...
 )
@@ -45,10 +45,10 @@ DuckDBTable(
 \item{conn}{Either a string containing the path to the data files or a
 \code{tbl_duckdb_connection} object.}
 
-\item{key}{Either a character vector or a list of character vectors
-containing the names of the columns that comprise the primary key.}
+\item{keycols}{Either a character vector or a list of character vectors
+containing the names of the columns that comprise the primary keycols.}
 
-\item{fact}{Either a character vector containing the names of the columns
+\item{datacols}{Either a character vector containing the names of the columns
 in the Parquet data that specify the facts}
 
 \item{type}{An optional named character vector where the names specify the
@@ -71,7 +71,7 @@ tf <- tempfile()
 on.exit(unlink(tf))
 arrow::write_parquet(df, tf)
 
-tbl <- DuckDBTable(tf, key = c("Class", "Sex", "Age", "Survived"), fact = "fate")
+tbl <- DuckDBTable(tf, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
 
 }
 \author{

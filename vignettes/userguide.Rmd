@@ -38,7 +38,7 @@ arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 
 # Creating the DuckDBDataFrame.
 library(BiocDuckDB)
-df <- DuckDBDataFrame(tf, key = "model")
+df <- DuckDBDataFrame(tf, keycols = "model")
 df
 ```
 
