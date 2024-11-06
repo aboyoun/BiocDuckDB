@@ -12,7 +12,7 @@
 #' (e.g., no delayed filter/mutate operations have been applied, no data has been added from other files).
 #' Thus, users can specialize code paths for a DuckDBDataFrame to operate directly on the underlying data.
 #'
-#' @author Aaron Lun, Patrick Aboyoun
+#' @author Patrick Aboyoun, Aaron Lun
 #'
 #' @examples
 #' # Mocking up a file:

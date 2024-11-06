@@ -77,5 +77,5 @@ class(combined2)
 
 }
 \author{
-Aaron Lun, Patrick Aboyoun
+Patrick Aboyoun, Aaron Lun
 }
