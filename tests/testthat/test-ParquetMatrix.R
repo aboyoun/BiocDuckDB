@@ -48,24 +48,24 @@ test_that("extraction methods work as expected for a ParquetMatrix", {
 
     expected <- as.array(state.x77[1, ])
     names(dimnames(expected)) <- "colname"
-    checkParquetArray(pqmat[1, ], expected)
+    checkDuckDBArray(pqmat[1, ], expected)
     checkParquetMatrix(pqmat[1, , drop = FALSE], state.x77[1, , drop = FALSE])
 
     expected <- as.array(state.x77["New Jersey", ])
     names(dimnames(expected)) <- "colname"
-    checkParquetArray(pqmat["New Jersey", ], expected)
+    checkDuckDBArray(pqmat["New Jersey", ], expected)
     checkParquetMatrix(pqmat["New Jersey", , drop = FALSE], state.x77["New Jersey", , drop = FALSE])
 
     checkParquetMatrix(pqmat[c("New Jersey", "Washington"), ], state.x77[c("New Jersey", "Washington"), ])
 
     expected <- as.array(state.x77[, 4])
     names(dimnames(expected)) <- "rowname"
-    checkParquetArray(pqmat[, 4], expected)
+    checkDuckDBArray(pqmat[, 4], expected)
     checkParquetMatrix(pqmat[, 4, drop = FALSE], state.x77[, 4, drop = FALSE])
 
     expected <- as.array(state.x77[, "Murder"])
     names(dimnames(expected)) <- "rowname"
-    checkParquetArray(pqmat[, "Murder"], expected)
+    checkDuckDBArray(pqmat[, "Murder"], expected)
     checkParquetMatrix(pqmat[, "Murder", drop = FALSE], state.x77[, "Murder", drop = FALSE])
 
     checkParquetMatrix(pqmat[, c("Income", "Life Exp", "Murder")], state.x77[, c("Income", "Life Exp", "Murder")])

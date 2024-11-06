@@ -46,17 +46,17 @@
 #' @aliases
 #' ParquetMatrix-class
 #' [,ParquetMatrix,ANY,ANY,ANY-method
-#' matrixClass,ParquetArray-method
+#' matrixClass,DuckDBArray-method
 #'
 #' @include DuckDBArraySeed.R
-#' @include ParquetArray.R
+#' @include DuckDBArray.R
 #'
 #' @name ParquetMatrix
 NULL
 
 #' @export
 #' @importClassesFrom DelayedArray DelayedMatrix
-setClass("ParquetMatrix", contains = c("ParquetArray", "DelayedMatrix"))
+setClass("ParquetMatrix", contains = c("DuckDBArray", "DelayedMatrix"))
 
 #' @importFrom S4Vectors setValidity2
 setValidity2("ParquetMatrix", function(x) {
@@ -68,14 +68,14 @@ setValidity2("ParquetMatrix", function(x) {
 
 #' @export
 #' @importFrom DelayedArray matrixClass
-setMethod("matrixClass", "ParquetArray", function(x) "ParquetMatrix")
+setMethod("matrixClass", "DuckDBArray", function(x) "ParquetMatrix")
 
 #' @export
 setMethod("[", "ParquetMatrix", function(x, i, j, ..., drop = TRUE) {
     Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
     seed <- .subset_DuckDBArraySeed(x@seed, Nindex = Nindex, drop = drop)
     if (length(dim(seed)) == 1L) {
-        ParquetArray(seed)
+        DuckDBArray(seed)
     } else {
         initialize2(x, seed = seed, check = FALSE)
     }

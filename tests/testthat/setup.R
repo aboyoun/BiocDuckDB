@@ -11,6 +11,10 @@ infert_df <- cbind(id = rownames(infert), infert)
 infert_path <- tempfile()
 arrow::write_parquet(infert_df, infert_path)
 
+# Edgar Anderson's Iris Data
+iris_path <- tempfile()
+arrow::write_dataset(iris, iris_path, format = "parquet", partitioning = "Species")
+
 # Motor Trend Car Road Tests
 mtcars_df <- cbind(model = rownames(mtcars), mtcars)
 rownames(mtcars_df) <- NULL
@@ -59,8 +63,8 @@ sparse_path <- tempfile()
 arrow::write_parquet(sparse_df, sparse_path)
 
 # Helper functions
-checkParquetFactTable <- function(object, expected) {
-    expect_s4_class(object, "ParquetFactTable")
+checkDuckDBTable <- function(object, expected) {
+    expect_s4_class(object, "DuckDBTable")
     expect_gte(nrow(object), nrow(expected))
     expect_equal(nkey(object) + ncol(object), ncol(expected))
     expect_identical(c(keynames(object), colnames(object)), colnames(expected))
@@ -71,8 +75,8 @@ checkParquetFactTable <- function(object, expected) {
     expect_equivalent(df, expected)
 }
 
-checkParquetArraySeed <- function(object, expected) {
-    expect_s4_class(object, "ParquetArraySeed")
+checkDuckDBArraySeed <- function(object, expected) {
+    expect_s4_class(object, "DuckDBArraySeed")
     expect_identical(type(object), type(expected))
     expect_identical(length(object), length(expected))
     expect_identical(dim(object), dim(expected))
@@ -80,8 +84,8 @@ checkParquetArraySeed <- function(object, expected) {
     expect_equal(as.array(object), expected)
 }
 
-checkParquetArray <- function(object, expected) {
-    expect_s4_class(object, "ParquetArray")
+checkDuckDBArray <- function(object, expected) {
+    expect_s4_class(object, "DuckDBArray")
     expect_identical(type(object), type(expected))
     expect_identical(length(object), length(expected))
     expect_identical(dim(object), dim(expected))

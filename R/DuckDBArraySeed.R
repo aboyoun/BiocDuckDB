@@ -6,7 +6,7 @@
 #'
 #' Note that a DuckDBArraySeed object is not intended to be used directly.
 #' Most end users will typically create and manipulate a higher-level
-#' \link{ParquetArray} object instead. See \code{?\link{ParquetArray}} for
+#' \link{DuckDBArray} object instead. See \code{?\link{DuckDBArray}} for
 #' more information.
 #'
 #' @param conn Either a string containing the path to the data files or a
@@ -64,7 +64,7 @@
 #' mad,DuckDBArraySeed-method
 #'
 #' @seealso
-#' \code{\link{ParquetArray}},
+#' \code{\link{DuckDBArray}},
 #' \code{\link[S4Arrays]{Array}}
 #'
 #' @include acquireTable.R
@@ -344,7 +344,7 @@ setMethod("extract_sparse_array", "DuckDBArraySeed", function(x, index) {
 
 #' @export
 #' @importFrom DelayedArray DelayedArray
-setMethod("DelayedArray", "DuckDBArraySeed", function(seed) ParquetArray(seed))
+setMethod("DelayedArray", "DuckDBArraySeed", function(seed) DuckDBArray(seed))
 
 #' @export
 #' @importFrom dplyr select

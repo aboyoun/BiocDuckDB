@@ -20,7 +20,7 @@ test_that("nonzero functions work for ParquetColumn", {
     expect_equal(nzcount(am), nzcount(as.vector(am)))
 })
 
-test_that("Arith methods work as expected for a ParquetArray", {
+test_that("Arith methods work as expected for a DuckDBArray", {
     df <- ParquetDataFrame(mtcars_path, key = "model")
     mpg <- df[["mpg"]]
     disp <- df[["disp"]]

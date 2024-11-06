@@ -55,7 +55,7 @@ pointer to a DuckDB table.
 
 Note that a DuckDBArraySeed object is not intended to be used directly.
 Most end users will typically create and manipulate a higher-level
-\link{ParquetArray} object instead. See \code{?\link{ParquetArray}} for
+\link{DuckDBArray} object instead. See \code{?\link{DuckDBArray}} for
 more information.
 }
 \examples{
@@ -72,7 +72,7 @@ pqaseed <- DuckDBArraySeed(tf, key = c("Class", "Sex", "Age", "Survived"), fact 
 
 }
 \seealso{
-\code{\link{ParquetArray}},
+\code{\link{DuckDBArray}},
 \code{\link[S4Arrays]{Array}}
 }
 \author{

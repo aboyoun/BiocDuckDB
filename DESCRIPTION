@@ -46,7 +46,7 @@ Collate:
     'LanguageList.R'
     'DuckDBTable.R'
     'DuckDBArraySeed.R'
-    'ParquetArray.R'
+    'DuckDBArray.R'
     'ParquetColumn.R'
     'ParquetDataFrame.R'
     'ParquetMatrix.R'
