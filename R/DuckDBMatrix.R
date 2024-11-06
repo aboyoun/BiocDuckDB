@@ -1,11 +1,11 @@
 #' Parquet datasets as DelayedMatrix objects
 #'
 #' @description
-#' The ParquetMatrix class is a \link[DelayedArray]{DelayedMatrix} subclass
-#' for representing and operating on a Parquet dataset.
+#' The DuckDBMatrix class is a \link[DelayedArray]{DelayedMatrix} subclass
+#' for representing and operating on a DuckDB table.
 #'
 #' All the operations available for \link[DelayedArray]{DelayedMatrix}
-#' objects work on ParquetMatrix objects.
+#' objects work on DuckDBMatrix objects.
 #'
 #' @param conn Either a string containing the path to the data files or a
 #' \code{tbl_duckdb_connection} object.
@@ -41,25 +41,25 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' pqmat <- ParquetMatrix(tf, row = "rowname", col = "colname", fact = "value")
+#' pqmat <- DuckDBMatrix(tf, row = "rowname", col = "colname", fact = "value")
 #'
 #' @aliases
-#' ParquetMatrix-class
-#' [,ParquetMatrix,ANY,ANY,ANY-method
+#' DuckDBMatrix-class
+#' [,DuckDBMatrix,ANY,ANY,ANY-method
 #' matrixClass,DuckDBArray-method
 #'
 #' @include DuckDBArraySeed.R
 #' @include DuckDBArray.R
 #'
-#' @name ParquetMatrix
+#' @name DuckDBMatrix
 NULL
 
 #' @export
 #' @importClassesFrom DelayedArray DelayedMatrix
-setClass("ParquetMatrix", contains = c("DuckDBArray", "DelayedMatrix"))
+setClass("DuckDBMatrix", contains = c("DuckDBArray", "DelayedMatrix"))
 
 #' @importFrom S4Vectors setValidity2
-setValidity2("ParquetMatrix", function(x) {
+setValidity2("DuckDBMatrix", function(x) {
     if (nkey(x@seed@table) != 2L) {
         return("'key' seed slot must be a two element named list of character vectors")
     }
@@ -68,10 +68,10 @@ setValidity2("ParquetMatrix", function(x) {
 
 #' @export
 #' @importFrom DelayedArray matrixClass
-setMethod("matrixClass", "DuckDBArray", function(x) "ParquetMatrix")
+setMethod("matrixClass", "DuckDBArray", function(x) "DuckDBMatrix")
 
 #' @export
-setMethod("[", "ParquetMatrix", function(x, i, j, ..., drop = TRUE) {
+setMethod("[", "DuckDBMatrix", function(x, i, j, ..., drop = TRUE) {
     Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
     seed <- .subset_DuckDBArraySeed(x@seed, Nindex = Nindex, drop = drop)
     if (length(dim(seed)) == 1L) {
@@ -84,8 +84,8 @@ setMethod("[", "ParquetMatrix", function(x, i, j, ..., drop = TRUE) {
 #' @export
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
-#' @rdname ParquetMatrix
-ParquetMatrix <- function(conn, row, col, fact, key = c(row, col), type = NULL, ...) {
+#' @rdname DuckDBMatrix
+DuckDBMatrix <- function(conn, row, col, fact, key = c(row, col), type = NULL, ...) {
     if (!missing(row) && isSingleString(row)) {
         row <- setNames(list(NULL), row)
     }
@@ -98,5 +98,5 @@ ParquetMatrix <- function(conn, row, col, fact, key = c(row, col), type = NULL, 
         }
         conn <- DuckDBArraySeed(conn, key = key, fact = fact, type = type, ...)
     }
-    new2("ParquetMatrix", seed = conn, check = FALSE)
+    new2("DuckDBMatrix", seed = conn, check = FALSE)
 }

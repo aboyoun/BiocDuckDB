@@ -93,8 +93,8 @@ checkDuckDBArray <- function(object, expected) {
     expect_equal(as.array(object), expected)
 }
 
-checkParquetMatrix <- function(object, expected) {
-    expect_s4_class(object, "ParquetMatrix")
+checkDuckDBMatrix <- function(object, expected) {
+    expect_s4_class(object, "DuckDBMatrix")
     expect_identical(type(object), typeof(expected))
     expect_identical(length(object), length(expected))
     expect_identical(dim(object), dim(expected))
