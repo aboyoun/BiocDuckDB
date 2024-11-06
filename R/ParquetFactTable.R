@@ -87,7 +87,7 @@ initialize2 <- function(..., check = TRUE)
 .has.row_number <- function(x) {
     if (length(x@key) == 1L) {
         key1 <- x@key[[1L]]
-        is.integer64(key1) && (length(key1) == 2L) && is.na(key1[1L]) && (key1[2L] < as.integer64(0L))
+        is.integer64(key1) && (length(key1) == 2L) && is.na(key1[1L]) && (key1[2L] <= as.integer64(0L))
     } else {
         FALSE
     }
