@@ -94,13 +94,21 @@ setMethod("makeNakedCharacterMatrixForDisplay", "ParquetDataFrame", function(x) 
 #' @export
 #' @importFrom S4Vectors classNameForDisplay get_showHeadLines get_showTailLines makeNakedCharacterMatrixForDisplay
 setMethod("show", "ParquetDataFrame", function(object) {
-    nhead <- get_showHeadLines()
-    ntail <- get_showTailLines()
     x_nrow <- nrow(object)
     x_ncol <- ncol(object)
+
     cat(classNameForDisplay(object), " with ",
         x_nrow, " row", ifelse(x_nrow == 1L, "", "s"), " and ",
         x_ncol, " column", ifelse(x_ncol == 1L, "", "s"), "\n", sep = "")
+
+    if (.has.row_number(object)) {
+        nhead <- get_showHeadLines() + get_showTailLines()
+        ntail <- 0L
+    } else {
+        nhead <- get_showHeadLines()
+        ntail <- get_showTailLines()
+    }
+
     if (x_nrow != 0L && x_ncol != 0L) {
         if (x_nrow <= nhead + ntail + 1L) {
             m <- makeNakedCharacterMatrixForDisplay(object)
@@ -109,17 +117,25 @@ setMethod("show", "ParquetDataFrame", function(object) {
                 rownames(m) <- x_rownames
             }
         } else {
-            i <- c(seq_len(nhead), (x_nrow + 1L) - rev(seq_len(ntail)))
-            df <- as.data.frame(object[i, , drop = FALSE])
-            m <- rbind(makeNakedCharacterMatrixForDisplay(head(df, nhead)),
-                       rbind(rep.int("...", x_ncol)),
-                       makeNakedCharacterMatrixForDisplay(tail(df, ntail)))
-            x_rownames <- c(rownames(head(object, nhead)), rownames(tail(object, ntail)))
+            x_head <- head(object, nhead)
+            x_rownames <- rownames(x_head)
+            if (ntail == 0L) {
+                m <- rbind(makeNakedCharacterMatrixForDisplay(x_head),
+                           rbind(rep.int("...", x_ncol)))
+            } else {
+                i <- c(seq_len(nhead), (x_nrow + 1L) - rev(seq_len(ntail)))
+                df <- as.data.frame(object[i, , drop = FALSE])
+                m <- rbind(makeNakedCharacterMatrixForDisplay(head(df, nhead)),
+                           rbind(rep.int("...", x_ncol)),
+                           makeNakedCharacterMatrixForDisplay(tail(df, ntail)))
+                x_rownames <- c(x_rownames, rownames(tail(object, ntail)))
+            }
             rownames(m) <- S4Vectors:::make_rownames_for_RectangularData_display(x_rownames, x_nrow, nhead, ntail)
         }
         m <- rbind(rep.int("<ParquetColumn>", ncol(object)), m)
         print(m, quote = FALSE, right = TRUE)
     }
+
     invisible(NULL)
 })
 
@@ -160,11 +176,21 @@ setMethod("extractROWS", "ParquetDataFrame", function(x, i) {
     .subset_ParquetFactTable(x, i = i)
 })
 
+.head_conn <- function(x, n) {
+    conn <- head(x@conn, n)
+    key <- x@key
+    key[[1L]] <- .key.row_number(conn)
+    initialize2(x, conn = conn, key = key, check = FALSE)
+}
+
 #' @export
 #' @importFrom S4Vectors head isSingleNumber
 setMethod("head", "ParquetDataFrame", function(x, n = 6L, ...) {
     if (!isSingleNumber(n)) {
         stop("'n' must be a single number")
+    }
+    if (.has.row_number(x)) {
+        return(.head_conn(x, n))
     }
     n <- as.integer(n)
     nr <- nrow(x)
@@ -183,6 +209,9 @@ setMethod("head", "ParquetDataFrame", function(x, n = 6L, ...) {
 setMethod("tail", "ParquetDataFrame", function(x, n = 6L, ...) {
     if (!isSingleNumber(n)) {
         stop("'n' must be a single number")
+    }
+    if ((n > 0L) && .has.row_number(x)) {
+        stop("tail requires a key to be efficient")
     }
     n <- as.integer(n)
     nr <- nrow(x)

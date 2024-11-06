@@ -54,22 +54,35 @@ setValidity2("ParquetColumn", function(x) {
 #' @importFrom S4Vectors classNameForDisplay
 setMethod("show", "ParquetColumn", function(object) {
     len <- length(object)
-    cat(sprintf("%s of length %d\n", classNameForDisplay(object), len))
-    n1 <- n2 <- 2L
+    cat(sprintf("%s of length %s\n", classNameForDisplay(object), len))
+    if (.has.row_number(object@table)) {
+        n1 <- 4L
+        n2 <- 0L
+    } else {
+        n1 <- n2 <- 2L
+    }
     if (len <= n1 + n2 + 1L) {
         vec <- as.vector(object)
     } else {
-        i <- c(seq_len(n1), (len + 1L) - rev(seq_len(n2)))
-        vec <- as.vector(object[i])
-        if (is.character(vec)) {
-            vec <- setNames(sprintf("\"%s\"", vec), names(vec))
+        if (n2 == 0L) {
+            vec <- as.vector(head(object, n1))
+            if (is.character(vec)) {
+                vec <- setNames(sprintf("\"%s\"", vec), names(vec))
+            }
+            vec <- format(vec, justify = "right")
+            vec <- c(vec, "..." = "...")
+        } else {
+            i <- c(seq_len(n1), (len + 1L) - rev(seq_len(n2)))
+            vec <- as.vector(object[i])
+            if (is.character(vec)) {
+                vec <- setNames(sprintf("\"%s\"", vec), names(vec))
+            }
+            vec <- format(vec, justify = "right")
+            vec <- c(head(vec, n1), "..." = "...", tail(vec, n2))
         }
-        vec <- format(vec, justify = "right")
-        vec1 <- head(vec, n1)
-        vec2 <- tail(vec, n2)
-        vec <- c(vec1, "..." = "...", vec2)
     }
     print(vec, quote = FALSE)
+    invisible(NULL)
 })
 
 #' @export
@@ -129,6 +142,9 @@ setMethod("head", "ParquetColumn", function(x, n = 6L, ...) {
     if (!isSingleNumber(n)) {
         stop("'n' must be a single number")
     }
+    if (.has.row_number(x@table)) {
+        return(initialize2(x, table = .head_conn(x@table, n), check = FALSE))
+    }
     n <- as.integer(n)
     len <- length(x)
     if (n < 0) {
@@ -146,6 +162,9 @@ setMethod("head", "ParquetColumn", function(x, n = 6L, ...) {
 setMethod("tail", "ParquetColumn", function(x, n = 6L, ...) {
     if (!isSingleNumber(n)) {
         stop("'n' must be a single number")
+    }
+    if ((n > 0L) && .has.row_number(x)) {
+        stop("tail requires a key to be efficient")
     }
     n <- as.integer(n)
     len <- length(x)

@@ -83,6 +83,22 @@ initialize2 <- function(..., check = TRUE)
     initialize(...)
 }
 
+#' @importFrom bit64 as.integer64 is.integer64
+.has.row_number <- function(x) {
+    if (length(x@key) == 1L) {
+        key1 <- x@key[[1L]]
+        is.integer64(key1) && (length(key1) == 2L) && is.na(key1[1L]) && (key1[2L] < as.integer64(0L))
+    } else {
+        FALSE
+    }
+}
+
+#' @importFrom bit64 NA_integer64_
+#' @importFrom dplyr n pull summarize
+.key.row_number <- function(conn) {
+    c(NA_integer64_, - pull(summarize(conn, n = n())))
+}
+
 #' @export
 #' @importClassesFrom BiocGenerics OutOfMemoryObject
 #' @importClassesFrom S4Vectors RectangularData
@@ -125,11 +141,25 @@ setMethod("dbconn", "ParquetFactTable", function(x) x@conn)
 setMethod("nkey", "ParquetFactTable", function(x) length(x@key))
 
 #' @export
-setMethod("nkeydim", "ParquetFactTable", function(x) lengths(x@key, use.names = FALSE))
+setMethod("nkeydim", "ParquetFactTable", function(x) {
+    if (.has.row_number(x)) {
+        abs(x@key[[1L]][2L])
+    } else {
+        lengths(x@key, use.names = FALSE)
+    }
+})
 
 #' @export
 #' @importFrom BiocGenerics nrow
-setMethod("nrow", "ParquetFactTable", function(x) as.integer(prod(nkeydim(x))))
+#' @importFrom bit64 as.integer64
+setMethod("nrow", "ParquetFactTable", function(x) {
+    nr <- prod(as.integer64(nkeydim(x)))
+    if (nr <= as.integer64(.Machine$integer.max)) {
+        as.integer(nr)
+    } else {
+        nr
+    }
+})
 
 #' @export
 #' @importFrom BiocGenerics ncol
@@ -139,8 +169,13 @@ setMethod("ncol", "ParquetFactTable", function(x) length(x@fact))
 setMethod("keynames", "ParquetFactTable", function(x) names(x@key))
 
 #' @export
+#' @importFrom dplyr pull select
 setMethod("keydimnames", "ParquetFactTable", function(x) {
-    lapply(x@key, function(y) names(y) %||% as.character(y))
+    if (.has.row_number(x)) {
+        list(as.character(pull(select(x@conn, !!as.name(names(x@key))))))
+    } else {
+        lapply(x@key, function(y) names(y) %||% as.character(y))
+    }
 })
 
 #' @export
@@ -165,10 +200,9 @@ setReplaceMethod("keydimnames", "ParquetFactTable", function(x, value) {
 #' @importFrom BiocGenerics rownames
 setMethod("rownames", "ParquetFactTable", function(x, do.NULL = TRUE, prefix = "row") {
     if (length(x@key) == 1L) {
-        key1 <- x@key[[1L]]
-        names(key1) %||% as.character(key1)
+        keydimnames(x)[[1L]]
     } else {
-        stop("rownames are not available for multi-dimensional keys")
+        stop("rownames is not supported for multi-dimensional keys")
     }
 })
 
@@ -299,9 +333,13 @@ setMethod("is_sparse", "ParquetFactTable", function(x) {
                        isTRUE(all.equal(as(x, "ParquetFactTable"), sub@table))) {
                 keep <- sub@table@fact[[1L]]
                 conn <- filter(conn, !!keep)
-                for (kname in names(key)) {
-                    kdnames <- pull(distinct(select(conn, !!as.name(kname))))
-                    key[[kname]] <- key[[kname]][match(kdnames, key[[kname]])]
+                if (.has.row_number(x)) {
+                    key[[1L]] <- .key.row_number(conn)
+                } else {
+                    for (kname in names(key)) {
+                        kdnames <- pull(distinct(select(conn, !!as.name(kname))))
+                        key[[kname]] <- key[[kname]][match(kdnames, key[[kname]])]
+                    }
                 }
             } else {
                 stop("unsupported 'i' for row subsetting")
@@ -526,16 +564,18 @@ setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, opt
     key <- x@key
     fact <- as.list(x@fact)
 
-    for (i in names(key)) {
-        set <- key[[i]]
-        conn <- filter(conn, !!as.name(i) %in% set)
+    if (!.has.row_number(x)) {
+        for (i in names(key)) {
+            set <- key[[i]]
+            conn <- filter(conn, !!as.name(i) %in% set)
+        }
     }
 
     conn <- mutate(conn, !!!fact)
     conn <- select(conn, c(names(key), names(fact)))
 
     # Allow for 1 extra row to check for duplicate keys
-    length <- prod(lengths(key, use.names = FALSE)) + 1L
+    length <- nrow(x) + 1L
     conn <- head(conn, n = length)
 
     df <- as.data.frame(conn)[, c(names(key), names(fact))]
@@ -555,8 +595,9 @@ setMethod("as.data.frame", "ParquetFactTable", function(x, row.names = NULL, opt
 })
 
 #' @export
-#' @importFrom dplyr distinct pull select
+#' @importFrom dplyr distinct mutate pull select
 #' @importFrom S4Vectors new2
+#' @importFrom stats setNames
 #' @rdname ParquetFactTable
 ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key)), type = NULL, ...) {
     # Acquire the connection if it is a string
@@ -567,20 +608,21 @@ ParquetFactTable <- function(conn, key, fact = setdiff(colnames(conn), names(key
         stop("'conn' must be a 'tbl_duckdb_connection' object")
     }
 
-    # Ensure 'key' is a named list of character vectors
-    if (is.character(key)) {
+    # Ensure 'key' is a named list of vectors
+    if (missing(key)) {
+        key <- tail(make.unique(c(colnames(conn), "row_number"), sep = "_"), 1L)
+        key <- setNames(list(call("row_number")), key)
+        conn <- mutate(conn, !!!key)
+        key[[1L]] <- .key.row_number(conn)
+    } else if (is.character(key)) {
         key <- sapply(key, function(x) NULL, simplify = FALSE)
     }
     if (!is.list(key) || is.null(names(key))) {
         stop("'key' must be a character vector or a named list of vectors")
     }
-
-    # Get distinct key dimnames
-    if (is.list(key)) {
-        for (k in names(key)) {
-            if (is.null(key[[k]])) {
-                key[[k]] <- pull(distinct(select(conn, !!as.name(k))))
-            }
+    for (k in names(key)) {
+        if (is.null(key[[k]])) {
+            key[[k]] <- pull(distinct(select(conn, !!as.name(k))))
         }
     }
 
