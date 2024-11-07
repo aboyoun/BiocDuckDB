@@ -31,6 +31,7 @@
 \alias{var,DuckDBTable,ANY-method}
 \alias{sd,DuckDBTable-method}
 \alias{mad,DuckDBTable-method}
+\alias{IQR,DuckDBTable-method}
 \title{DuckDBTable objects}
 \usage{
 DuckDBTable(

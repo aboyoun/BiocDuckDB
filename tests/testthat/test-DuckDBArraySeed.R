@@ -309,9 +309,13 @@ test_that("Other aggregate methods work as expected for a DuckDBArraySeed", {
     expect_equal(var(seed), var(as.array(seed)))
     expect_equal(sd(seed), sd(as.array(seed)))
     expect_equal(mad(seed), mad(as.array(seed)))
+    expect_equal(mad(seed, constant = 1), mad(as.array(seed), constant = 1))
 
     expect_equal(quantile(seed), quantile(as.array(seed)))
     expect_equal(quantile(seed, probs = seq(0, 1, by = 0.05)), quantile(as.array(seed), probs = seq(0, 1, by = 0.05)))
     expect_equal(quantile(seed, names = FALSE), quantile(as.array(seed), names = FALSE))
     expect_equal(quantile(seed, type = 1), quantile(as.array(seed), type = 1))
+
+    expect_equal(IQR(seed), IQR(as.array(seed)))
+    expect_equal(IQR(seed, type = 1), IQR(as.array(seed), type = 1))
 })

@@ -27,6 +27,7 @@
 \alias{var,DuckDBColumn,ANY-method}
 \alias{sd,DuckDBColumn-method}
 \alias{mad,DuckDBColumn-method}
+\alias{IQR,DuckDBColumn-method}
 \title{DuckDBColumn objects}
 \description{
 DuckDBColumn objects

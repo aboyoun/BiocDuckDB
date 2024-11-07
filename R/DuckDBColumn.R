@@ -30,6 +30,7 @@
 #' var,DuckDBColumn,ANY-method
 #' sd,DuckDBColumn-method
 #' mad,DuckDBColumn-method
+#' IQR,DuckDBColumn-method
 #'
 #' @name DuckDBColumn
 NULL
@@ -239,7 +240,13 @@ setMethod("sd", "DuckDBColumn", function(x, na.rm = FALSE) {
 #' @importFrom BiocGenerics mad
 setMethod("mad", "DuckDBColumn",
 function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, high = FALSE) {
-    callGeneric(x@table)
+    callGeneric(x@table, constant = constant)
+})
+
+#' @export
+#' @importFrom BiocGenerics IQR
+setMethod("IQR", "DuckDBColumn", function(x, na.rm = FALSE, type = 7) {
+    callGeneric(x@table, type = type)
 })
 
 #' @export

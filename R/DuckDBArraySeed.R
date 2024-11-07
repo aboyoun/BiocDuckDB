@@ -61,6 +61,7 @@
 #' var,DuckDBArraySeed,ANY-method
 #' sd,DuckDBArraySeed-method
 #' mad,DuckDBArraySeed-method
+#' IQR,DuckDBArraySeed-method
 #'
 #' @seealso
 #' \code{\link{DuckDBArray}},
@@ -261,7 +262,13 @@ setMethod("sd", "DuckDBArraySeed", function(x, na.rm = FALSE) {
 #' @importFrom BiocGenerics mad
 setMethod("mad", "DuckDBArraySeed",
 function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, high = FALSE) {
-    callGeneric(x@table)
+    callGeneric(x@table, constant = constant)
+})
+
+#' @export
+#' @importFrom BiocGenerics IQR
+setMethod("IQR", "DuckDBArraySeed", function(x, na.rm = FALSE, type = 7) {
+    callGeneric(x@table, type = type)
 })
 
 .extract_array_index <- function(x, index) {

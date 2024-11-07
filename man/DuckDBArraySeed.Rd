@@ -28,6 +28,7 @@
 \alias{var,DuckDBArraySeed,ANY-method}
 \alias{sd,DuckDBArraySeed-method}
 \alias{mad,DuckDBArraySeed-method}
+\alias{IQR,DuckDBArraySeed-method}
 \title{DuckDBArraySeed objects}
 \usage{
 DuckDBArraySeed(conn, keycols, datacols, type = NULL, ...)

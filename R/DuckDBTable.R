@@ -61,6 +61,7 @@
 #' var,DuckDBTable,ANY-method
 #' sd,DuckDBTable-method
 #' mad,DuckDBTable-method
+#' IQR,DuckDBTable-method
 #'
 #' @include acquireTable.R
 #' @include keynames.R
@@ -570,6 +571,12 @@ setMethod("sd", "DuckDBTable", function(x, na.rm = FALSE) {
 setMethod("mad", "DuckDBTable",
 function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, high = FALSE) {
     constant * .pull.aggregagte(x, "mad")
+})
+
+#' @export
+#' @importFrom BiocGenerics IQR
+setMethod("IQR", "DuckDBTable", function(x, na.rm = FALSE, type = 7) {
+    diff(quantile(x, c(0.25, 0.75), na.rm = na.rm, names = FALSE, type = type))
 })
 
 #' @export

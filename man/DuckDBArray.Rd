@@ -22,6 +22,7 @@
 \alias{var,DuckDBArray,ANY-method}
 \alias{sd,DuckDBArray-method}
 \alias{mad,DuckDBArray-method}
+\alias{IQR,DuckDBArray-method}
 \title{DuckDB tables as DelayedArray objects}
 \usage{
 DuckDBArray(conn, keycols, datacols, type = NULL, ...)
