@@ -261,3 +261,22 @@ test_that("as.env works for a DuckDBDataFrame", {
     expect_identical(env[["gear"]], df[["gear"]])
     expect_identical(env[["carb"]], df[["carb"]])
 })
+
+test_that("column replacement works for a DuckDBDataFrame", {
+    df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
+    expected <- mtcars
+
+    df[["wt"]] <- df[["wt"]] * 1000
+    expected[["wt"]] <- expected[["wt"]] * 1000
+    checkDuckDBDataFrame(df, expected)
+
+    df$gpm <- 1 / df$mpg
+    expected$gpm <- 1 / expected$mpg
+    checkDuckDBDataFrame(df, expected)
+})
+
+test_that("transform works for a DuckDBDataFrame", {
+    df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
+    checkDuckDBDataFrame(transform(df, wt = wt * 1000, gpm = 1 / mpg),
+                         transform(mtcars, wt = wt * 1000, gpm = 1 / mpg))
+})

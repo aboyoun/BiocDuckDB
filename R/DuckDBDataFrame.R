@@ -299,13 +299,15 @@ function(value, x) {
 #' @importFrom S4Vectors replaceCOLS normalizeSingleBracketSubscript
 setMethod("replaceCOLS", "DuckDBDataFrame", function(x, i, value) {
     xstub <- setNames(seq_along(x), names(x))
-    i2 <- normalizeSingleBracketSubscript(i, xstub, allow.NAs = TRUE)
-    if (!anyNA(i2)) {
-        if (is(value, "DuckDBDataFrame")) {
-            if (isTRUE(all.equal(x, value))) {
-                x@datacols[i2] <- unname(value@datacols)
-                return(x)
+    i2 <- normalizeSingleBracketSubscript(i, xstub, allow.append = TRUE)
+    if (is(value, "DuckDBDataFrame")) {
+        if (isTRUE(all.equal(x, value))) {
+            datacols <- x@datacols
+            datacols[i2] <- unname(value@datacols)
+            if (is.character(i)) {
+                names(datacols)[i2] <- i
             }
+            return(initialize2(x, datacols = datacols, check = FALSE))
         }
     }
     stop("not compatible DuckDBDataFrame objects")
@@ -314,12 +316,17 @@ setMethod("replaceCOLS", "DuckDBDataFrame", function(x, i, value) {
 #' @export
 #' @importFrom S4Vectors normalizeDoubleBracketSubscript
 setMethod("[[<-", "DuckDBDataFrame", function(x, i, j, ..., value) {
-    i2 <- normalizeDoubleBracketSubscript(i, x, allow.nomatch = TRUE)
+    if (is.character(i)) {
+        i2 <- i
+    } else {
+        i2 <- normalizeDoubleBracketSubscript(i, x, allow.nomatch = TRUE)
+    }
     if (length(i2) == 1L && !is.na(i2)) {
         if (is(value, "DuckDBColumn")) {
             if (isTRUE(all.equal(as(x, "DuckDBTable"), value@table))) {
-                x@datacols[[i2]] <- value@table@datacols[[1L]]
-                return(x)
+                datacols <- x@datacols
+                datacols[[i2]] <- value@table@datacols[[1L]]
+                return(initialize2(x, datacols = datacols, check = FALSE))
             }
         }
     }
