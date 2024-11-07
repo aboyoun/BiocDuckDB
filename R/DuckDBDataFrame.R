@@ -53,6 +53,8 @@
 #' tail,DuckDBDataFrame-method
 #' extractCOLS,DuckDBDataFrame-method
 #' [,DuckDBDataFrame,ANY,ANY,ANY-method
+#' subset.DuckDBDataFrame
+#' subset,DuckDBDataFrame-method
 #' [[,DuckDBDataFrame-method
 #'
 #' replaceROWS,DuckDBDataFrame-method
@@ -247,11 +249,11 @@ setMethod("extractCOLS", "DuckDBDataFrame", function(x, i) {
 
 #' @export
 setMethod("[", "DuckDBDataFrame", function(x, i, j, ..., drop = TRUE) {
-    if (!missing(j)) {
-        x <- extractCOLS(x, j)
-    }
     if (!missing(i)) {
         x <- extractROWS(x, i)
+    }
+    if (!missing(j)) {
+        x <- extractCOLS(x, j)
     }
     if (missing(drop)) {
         drop <- (ncol(x) == 1L)
@@ -261,6 +263,29 @@ setMethod("[", "DuckDBDataFrame", function(x, i, j, ..., drop = TRUE) {
     }
     x
 })
+
+#' @exportS3Method base::subset
+subset.DuckDBDataFrame <- function(x, subset, select, drop = FALSE, ...) {
+    if (!missing(subset)) {
+        i <- eval(substitute(subset), as.env(x), parent.frame())
+        x <- extractROWS(x, i)
+    }
+    if (!missing(select)) {
+        j <- S4Vectors:::evalqForSelect(select, x, ...)
+        x <- extractCOLS(x, j)
+    }
+    if (missing(drop)) {
+        drop <- (ncol(x) == 1L)
+    }
+    if (drop && (ncol(x) == 1L)) {
+        x <- x[[1L]]
+    }
+    x
+}
+
+#' @export
+#' @importFrom S4Vectors subset
+setMethod("subset", "DuckDBDataFrame", subset.DuckDBDataFrame)
 
 #' @export
 #' @importFrom S4Vectors new2 normalizeDoubleBracketSubscript

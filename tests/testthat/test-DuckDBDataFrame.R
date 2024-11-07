@@ -95,26 +95,35 @@ test_that("extraction of a column yields a DuckDBColumn", {
     checkDuckDBColumn(df[,keep], setNames(mtcars[,keep], rownames(mtcars)))
 })
 
-test_that("conditional slicing by rows works for a DuckDBDataFrame with a keycol", {
+test_that("conditional slicing by rows works for a DuckDBDataFrame", {
     df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
     checkDuckDBDataFrame(df[df$cyl > 6,], mtcars[mtcars$cyl > 6,])
-})
 
-test_that("conditional slicing by rows works for a DuckDBDataFrame with row_number", {
     df <- DuckDBDataFrame(infert_path)
     checkDuckDBDataFrame(df[df$age > 30, ], infert[infert$age > 30, ])
 })
 
-test_that("positional slicing by rows works for a DuckDBDataFrame with a keycol", {
+test_that("positional slicing by rows works for a DuckDBDataFrame", {
     df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
     i <- sample(nrow(df))
     checkDuckDBDataFrame(df[i,], mtcars[i,])
-})
 
-test_that("positional slicing by rows works for a DuckDBDataFrame with row_number", {
     df <- DuckDBDataFrame(infert_path)
     i <- c(8,6,7,5,3,9)
     checkDuckDBDataFrame(df[i, ], infert[i, ])
+})
+
+test_that("subset works for a DuckDBDataFrame", {
+    df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
+    checkDuckDBDataFrame(subset(df, cyl > 6, mpg:wt), subset(mtcars, cyl > 6, mpg:wt))
+
+    df <- DuckDBDataFrame(infert_path)
+    checkDuckDBDataFrame(subset(df, age > 30, education, drop = FALSE),
+                         subset(infert, age > 30, education, drop = FALSE))
+
+    df <- DuckDBDataFrame(infert_path)
+    expect_identical(unname(as.vector(subset(df, age > 30, case, drop = TRUE))),
+                     subset(infert, age > 30, case, drop = TRUE))
 })
 
 test_that("head works for a DuckDBDataFrame", {
