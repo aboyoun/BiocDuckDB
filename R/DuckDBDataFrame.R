@@ -172,7 +172,7 @@ setMethod("extractROWS", "DuckDBDataFrame", function(x, i) {
     if (missing(i)) {
         return(x)
     }
-    i <- setNames(list(i), keynames(x))
+    i <- setNames(list(i), names(x@keycols))
     .subset_DuckDBTable(x, i = i)
 })
 

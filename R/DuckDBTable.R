@@ -257,7 +257,7 @@ setGeneric("coltypes", function(x) standardGeneric("coltypes"))
 
 #' @export
 setMethod("coltypes", "DuckDBTable", function(x) {
-    i <- sapply(keynames(x), function(x) character(), simplify = FALSE)
+    i <- sapply(names(x@keycols), function(x) character(), simplify = FALSE)
     empty <- .subset_DuckDBTable(x, i, drop = FALSE)
     vapply(as.data.frame(empty)[names(x@datacols)], .get_type, character(1L))
 })
@@ -314,6 +314,7 @@ setMethod("is_sparse", "DuckDBTable", function(x) {
     (ncol(x) == 1L) && ((nzcount(x) / nrow(x)) < 0.5)
 })
 
+#' @importFrom bit64 as.integer64
 #' @importFrom dplyr distinct filter pull select
 .subset_DuckDBTable <- function(x, i, j, ..., drop = TRUE) {
     conn <- x@conn
@@ -329,10 +330,20 @@ setMethod("is_sparse", "DuckDBTable", function(x) {
         }
         for (k in intersect(names(keycols), names(i))) {
             sub <- i[[k]]
-            if (is.character(sub) && is.null(names(keycols[[k]]))) {
-                keycols[[k]] <- sub
-            } else if (is.atomic(sub)) {
-                keycols[[k]] <- keycols[[k]][sub]
+            if (is.atomic(sub)) {
+                if (.has.row_number(x)) {
+                    if (is.numeric(sub)) {
+                        keep <- call("%in%", as.name(k), as.integer64(sub))
+                        conn <- filter(conn, !!keep)
+                        keycols[[1L]] <- .keycols.row_number(conn)
+                    } else {
+                        stop("unsupported 'i' for row subsetting with row_number")
+                    }
+                } else if (is.character(sub) && is.null(names(keycols[[k]]))) {
+                    keycols[[k]] <- sub
+                } else {
+                    keycols[[k]] <- keycols[[k]][sub]
+                }
             } else if (is(sub, "DuckDBColumn") &&
                        is.logical(as.vector(head(sub, 0L))) &&
                        isTRUE(all.equal(as(x, "DuckDBTable"), sub@table))) {

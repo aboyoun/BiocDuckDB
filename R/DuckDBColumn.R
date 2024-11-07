@@ -133,7 +133,7 @@ setMethod("extractROWS", "DuckDBColumn", function(x, i) {
     if (is(i, "DuckDBColumn")) {
         i <- i@table
     }
-    i <- setNames(list(i), keynames(x@table))
+    i <- setNames(list(i), names(x@table@keycols))
     initialize2(x, table = .subset_DuckDBTable(x@table, i = i), check = FALSE)
 })
 
