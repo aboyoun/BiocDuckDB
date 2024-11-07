@@ -65,6 +65,7 @@
 #' cbind.DuckDBDataFrame
 #'
 #' as.data.frame,DuckDBDataFrame-method
+#' as.env,DuckDBDataFrame-method
 #'
 #' @include acquireTable.R
 #' @include DuckDBColumn.R
@@ -285,7 +286,8 @@ setMethod("replaceROWS", "DuckDBDataFrame", function(x, i, value) {
 
 #' @export
 #' @importFrom S4Vectors new2 normalizeSingleBracketReplacementValue
-setMethod("normalizeSingleBracketReplacementValue", "DuckDBDataFrame", function(value, x) {
+setMethod("normalizeSingleBracketReplacementValue", "DuckDBDataFrame",
+function(value, x) {
     if (is(value, "DuckDBColumn")) {
         return(new2("DuckDBDataFrame", value@table, check = FALSE))
     }
@@ -326,7 +328,8 @@ setMethod("[[<-", "DuckDBDataFrame", function(x, i, j, ..., value) {
 
 #' @export
 #' @importFrom S4Vectors bindROWS
-setMethod("bindROWS", "DuckDBDataFrame", function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TRUE) {
+setMethod("bindROWS", "DuckDBDataFrame",
+function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TRUE) {
     stop("binding rows to a DuckDBDataFrame is not supported")
 })
 
@@ -389,9 +392,17 @@ cbind.DuckDBDataFrame <- function(..., deparse.level = 1) {
 setMethod("cbind", "DuckDBDataFrame", cbind.DuckDBDataFrame)
 
 #' @export
+#' @importFrom S4Vectors as.env
+setMethod("as.env", "DuckDBDataFrame",
+function(x, enclos = parent.frame(2), tform = identity) {
+    S4Vectors:::makeEnvForNames(x, colnames(x), enclos, tform)
+})
+
+#' @export
 #' @importFrom BiocGenerics as.data.frame
 #' @importFrom stats setNames
-setMethod("as.data.frame", "DuckDBDataFrame", function(x, row.names = NULL, optional = FALSE, ...) {
+setMethod("as.data.frame", "DuckDBDataFrame",
+function(x, row.names = NULL, optional = FALSE, ...) {
     # as.data.frame,DuckDBTable-method
     df <- callNextMethod(x, row.names = row.names, optional = optional, ...)
 

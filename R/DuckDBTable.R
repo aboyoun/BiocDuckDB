@@ -213,7 +213,9 @@ setMethod("rownames", "DuckDBTable", function(x, do.NULL = TRUE, prefix = "row")
 
 #' @export
 #' @importFrom BiocGenerics colnames
-setMethod("colnames", "DuckDBTable", function(x, do.NULL = TRUE, prefix = "col") names(x@datacols))
+setMethod("colnames", "DuckDBTable", function(x, do.NULL = TRUE, prefix = "col") {
+    names(x@datacols)
+})
 
 #' @export
 #' @importFrom BiocGenerics colnames<-
@@ -582,7 +584,8 @@ setMethod("IQR", "DuckDBTable", function(x, na.rm = FALSE, type = 7) {
 #' @export
 #' @importFrom BiocGenerics as.data.frame
 #' @importFrom dplyr filter mutate select
-setMethod("as.data.frame", "DuckDBTable", function(x, row.names = NULL, optional = FALSE, ...) {
+setMethod("as.data.frame", "DuckDBTable",
+function(x, row.names = NULL, optional = FALSE, ...) {
     conn <- x@conn
     keycols <- x@keycols
     datacols <- as.list(x@datacols)
@@ -622,7 +625,8 @@ setMethod("as.data.frame", "DuckDBTable", function(x, row.names = NULL, optional
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
 #' @rdname DuckDBTable
-DuckDBTable <- function(conn, keycols, datacols = setdiff(colnames(conn), names(keycols)), type = NULL, ...) {
+DuckDBTable <-
+function(conn, keycols, datacols = setdiff(colnames(conn), names(keycols)), type = NULL, ...) {
     # Acquire the connection if it is a string
     if (is.character(conn)) {
         conn <- acquireTable(conn, ...)

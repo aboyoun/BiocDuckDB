@@ -23,6 +23,7 @@
 \alias{cbind,DuckDBDataFrame-method}
 \alias{cbind.DuckDBDataFrame}
 \alias{as.data.frame,DuckDBDataFrame-method}
+\alias{as.env,DuckDBDataFrame-method}
 \title{DuckDB-backed DataFrame}
 \usage{
 DuckDBDataFrame(conn, keycols, datacols, ...)
