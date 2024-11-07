@@ -17,7 +17,7 @@ test_that("basic methods work for a DuckDBDataFrame", {
     checkDuckDBDataFrame(df, infert)
 })
 
-test_that("renaming columns creates a new DuckDBDataFrame", {
+test_that("renaming columns works for a DuckDBDataFrame", {
     df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
     expected <- mtcars
 
@@ -27,7 +27,7 @@ test_that("renaming columns creates a new DuckDBDataFrame", {
     checkDuckDBDataFrame(df, expected)
 })
 
-test_that("adding rownames creates a new DuckDBDataFrame", {
+test_that("renaming rownames works for a DuckDBDataFrame with a keycol", {
     df <- DuckDBDataFrame(mtcars_path, keycols = "model")
     expected <- mtcars
 
@@ -45,7 +45,13 @@ test_that("adding rownames creates a new DuckDBDataFrame", {
     checkDuckDBDataFrame(df, expected)
 })
 
-test_that("slicing by columns preserves type of a DuckDBDataFrame", {
+test_that("renaming rownames doesn't works for a DuckDBDataFrame with row_number", {
+    df <- DuckDBDataFrame(infert_path, datacols = colnames(infert))
+    checkDuckDBDataFrame(df, infert)
+    expect_error(rownames(df) <- sprintf("ROW%d", seq_len(nrow(df))))
+})
+
+test_that("slicing by columns works for a DuckDBDataFrame", {
     df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
 
     keep <- 1:2
@@ -89,26 +95,43 @@ test_that("extraction of a column yields a DuckDBColumn", {
     checkDuckDBColumn(df[,keep], setNames(mtcars[,keep], rownames(mtcars)))
 })
 
-test_that("conditional slicing by rows preserves type of a DuckDBDataFrame", {
+test_that("conditional slicing by rows works for a DuckDBDataFrame with a keycol", {
     df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
     checkDuckDBDataFrame(df[df$cyl > 6,], mtcars[mtcars$cyl > 6,])
 })
 
-test_that("positional slicing by rows preserves type of a DuckDBDataFrame", {
+test_that("conditional slicing by rows works for a DuckDBDataFrame with row_number", {
+    df <- DuckDBDataFrame(infert_path)
+    checkDuckDBDataFrame(df[df$age > 30, ], infert[infert$age > 30, ])
+})
+
+test_that("positional slicing by rows works for a DuckDBDataFrame with a keycol", {
     df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
     i <- sample(nrow(df))
     checkDuckDBDataFrame(df[i,], mtcars[i,])
 })
 
-test_that("head preserves type of a DuckDBDataFrame", {
+test_that("positional slicing by rows works for a DuckDBDataFrame with row_number", {
+    df <- DuckDBDataFrame(infert_path)
+    i <- c(8,6,7,5,3,9)
+    checkDuckDBDataFrame(df[i, ], infert[i, ])
+})
+
+test_that("head works for a DuckDBDataFrame", {
     df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
     checkDuckDBDataFrame(head(df, 0), head(mtcars, 0))
 
     df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
     checkDuckDBDataFrame(head(df, 20), head(mtcars, 20))
+
+    df <- DuckDBDataFrame(infert_path)
+    checkDuckDBDataFrame(head(df, 0), head(infert, 0))
+
+    df <- DuckDBDataFrame(infert_path)
+    checkDuckDBDataFrame(head(df, 20), head(infert, 20))
 })
 
-test_that("tail preserves type of a DuckDBDataFrame", {
+test_that("tail works for a DuckDBDataFrame", {
     df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
     checkDuckDBDataFrame(tail(df, 0), tail(mtcars, 0))
 
@@ -123,7 +146,7 @@ test_that("subset assignments that produce errors", {
     expect_error(df$some_random_thing <- runif(nrow(df)))
 })
 
-test_that("subset assignments that return a DuckDBDataFrame", {
+test_that("subset assignments works for a DuckDBDataFrame", {
     df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
 
     copy <- df
@@ -151,12 +174,12 @@ test_that("subset assignments that return a DuckDBDataFrame", {
     checkDuckDBDataFrame(copy, mtcars2)
 })
 
-test_that("rbinding produces errors", {
+test_that("rbind produces errors", {
     df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
     expect_error(rbind(df, df))
 })
 
-test_that("cbinding operations that return a DuckDBDataFrame", {
+test_that("cbind operations that works for DuckDBDataFrame", {
     df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
 
     # Same path, we get another PDF.
@@ -178,7 +201,7 @@ test_that("cbinding operations that return a DuckDBDataFrame", {
     checkDuckDBDataFrame(cbind(carb=df[["carb"]], df), expected)
 })
 
-test_that("cbinding operations that produce errors", {
+test_that("cbind operations that produce errors", {
     df <- DuckDBDataFrame(mtcars_path, keycols = list(model = rownames(mtcars)))
 
     expect_error(cbind(df, mtcars))

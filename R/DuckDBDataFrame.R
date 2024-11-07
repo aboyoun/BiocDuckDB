@@ -149,6 +149,9 @@ setMethod("names", "DuckDBDataFrame", function(x) colnames(x))
 #' @export
 #' @importFrom BiocGenerics rownames<-
 setReplaceMethod("rownames", "DuckDBDataFrame", function(x, value) {
+    if (.has.row_number(x)) {
+        stop("cannot replace row numbers with rownames")
+    }
     keydimnames(x) <- list(value)
     x
 })

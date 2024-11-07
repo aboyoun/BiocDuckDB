@@ -63,7 +63,11 @@ checkDuckDBTable <- function(object, expected) {
     expect_gte(nrow(object), nrow(expected))
     expect_equal(nkey(object) + ncol(object), ncol(expected))
     expect_identical(c(keynames(object), colnames(object)), colnames(expected))
-    if (nkey(object) > 0L) {
+    if (nkey(object) == 0L) {
+        object <- as.data.frame(object)
+        expect_gte(nrow(object), nrow(expected))
+        expect_equal(ncol(object) - 1L, ncol(expected))
+    } else {
         df <- as.data.frame(object)
         df <- df[match(do.call(paste, expected[, keynames(object), drop = FALSE]),
                        do.call(paste, df[, keynames(object), drop = FALSE])), ]
@@ -105,7 +109,12 @@ checkDuckDBDataFrame <- function(object, expected) {
     expect_identical(nrow(object), nrow(expected))
     expect_setequal(rownames(object), rownames(expected))
     expect_identical(colnames(object), colnames(expected))
-    if (nkey(object) > 0L) {
+    if (nkey(object) == 0L) {
+        object <- as.data.frame(object)
+        expect_identical(ncol(object), ncol(expected))
+        expect_identical(nrow(object), nrow(expected))
+        expect_identical(colnames(object), colnames(expected))
+    } else {
         expect_identical(as.data.frame(object)[rownames(expected), , drop=FALSE], expected)
     }
 }
