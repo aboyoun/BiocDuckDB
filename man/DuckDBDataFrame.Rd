@@ -14,7 +14,6 @@
 \alias{tail,DuckDBDataFrame-method}
 \alias{extractCOLS,DuckDBDataFrame-method}
 \alias{[,DuckDBDataFrame,ANY,ANY,ANY-method}
-\alias{subset.DuckDBDataFrame}
 \alias{subset,DuckDBDataFrame-method}
 \alias{[[,DuckDBDataFrame-method}
 \alias{replaceROWS,DuckDBDataFrame-method}

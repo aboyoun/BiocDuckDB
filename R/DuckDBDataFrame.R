@@ -53,7 +53,6 @@
 #' tail,DuckDBDataFrame-method
 #' extractCOLS,DuckDBDataFrame-method
 #' [,DuckDBDataFrame,ANY,ANY,ANY-method
-#' subset.DuckDBDataFrame
 #' subset,DuckDBDataFrame-method
 #' [[,DuckDBDataFrame-method
 #'
@@ -264,8 +263,10 @@ setMethod("[", "DuckDBDataFrame", function(x, i, j, ..., drop = TRUE) {
     x
 })
 
-#' @exportS3Method base::subset
-subset.DuckDBDataFrame <- function(x, subset, select, drop = FALSE, ...) {
+#' @export
+#' @importFrom BiocGenerics subset
+setMethod("subset", "DuckDBDataFrame",
+function(x, subset, select, drop = FALSE, ...) {
     if (!missing(subset)) {
         i <- eval(substitute(subset), as.env(x), parent.frame())
         x <- extractROWS(x, i)
@@ -281,11 +282,7 @@ subset.DuckDBDataFrame <- function(x, subset, select, drop = FALSE, ...) {
         x <- x[[1L]]
     }
     x
-}
-
-#' @export
-#' @importFrom S4Vectors subset
-setMethod("subset", "DuckDBDataFrame", subset.DuckDBDataFrame)
+})
 
 #' @export
 #' @importFrom S4Vectors new2 normalizeDoubleBracketSubscript
