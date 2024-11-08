@@ -32,7 +32,6 @@ state_df <- data.frame(
   value = as.vector(state.x77)
 )
 state_path <- tempfile()
-state_read <- sprintf("read_parquet('%s')", file.path(state_path, "**"))
 arrow::write_dataset(state_df, state_path, format = "parquet", partitioning = c("region", "division"))
 
 # Titanic dataset
