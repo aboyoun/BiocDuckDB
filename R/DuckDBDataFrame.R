@@ -181,10 +181,10 @@ setMethod("extractROWS", "DuckDBDataFrame", function(x, i) {
 })
 
 .head_conn <- function(x, n) {
-    conn <- head(x@conn, n)
+    con <- head(x@con, n)
     keycols <- x@keycols
-    keycols[[1L]] <- .keycols.row_number(conn)
-    initialize2(x, conn = conn, keycols = keycols, check = FALSE)
+    keycols[[1L]] <- .keycols.row_number(con)
+    initialize2(x, con = con, keycols = keycols, check = FALSE)
 }
 
 #' @export
@@ -453,11 +453,11 @@ function(x, row.names = NULL, optional = FALSE, ...) {
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
 #' @rdname DuckDBDataFrame
-DuckDBDataFrame <- function(conn, keycols, datacols, ...) {
+DuckDBDataFrame <- function(con, keycols, datacols, ...) {
     if (missing(datacols)) {
-        tbl <- DuckDBTable(conn, keycols = keycols, ...)
+        tbl <- DuckDBTable(con, keycols = keycols, ...)
     } else {
-        tbl <- DuckDBTable(conn, keycols = keycols, datacols = datacols, ...)
+        tbl <- DuckDBTable(con, keycols = keycols, datacols = datacols, ...)
     }
     new2("DuckDBDataFrame", tbl, ..., check = FALSE)
 }

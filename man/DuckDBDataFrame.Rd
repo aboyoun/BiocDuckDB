@@ -27,10 +27,10 @@
 \alias{as.env,DuckDBDataFrame-method}
 \title{DuckDB-backed DataFrame}
 \usage{
-DuckDBDataFrame(conn, keycols, datacols, ...)
+DuckDBDataFrame(con, keycols, datacols, ...)
 }
 \arguments{
-\item{conn}{Either a string containing the path to the underlying data files
+\item{con}{Either a string containing the path to the underlying data files
 or a \code{tbl_duckdb_connection} object.}
 
 \item{keycols}{An optional character vector or a list of character vectors

@@ -9,7 +9,7 @@
 #' \link{DuckDBArray} object instead. See \code{?\link{DuckDBArray}} for
 #' more information.
 #'
-#' @param conn Either a string containing the path to the data files or a
+#' @param con Either a string containing the path to the data files or a
 #' \code{tbl_duckdb_connection} object.
 #' @param keycols Either a character vector or a list of character vectors
 #' containing the names of the columns that comprise the primary key.
@@ -356,13 +356,13 @@ setMethod("DelayedArray", "DuckDBArraySeed", function(seed) DuckDBArray(seed))
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
 #' @rdname DuckDBArraySeed
-DuckDBArraySeed <- function(conn, keycols, datacols, type = NULL, ...) {
+DuckDBArraySeed <- function(con, keycols, datacols, type = NULL, ...) {
     if (is.null(type)) {
-        table <- DuckDBTable(conn, keycols = keycols, datacols = datacols, ...)
-        column <- as.data.frame(select(head(table@conn, 0L), !!datacols))[[datacols]]
+        table <- DuckDBTable(con, keycols = keycols, datacols = datacols, ...)
+        column <- as.data.frame(select(head(table@con, 0L), !!datacols))[[datacols]]
         type <- .get_type(column)
     } else {
-        table <- DuckDBTable(conn, keycols = keycols, datacols = datacols, type = setNames(type, datacols), ...)
+        table <- DuckDBTable(con, keycols = keycols, datacols = datacols, type = setNames(type, datacols), ...)
     }
     new2("DuckDBArraySeed", table = table, drop = FALSE, check = FALSE)
 }

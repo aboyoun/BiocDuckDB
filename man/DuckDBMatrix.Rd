@@ -7,10 +7,10 @@
 \alias{matrixClass,DuckDBArray-method}
 \title{DuckDB tables as DelayedMatrix objects}
 \usage{
-DuckDBMatrix(conn, row, col, datacols, keycols = c(row, col), type = NULL, ...)
+DuckDBMatrix(con, row, col, datacols, keycols = c(row, col), type = NULL, ...)
 }
 \arguments{
-\item{conn}{Either a string containing the path to the underlying data files
+\item{con}{Either a string containing the path to the underlying data files
 or a \code{tbl_duckdb_connection} object.}
 
 \item{row}{Either a character vector or a named list of character vectors

@@ -31,10 +31,10 @@
 \alias{IQR,DuckDBArraySeed-method}
 \title{DuckDBArraySeed objects}
 \usage{
-DuckDBArraySeed(conn, keycols, datacols, type = NULL, ...)
+DuckDBArraySeed(con, keycols, datacols, type = NULL, ...)
 }
 \arguments{
-\item{conn}{Either a string containing the path to the data files or a
+\item{con}{Either a string containing the path to the data files or a
 \code{tbl_duckdb_connection} object.}
 
 \item{keycols}{Either a character vector or a list of character vectors

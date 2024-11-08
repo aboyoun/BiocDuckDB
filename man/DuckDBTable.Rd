@@ -35,15 +35,15 @@
 \title{DuckDBTable objects}
 \usage{
 DuckDBTable(
-  conn,
+  con,
   keycols,
-  datacols = setdiff(colnames(conn), names(keycols)),
+  datacols = setdiff(colnames(con), names(keycols)),
   type = NULL,
   ...
 )
 }
 \arguments{
-\item{conn}{Either a string containing the path to the underlying data files
+\item{con}{Either a string containing the path to the underlying data files
 or a \code{tbl_duckdb_connection} object.}
 
 \item{keycols}{An optional character vector or a list of character vectors

@@ -7,7 +7,7 @@
 #' All the operations available for \link[DelayedArray]{DelayedMatrix}
 #' objects work on DuckDBMatrix objects.
 #'
-#' @param conn Either a string containing the path to the underlying data files
+#' @param con Either a string containing the path to the underlying data files
 #' or a \code{tbl_duckdb_connection} object.
 #' @param row Either a character vector or a named list of character vectors
 #' containing the names of the columns in the DuckDB table that specify the
@@ -84,18 +84,18 @@ setMethod("[", "DuckDBMatrix", function(x, i, j, ..., drop = TRUE) {
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
 #' @rdname DuckDBMatrix
-DuckDBMatrix <- function(conn, row, col, datacols, keycols = c(row, col), type = NULL, ...) {
+DuckDBMatrix <- function(con, row, col, datacols, keycols = c(row, col), type = NULL, ...) {
     if (!missing(row) && isSingleString(row)) {
         row <- setNames(list(NULL), row)
     }
     if (!missing(col) && isSingleString(col)) {
         col <- setNames(list(NULL), col)
     }
-    if (!is(conn, "DuckDBArraySeed")) {
+    if (!is(con, "DuckDBArraySeed")) {
         if (length(keycols) != 2L) {
             stop("'keycols' must contain exactly 2 elements: rows and columns")
         }
-        conn <- DuckDBArraySeed(conn, keycols = keycols, datacols = datacols, type = type, ...)
+        con <- DuckDBArraySeed(con, keycols = keycols, datacols = datacols, type = type, ...)
     }
-    new2("DuckDBMatrix", seed = conn, check = FALSE)
+    new2("DuckDBMatrix", seed = con, check = FALSE)
 }
