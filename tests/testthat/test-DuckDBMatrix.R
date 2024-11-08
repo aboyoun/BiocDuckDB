@@ -4,7 +4,7 @@
 test_that("basic methods work as expected for a DuckDBMatrix", {
     names(dimnames(state.x77)) <- c("rowname", "colname")
 
-    pqmat <- DuckDBMatrix(state_path, row = "rowname", col = "colname", datacols = "value")
+    pqmat <- DuckDBMatrix(state_read, row = "rowname", col = "colname", datacols = "value")
     expect_s4_class(pqmat, "DuckDBMatrix")
     expect_identical(type(pqmat), "double")
     expect_identical(type(pqmat), typeof(state.x77))
@@ -14,7 +14,7 @@ test_that("basic methods work as expected for a DuckDBMatrix", {
     expect_setequal(colnames(pqmat), colnames(state.x77))
     expect_equal(as.matrix(pqmat)[rownames(state.x77), colnames(state.x77)], state.x77)
 
-    pqmat <- DuckDBMatrix(state_path, row = dimnames(state.x77)[1L], col = "colname", datacols = "value")
+    pqmat <- DuckDBMatrix(state_read, row = dimnames(state.x77)[1L], col = "colname", datacols = "value")
     expect_s4_class(pqmat, "DuckDBMatrix")
     expect_identical(type(pqmat), "double")
     expect_identical(type(pqmat), typeof(state.x77))
@@ -24,7 +24,7 @@ test_that("basic methods work as expected for a DuckDBMatrix", {
     expect_setequal(colnames(pqmat), colnames(state.x77))
     expect_equal(as.matrix(pqmat)[rownames(state.x77), colnames(state.x77)], state.x77)
 
-    pqmat <- DuckDBMatrix(state_path, row = "rowname", col = dimnames(state.x77)[2L], datacols = "value")
+    pqmat <- DuckDBMatrix(state_read, row = "rowname", col = dimnames(state.x77)[2L], datacols = "value")
     expect_s4_class(pqmat, "DuckDBMatrix")
     expect_identical(type(pqmat), "double")
     expect_identical(type(pqmat), typeof(state.x77))
@@ -34,17 +34,17 @@ test_that("basic methods work as expected for a DuckDBMatrix", {
     expect_setequal(colnames(pqmat), colnames(state.x77))
     expect_equal(as.matrix(pqmat)[rownames(state.x77), colnames(state.x77)], state.x77)
 
-    pqmat <- DuckDBMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
+    pqmat <- DuckDBMatrix(state_read, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
     checkDuckDBMatrix(pqmat, state.x77)
 
-    pqmat <- DuckDBMatrix(state_path, keycols = dimnames(state.x77), datacols = "value")
+    pqmat <- DuckDBMatrix(state_read, keycols = dimnames(state.x77), datacols = "value")
     checkDuckDBMatrix(pqmat, state.x77)
 })
 
 test_that("extraction methods work as expected for a DuckDBMatrix", {
     names(dimnames(state.x77)) <- c("rowname", "colname")
 
-    pqmat <- DuckDBMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
+    pqmat <- DuckDBMatrix(state_read, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
 
     expected <- as.array(state.x77[1, ])
     names(dimnames(expected)) <- "colname"
@@ -77,14 +77,14 @@ test_that("extraction methods work as expected for a DuckDBMatrix", {
 
 test_that("aperm and t methods work as expected for a DuckDBMatrix", {
     names(dimnames(state.x77)) <- c("rowname", "colname")
-    pqmat <- DuckDBMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
+    pqmat <- DuckDBMatrix(state_read, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
     checkDuckDBMatrix(aperm(pqmat, c(2, 1)), aperm(state.x77, c(2, 1)))
     checkDuckDBMatrix(t(pqmat), t(state.x77))
 })
 
 test_that("Arith methods work as expected for a DuckDBMatrix", {
     names(dimnames(state.x77)) <- c("rowname", "colname")
-    pqmat <- DuckDBMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
+    pqmat <- DuckDBMatrix(state_read, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
 
     checkDuckDBMatrix(pqmat + sqrt(pqmat), as.array(pqmat) + sqrt(as.array(pqmat)))
     checkDuckDBMatrix(pqmat - 1L, as.array(pqmat) - 1L)
@@ -97,7 +97,7 @@ test_that("Arith methods work as expected for a DuckDBMatrix", {
 
 test_that("Compare methods work as expected for a DuckDBMatrix", {
     names(dimnames(state.x77)) <- c("rowname", "colname")
-    pqmat <- DuckDBMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
+    pqmat <- DuckDBMatrix(state_read, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
 
     checkDuckDBMatrix(pqmat == sqrt(pqmat), as.array(pqmat) == sqrt(as.array(pqmat)))
     checkDuckDBMatrix(pqmat > 1L, as.array(pqmat) > 1L)
@@ -109,7 +109,7 @@ test_that("Compare methods work as expected for a DuckDBMatrix", {
 
 test_that("Logic methods work as expected for a DuckDBMatrix", {
     names(dimnames(state.x77)) <- c("rowname", "colname")
-    pqmat <- DuckDBMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
+    pqmat <- DuckDBMatrix(state_read, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
 
     ## "&"
     x <- pqmat > 70
@@ -124,7 +124,7 @@ test_that("Logic methods work as expected for a DuckDBMatrix", {
 
 test_that("Math methods work as expected for a DuckDBMatrix", {
     names(dimnames(state.x77)) <- c("rowname", "colname")
-    pqmat <- DuckDBMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
+    pqmat <- DuckDBMatrix(state_read, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
 
     income <- pqmat[, "Income", drop = FALSE]
     ikeep <-

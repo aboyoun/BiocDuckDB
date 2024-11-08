@@ -25,10 +25,10 @@
 \alias{IQR,DuckDBArray-method}
 \title{DuckDB tables as DelayedArray objects}
 \usage{
-DuckDBArray(con, keycols, datacols, type = NULL, ...)
+DuckDBArray(conn, keycols, datacols, type = NULL)
 }
 \arguments{
-\item{con}{Either a string containing the path to the data files or a
+\item{conn}{Either a string containing the path to the data files or a
 \code{tbl_duckdb_connection} object.}
 
 \item{keycols}{Either a character vector or a list of character vectors
@@ -40,8 +40,6 @@ that specifies the value of the array.}
 \item{type}{String specifying the type of the data values; one of
 \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
 \code{"character"}. If \code{NULL}, it is determined by inspecting the data.}
-
-\item{...}{Further arguments to be passed to \code{read_parquet}.}
 }
 \description{
 The DuckDBArray class is a \link[DelayedArray]{DelayedArray} subclass
@@ -56,7 +54,7 @@ df <- do.call(expand.grid, c(dimnames(Titanic), stringsAsFactors = FALSE))
 df$fate <- Titanic[as.matrix(df)]
 
 # Write data to a parquet file
-tf <- tempfile()
+tf <- paste0(tempfile(), ".parquet")
 on.exit(unlink(tf))
 arrow::write_parquet(df, tf)
 

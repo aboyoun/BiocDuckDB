@@ -27,10 +27,10 @@
 \alias{as.env,DuckDBDataFrame-method}
 \title{DuckDB-backed DataFrame}
 \usage{
-DuckDBDataFrame(con, keycols, datacols, ...)
+DuckDBDataFrame(conn, keycols, datacols, type = NULL)
 }
 \arguments{
-\item{con}{Either a string containing the path to the underlying data files
+\item{conn}{Either a string containing the path to the underlying data files
 or a \code{tbl_duckdb_connection} object.}
 
 \item{keycols}{An optional character vector or a list of character vectors
@@ -40,7 +40,10 @@ a \code{row_number} column is created as an identifier.}
 \item{datacols}{Either a character vector containing the names of the columns
 in the DuckDB table that specify the data columns.}
 
-\item{...}{Further arguments to be passed to \code{read_parquet}.}
+\item{type}{An optional named character vector where the names specify the
+column names and the values specify the column type; one of
+\code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
+\code{"character"}.}
 }
 \value{
 A DuckDBDataFrame where each column is a \linkS4class{DuckDBColumn}.
@@ -56,7 +59,7 @@ Thus, users can specialize code paths for a DuckDBDataFrame to operate directly 
 }
 \examples{
 # Mocking up a file:
-tf <- tempfile()
+tf <- paste0(tempfile(), ".parquet")
 on.exit(unlink(tf))
 arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 

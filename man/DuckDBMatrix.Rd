@@ -7,10 +7,10 @@
 \alias{matrixClass,DuckDBArray-method}
 \title{DuckDB tables as DelayedMatrix objects}
 \usage{
-DuckDBMatrix(con, row, col, datacols, keycols = c(row, col), type = NULL, ...)
+DuckDBMatrix(conn, row, col, datacols, keycols = c(row, col), type = NULL)
 }
 \arguments{
-\item{con}{Either a string containing the path to the underlying data files
+\item{conn}{Either a string containing the path to the underlying data files
 or a \code{tbl_duckdb_connection} object.}
 
 \item{row}{Either a character vector or a named list of character vectors
@@ -31,8 +31,6 @@ rows and columns of the matrix.}
 \item{type}{String specifying the type of the data values; one of
 \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
 \code{"character"}. If \code{NULL}, it is determined by inspecting the data.}
-
-\item{...}{Further arguments to be passed to \code{read_parquet}.}
 }
 \description{
 The DuckDBMatrix class is a \link[DelayedArray]{DelayedMatrix} subclass
@@ -50,7 +48,7 @@ df <- data.frame(
 )
 
 # Write data to a parquet file
-tf <- tempfile()
+tf <- paste0(tempfile(), ".parquet")
 on.exit(unlink(tf))
 arrow::write_parquet(df, tf)
 

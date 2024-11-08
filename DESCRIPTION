@@ -19,15 +19,16 @@ Depends:
     methods,
     bit64,
     SparseArray (>= 1.5.42),
-    DelayedArray (>= 0.31.8)
+    DelayedArray (>= 0.31.8),
+    duckdb
 Imports:
     stats,
+    tools,
     BiocGenerics (>= 0.51.2),
     S4Vectors,
     S4Arrays (>= 1.1.1),
     DBI,
-    dplyr,
-    duckdb
+    dplyr
 Suggests:
     knitr,
     rmarkdown,
@@ -42,7 +43,7 @@ RoxygenNote: 7.3.2
 Encoding: UTF-8
 Collate:
     'keynames.R'
-    'acquireTable.R'
+    'DuckDBConnection.R'
     'DuckDBTable.R'
     'DuckDBArraySeed.R'
     'DuckDBArray.R'

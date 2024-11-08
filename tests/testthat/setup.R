@@ -3,17 +3,17 @@ esoph_df <- esoph
 for (i in 1:3) {
   esoph_df[[i]] <- as.character(esoph_df[[i]])
 }
-esoph_path <- tempfile()
+esoph_path <- paste0(tempfile(), ".parquet")
 arrow::write_parquet(esoph_df, esoph_path)
 
 # Infertility after Spontaneous and Induced Abortion
-infert_path <- tempfile()
+infert_path <- paste0(tempfile(), ".parquet")
 arrow::write_parquet(infert, infert_path)
 
 # Motor Trend Car Road Tests
 mtcars_df <- cbind(model = rownames(mtcars), mtcars)
 rownames(mtcars_df) <- NULL
-mtcars_path <- tempfile()
+mtcars_path <- paste0(tempfile(), ".parquet")
 arrow::write_parquet(mtcars_df, mtcars_path)
 mtcars_mcols <- DataFrame(description = c("Miles/(US) gallon", "Number of cylinders",
                                           "Displacement (cu.in.)", "Gross horsepower",
@@ -32,6 +32,7 @@ state_df <- data.frame(
   value = as.vector(state.x77)
 )
 state_path <- tempfile()
+state_read <- sprintf("read_parquet('%s')", file.path(state_path, "**"))
 arrow::write_dataset(state_df, state_path, format = "parquet", partitioning = c("region", "division"))
 
 # Titanic dataset
@@ -40,7 +41,7 @@ storage.mode(titanic_array) <- "integer"
 titanic_df <- do.call(expand.grid, c(dimnames(Titanic), stringsAsFactors = FALSE))
 titanic_df$fate <- as.integer(Titanic[as.matrix(titanic_df)])
 titanic_df[titanic_df$fate != 0L, ]
-titanic_path <- tempfile()
+titanic_path <- paste0(tempfile(), ".parquet")
 arrow::write_parquet(titanic_df, titanic_path)
 
 # Random array
@@ -54,7 +55,7 @@ sparse_df <- sparse_df[order(sparse_df$dim1, sparse_df$dim2, sparse_df$dim3),]
 rownames(sparse_df) <- NULL
 sparse_array <- array(0L, dim = c(26L, 26L, 12L), dimnames = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb))
 sparse_array[as.matrix(sparse_df[,1:3])] <- sparse_df[["value"]]
-sparse_path <- tempfile()
+sparse_path <- paste0(tempfile(), ".parquet")
 arrow::write_parquet(sparse_df, sparse_path)
 
 # Helper functions

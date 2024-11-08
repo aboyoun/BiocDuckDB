@@ -108,7 +108,7 @@ test_that("aperm and t methods work as expected for a DuckDBArraySeed", {
     checkDuckDBArraySeed(object, expected)
 
     names(dimnames(state.x77)) <- c("rowname", "colname")
-    seed <- DuckDBArraySeed(state_path, keycols = dimnames(state.x77), datacols = "value")
+    seed <- DuckDBArraySeed(state_read, keycols = dimnames(state.x77), datacols = "value")
 
     object <- t(seed)
     expected <- t(state.x77)
@@ -160,7 +160,7 @@ test_that("Logic methods work as expected for a DuckDBArraySeed", {
 
 test_that("Math methods work as expected for a DuckDBArraySeed", {
     names(dimnames(state.x77)) <- c("rowname", "colname")
-    seed <- DuckDBArraySeed(state_path, keycols = dimnames(state.x77), datacols = "value")
+    seed <- DuckDBArraySeed(state_read, keycols = dimnames(state.x77), datacols = "value")
 
     income <- seed[, "Income"]
     ikeep <-

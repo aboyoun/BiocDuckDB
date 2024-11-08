@@ -7,7 +7,7 @@
 #' All the operations available for \link[DelayedArray]{DelayedMatrix}
 #' objects work on DuckDBMatrix objects.
 #'
-#' @param con Either a string containing the path to the underlying data files
+#' @param conn Either a string containing the path to the underlying data files
 #' or a \code{tbl_duckdb_connection} object.
 #' @param row Either a character vector or a named list of character vectors
 #' containing the names of the columns in the DuckDB table that specify the
@@ -23,7 +23,6 @@
 #' @param type String specifying the type of the data values; one of
 #' \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
 #' \code{"character"}. If \code{NULL}, it is determined by inspecting the data.
-#' @param ... Further arguments to be passed to \code{read_parquet}.
 #'
 #' @author Patrick Aboyoun
 #'
@@ -36,7 +35,7 @@
 #' )
 #'
 #' # Write data to a parquet file
-#' tf <- tempfile()
+#' tf <- paste0(tempfile(), ".parquet")
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
@@ -84,18 +83,18 @@ setMethod("[", "DuckDBMatrix", function(x, i, j, ..., drop = TRUE) {
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
 #' @rdname DuckDBMatrix
-DuckDBMatrix <- function(con, row, col, datacols, keycols = c(row, col), type = NULL, ...) {
+DuckDBMatrix <- function(conn, row, col, datacols, keycols = c(row, col), type = NULL) {
     if (!missing(row) && isSingleString(row)) {
         row <- setNames(list(NULL), row)
     }
     if (!missing(col) && isSingleString(col)) {
         col <- setNames(list(NULL), col)
     }
-    if (!is(con, "DuckDBArraySeed")) {
+    if (!is(conn, "DuckDBArraySeed")) {
         if (length(keycols) != 2L) {
             stop("'keycols' must contain exactly 2 elements: rows and columns")
         }
-        con <- DuckDBArraySeed(con, keycols = keycols, datacols = datacols, type = type, ...)
+        conn <- DuckDBArraySeed(conn, keycols = keycols, datacols = datacols, type = type)
     }
-    new2("DuckDBMatrix", seed = con, check = FALSE)
+    new2("DuckDBMatrix", seed = conn, check = FALSE)
 }

@@ -17,7 +17,7 @@
 #' df$fate <- Titanic[as.matrix(df)]
 #'
 #' # Write data to a parquet file
-#' tf <- tempfile()
+#' tf <- paste0(tempfile(), ".parquet")
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
@@ -177,9 +177,9 @@ setMethod("IQR", "DuckDBArray", function(x, na.rm = FALSE, type = 7) {
 #' @export
 #' @importFrom S4Vectors new2
 #' @rdname DuckDBArray
-DuckDBArray <- function(con, keycols, datacols, type = NULL, ...) {
-    if (!is(con, "DuckDBArraySeed")) {
-        con <- DuckDBArraySeed(con, keycols = keycols, datacols = datacols, type = type, ...)
+DuckDBArray <- function(conn, keycols, datacols, type = NULL) {
+    if (!is(conn, "DuckDBArraySeed")) {
+        conn <- DuckDBArraySeed(conn, keycols = keycols, datacols = datacols, type = type)
     }
-    new2("DuckDBArray", seed = con, check = FALSE)
+    new2("DuckDBArray", seed = conn, check = FALSE)
 }

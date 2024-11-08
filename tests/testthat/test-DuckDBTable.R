@@ -34,10 +34,10 @@ test_that("basic methods work as expected for a DuckDBTable", {
     checkDuckDBTable(tbl, mtcars_df)
 
     # state dataset
-    tbl <- DuckDBTable(state_path, keycols = c("region", "division", "rowname", "colname"))
+    tbl <- DuckDBTable(state_read, keycols = c("region", "division", "rowname", "colname"))
     checkDuckDBTable(tbl, state_df)
 
-    tbl <- DuckDBTable(state_path, keycols = c("region", "division", "rowname", "colname"), datacols = "value")
+    tbl <- DuckDBTable(state_read, keycols = c("region", "division", "rowname", "colname"), datacols = "value")
     checkDuckDBTable(tbl, state_df)
 
     # titanic dataset
@@ -165,7 +165,7 @@ test_that("Logic methods work as expected for a DuckDBTable", {
 })
 
 test_that("Math methods work as expected for a DuckDBTable", {
-    tbl <- DuckDBTable(state_path, keycols = c("region", "division", "rowname", "colname"), datacols = "value")
+    tbl <- DuckDBTable(state_read, keycols = c("region", "division", "rowname", "colname"), datacols = "value")
 
     income <- tbl[list(colname = "Income"), ]
     income_df <- state_df[state_df$colname == "Income", ]

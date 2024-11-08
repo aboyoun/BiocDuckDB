@@ -16,7 +16,7 @@
 #'
 #' @examples
 #' # Mocking up a file:
-#' tf <- tempfile()
+#' tf <- paste0(tempfile(), ".parquet")
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 #'
@@ -181,10 +181,10 @@ setMethod("extractROWS", "DuckDBDataFrame", function(x, i) {
 })
 
 .head_conn <- function(x, n) {
-    con <- head(x@con, n)
+    conn <- head(x@conn, n)
     keycols <- x@keycols
-    keycols[[1L]] <- .keycols.row_number(con)
-    initialize2(x, con = con, keycols = keycols, check = FALSE)
+    keycols[[1L]] <- .keycols.row_number(conn)
+    initialize2(x, conn = conn, keycols = keycols, check = FALSE)
 }
 
 #' @export
@@ -453,11 +453,11 @@ function(x, row.names = NULL, optional = FALSE, ...) {
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
 #' @rdname DuckDBDataFrame
-DuckDBDataFrame <- function(con, keycols, datacols, ...) {
+DuckDBDataFrame <- function(conn, keycols, datacols, type = NULL) {
     if (missing(datacols)) {
-        tbl <- DuckDBTable(con, keycols = keycols, ...)
+        tbl <- DuckDBTable(conn, keycols = keycols, type = NULL)
     } else {
-        tbl <- DuckDBTable(con, keycols = keycols, datacols = datacols, ...)
+        tbl <- DuckDBTable(conn, keycols = keycols, datacols = datacols, type = NULL)
     }
-    new2("DuckDBDataFrame", tbl, ..., check = FALSE)
+    new2("DuckDBDataFrame", tbl, check = FALSE)
 }

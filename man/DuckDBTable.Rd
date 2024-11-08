@@ -35,15 +35,14 @@
 \title{DuckDBTable objects}
 \usage{
 DuckDBTable(
-  con,
+  conn,
   keycols,
-  datacols = setdiff(colnames(con), names(keycols)),
-  type = NULL,
-  ...
+  datacols = setdiff(colnames(conn), names(keycols)),
+  type = NULL
 )
 }
 \arguments{
-\item{con}{Either a string containing the path to the underlying data files
+\item{conn}{Either a string containing the path to the underlying data files
 or a \code{tbl_duckdb_connection} object.}
 
 \item{keycols}{An optional character vector or a list of character vectors
@@ -57,8 +56,6 @@ in the DuckDB table that specify the data columns.}
 column names and the values specify the column type; one of
 \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
 \code{"character"}.}
-
-\item{...}{Further arguments to be passed to \code{read_parquet}.}
 }
 \description{
 DuckDBTable is a low-level helper class for representing a
@@ -70,7 +67,7 @@ df <- do.call(expand.grid, c(dimnames(Titanic), stringsAsFactors = FALSE))
 df$fate <- as.integer(Titanic[as.matrix(df)])
 
 # Write data to a parquet file
-tf <- tempfile()
+tf <- paste0(tempfile(), ".parquet")
 on.exit(unlink(tf))
 arrow::write_parquet(df, tf)
 
