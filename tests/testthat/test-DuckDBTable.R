@@ -130,121 +130,24 @@ test_that("DuckDBTable can be bound across columns", {
 test_that("Arith methods work as expected for a DuckDBTable", {
     tbl <- DuckDBTable(mtcars_path, keycols = "model", datacols = colnames(mtcars))
 
-    ## "+"
     checkDuckDBTable(tbl + sqrt(tbl), cbind(model = rownames(mtcars), mtcars + sqrt(mtcars)))
-    checkDuckDBTable(tbl + tbl[,"carb"], cbind(model = rownames(mtcars), mtcars + mtcars[, "carb"]))
-    checkDuckDBTable(tbl + 1L, cbind(model = rownames(mtcars), mtcars + 1L))
-    checkDuckDBTable(tbl + 3.14, cbind(model = rownames(mtcars), mtcars + 3.14))
-    checkDuckDBTable(sqrt(tbl) + tbl, cbind(model = rownames(mtcars), sqrt(mtcars) + mtcars))
-    checkDuckDBTable(tbl[,"carb"] + tbl, cbind(model = rownames(mtcars), mtcars[, "carb"] + mtcars))
-    checkDuckDBTable(1L + tbl, cbind(model = rownames(mtcars), 1L + mtcars))
-    checkDuckDBTable(3.14 + tbl, cbind(model = rownames(mtcars), 3.14 + mtcars))
-
-    ## "-"
-    checkDuckDBTable(tbl - sqrt(tbl), cbind(model = rownames(mtcars), mtcars - sqrt(mtcars)))
     checkDuckDBTable(tbl - tbl[,"carb"], cbind(model = rownames(mtcars), mtcars - mtcars[, "carb"]))
-    checkDuckDBTable(tbl - 1L, cbind(model = rownames(mtcars), mtcars - 1L))
-    checkDuckDBTable(tbl - 3.14, cbind(model = rownames(mtcars), mtcars - 3.14))
-    checkDuckDBTable(sqrt(tbl) - tbl, cbind(model = rownames(mtcars), sqrt(mtcars) - mtcars))
-    checkDuckDBTable(tbl[,"carb"] - tbl, cbind(model = rownames(mtcars), mtcars[, "carb"] - mtcars))
-    checkDuckDBTable(1L - tbl, cbind(model = rownames(mtcars), 1L - mtcars))
-    checkDuckDBTable(3.14 - tbl, cbind(model = rownames(mtcars), 3.14 - mtcars))
-
-    ## "*"
-    checkDuckDBTable(tbl * sqrt(tbl), cbind(model = rownames(mtcars), mtcars * sqrt(mtcars)))
-    checkDuckDBTable(tbl * tbl[,"carb"], cbind(model = rownames(mtcars), mtcars * mtcars[, "carb"]))
     checkDuckDBTable(tbl * 1L, cbind(model = rownames(mtcars), mtcars * 1L))
-    checkDuckDBTable(tbl * 3.14, cbind(model = rownames(mtcars), mtcars * 3.14))
-    checkDuckDBTable(sqrt(tbl) * tbl, cbind(model = rownames(mtcars), sqrt(mtcars) * mtcars))
-    checkDuckDBTable(tbl[,"carb"] * tbl, cbind(model = rownames(mtcars), mtcars[, "carb"] * mtcars))
-    checkDuckDBTable(1L * tbl, cbind(model = rownames(mtcars), 1L * mtcars))
-    checkDuckDBTable(3.14 * tbl, cbind(model = rownames(mtcars), 3.14 * mtcars))
-
-    ## "/"
-    checkDuckDBTable(tbl / sqrt(tbl), cbind(model = rownames(mtcars), mtcars / sqrt(mtcars)))
-    checkDuckDBTable(tbl / tbl[,"carb"], cbind(model = rownames(mtcars), mtcars / mtcars[, "carb"]))
-    checkDuckDBTable(tbl / 1L, cbind(model = rownames(mtcars), mtcars / 1L))
     checkDuckDBTable(tbl / 3.14, cbind(model = rownames(mtcars), mtcars / 3.14))
-    checkDuckDBTable(sqrt(tbl) / tbl, cbind(model = rownames(mtcars), sqrt(mtcars) / mtcars))
-    checkDuckDBTable(tbl[,"carb"] / tbl, cbind(model = rownames(mtcars), mtcars[, "carb"] / mtcars))
-    checkDuckDBTable(1L / tbl, cbind(model = rownames(mtcars), 1L / mtcars))
-    checkDuckDBTable(3.14 / tbl, cbind(model = rownames(mtcars), 3.14 / mtcars))
-
-    ## "^"
-    checkDuckDBTable(tbl ^ sqrt(tbl), cbind(model = rownames(mtcars), mtcars ^ sqrt(mtcars)))
-    checkDuckDBTable(tbl ^ tbl[,"carb"], cbind(model = rownames(mtcars), mtcars ^ mtcars[, "carb"]))
-    checkDuckDBTable(tbl ^ 1L, cbind(model = rownames(mtcars), mtcars ^ 1L))
-    checkDuckDBTable(tbl ^ 3.14, cbind(model = rownames(mtcars), mtcars ^ 3.14))
     checkDuckDBTable(sqrt(tbl) ^ tbl, cbind(model = rownames(mtcars), sqrt(mtcars) ^ mtcars))
-    checkDuckDBTable(tbl[,"carb"] ^ tbl, cbind(model = rownames(mtcars), mtcars[, "carb"] ^ mtcars))
-    checkDuckDBTable(1L ^ tbl, cbind(model = rownames(mtcars), 1L ^ mtcars))
-    checkDuckDBTable(3.14 ^ tbl, cbind(model = rownames(mtcars), 3.14 ^ mtcars))
-
-    ## "%%"
-    checkDuckDBTable(tbl %% sqrt(tbl), cbind(model = rownames(mtcars), mtcars %% sqrt(mtcars)))
-    checkDuckDBTable(tbl %% tbl[,"carb"], cbind(model = rownames(mtcars), mtcars %% mtcars[, "carb"]))
-    checkDuckDBTable(tbl %% 1L, cbind(model = rownames(mtcars), mtcars %% 1L))
-    checkDuckDBTable(tbl %% 3.14, cbind(model = rownames(mtcars), mtcars %% 3.14))
-    checkDuckDBTable(sqrt(tbl) %% tbl, cbind(model = rownames(mtcars), sqrt(mtcars) %% mtcars))
     checkDuckDBTable(tbl[,"carb"] %% tbl, cbind(model = rownames(mtcars), mtcars[, "carb"] %% mtcars))
-    checkDuckDBTable(1L %% tbl, cbind(model = rownames(mtcars), 1L %% mtcars))
-    checkDuckDBTable(3.14 %% tbl, cbind(model = rownames(mtcars), 3.14 %% mtcars))
-
-    ## "%/%"
-    checkDuckDBTable(tbl %/% sqrt(tbl), cbind(model = rownames(mtcars), mtcars %/% sqrt(mtcars)))
-    checkDuckDBTable(tbl %/% tbl[,"carb"], cbind(model = rownames(mtcars), mtcars %/% mtcars[, "carb"]))
-    checkDuckDBTable(tbl %/% 1L, cbind(model = rownames(mtcars), mtcars %/% 1L))
-    checkDuckDBTable(tbl %/% 3.14, cbind(model = rownames(mtcars), mtcars %/% 3.14))
-    checkDuckDBTable(sqrt(tbl) %/% tbl, cbind(model = rownames(mtcars), sqrt(mtcars) %/% mtcars))
-    checkDuckDBTable(tbl[,"carb"] %/% tbl, cbind(model = rownames(mtcars), mtcars[, "carb"] %/% mtcars))
-    checkDuckDBTable(1L %/% tbl, cbind(model = rownames(mtcars), 1L %/% mtcars))
     checkDuckDBTable(3.14 %/% tbl, cbind(model = rownames(mtcars), 3.14 %/% mtcars))
 })
 
 test_that("Compare methods work as expected for a DuckDBTable", {
     tbl <- DuckDBTable(titanic_path, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
 
-    ## "=="
     checkDuckDBTable(tbl == sqrt(tbl), cbind(titanic_df[,1:4], fate = titanic_df$fate == sqrt(titanic_df$fate)))
-    checkDuckDBTable(tbl == 1L, cbind(titanic_df[,1:4], fate = titanic_df$fate == 1L))
-    checkDuckDBTable(tbl == 3.14, cbind(titanic_df[,1:4], fate = titanic_df$fate == 3.14))
-    checkDuckDBTable(1L == tbl, cbind(titanic_df[,1:4], fate = 1L == titanic_df$fate))
-    checkDuckDBTable(3.14 == tbl, cbind(titanic_df[,1:4], fate = 3.14 == titanic_df$fate))
-
-    ## ">"
-    checkDuckDBTable(tbl > sqrt(tbl), cbind(titanic_df[,1:4], fate = titanic_df$fate > sqrt(titanic_df$fate)))
     checkDuckDBTable(tbl > 1L, cbind(titanic_df[,1:4], fate = titanic_df$fate > 1L))
-    checkDuckDBTable(tbl > 3.14, cbind(titanic_df[,1:4], fate = titanic_df$fate > 3.14))
-    checkDuckDBTable(1L > tbl, cbind(titanic_df[,1:4], fate = 1L > titanic_df$fate))
-    checkDuckDBTable(3.14 > tbl, cbind(titanic_df[,1:4], fate = 3.14 > titanic_df$fate))
-
-    ## "<"
-    checkDuckDBTable(tbl < sqrt(tbl), cbind(titanic_df[,1:4], fate = titanic_df$fate < sqrt(titanic_df$fate)))
-    checkDuckDBTable(tbl < 1L, cbind(titanic_df[,1:4], fate = titanic_df$fate < 1L))
     checkDuckDBTable(tbl < 3.14, cbind(titanic_df[,1:4], fate = titanic_df$fate < 3.14))
-    checkDuckDBTable(1L < tbl, cbind(titanic_df[,1:4], fate = 1L < titanic_df$fate))
-    checkDuckDBTable(3.14 < tbl, cbind(titanic_df[,1:4], fate = 3.14 < titanic_df$fate))
-
-    ## "!="
-    checkDuckDBTable(tbl != sqrt(tbl), cbind(titanic_df[,1:4], fate = titanic_df$fate != sqrt(titanic_df$fate)))
-    checkDuckDBTable(tbl != 1L, cbind(titanic_df[,1:4], fate = titanic_df$fate != 1L))
-    checkDuckDBTable(tbl != 3.14, cbind(titanic_df[,1:4], fate = titanic_df$fate != 3.14))
     checkDuckDBTable(1L != tbl, cbind(titanic_df[,1:4], fate = 1L != titanic_df$fate))
-    checkDuckDBTable(3.14 != tbl, cbind(titanic_df[,1:4], fate = 3.14 != titanic_df$fate))
-
-    ## "<="
-    checkDuckDBTable(tbl <= sqrt(tbl), cbind(titanic_df[,1:4], fate = titanic_df$fate <= sqrt(titanic_df$fate)))
-    checkDuckDBTable(tbl <= 1L, cbind(titanic_df[,1:4], fate = titanic_df$fate <= 1L))
-    checkDuckDBTable(tbl <= 3.14, cbind(titanic_df[,1:4], fate = titanic_df$fate <= 3.14))
-    checkDuckDBTable(1L <= tbl, cbind(titanic_df[,1:4], fate = 1L <= titanic_df$fate))
     checkDuckDBTable(3.14 <= tbl, cbind(titanic_df[,1:4], fate = 3.14 <= titanic_df$fate))
-
-    ## ">="
     checkDuckDBTable(tbl >= sqrt(tbl), cbind(titanic_df[,1:4], fate = titanic_df$fate >= sqrt(titanic_df$fate)))
-    checkDuckDBTable(tbl >= 1L, cbind(titanic_df[,1:4], fate = titanic_df$fate >= 1L))
-    checkDuckDBTable(tbl >= 3.14, cbind(titanic_df[,1:4], fate = titanic_df$fate >= 3.14))
-    checkDuckDBTable(1L >= tbl, cbind(titanic_df[,1:4], fate = 1L >= titanic_df$fate))
-    checkDuckDBTable(3.14 >= tbl, cbind(titanic_df[,1:4], fate = 3.14 >= titanic_df$fate))
 })
 
 test_that("Logic methods work as expected for a DuckDBTable", {

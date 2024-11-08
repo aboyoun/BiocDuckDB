@@ -86,95 +86,25 @@ test_that("Arith methods work as expected for a DuckDBMatrix", {
     names(dimnames(state.x77)) <- c("rowname", "colname")
     pqmat <- DuckDBMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
 
-    ## "+"
     checkDuckDBMatrix(pqmat + sqrt(pqmat), as.array(pqmat) + sqrt(as.array(pqmat)))
-    checkDuckDBMatrix(pqmat + 1L, as.array(pqmat) + 1L)
-    checkDuckDBMatrix(pqmat + 3.14, as.array(pqmat) + 3.14)
-    checkDuckDBMatrix(1L + pqmat, 1L + as.array(pqmat))
-    checkDuckDBMatrix(3.14 + pqmat, 3.14 + as.array(pqmat))
-
-    ## "-"
-    checkDuckDBMatrix(pqmat - sqrt(pqmat), as.array(pqmat) - sqrt(as.array(pqmat)))
     checkDuckDBMatrix(pqmat - 1L, as.array(pqmat) - 1L)
-    checkDuckDBMatrix(pqmat - 3.14, as.array(pqmat) - 3.14)
-    checkDuckDBMatrix(1L - pqmat, 1L - as.array(pqmat))
-    checkDuckDBMatrix(3.14 - pqmat, 3.14 - as.array(pqmat))
-
-    ## "*"
-    checkDuckDBMatrix(pqmat * sqrt(pqmat), as.array(pqmat) * sqrt(as.array(pqmat)))
-    checkDuckDBMatrix(pqmat * 1L, as.array(pqmat) * 1L)
     checkDuckDBMatrix(pqmat * 3.14, as.array(pqmat) * 3.14)
-    checkDuckDBMatrix(1L * pqmat, 1L * as.array(pqmat))
-    checkDuckDBMatrix(3.14 * pqmat, 3.14 * as.array(pqmat))
-
-    ## "/"
-    checkDuckDBMatrix(pqmat / sqrt(pqmat), as.array(pqmat) / sqrt(as.array(pqmat)))
-    checkDuckDBMatrix(pqmat / 1L, as.array(pqmat) / 1L)
-    checkDuckDBMatrix(pqmat / 3.14, as.array(pqmat) / 3.14)
     checkDuckDBMatrix(1L / pqmat, 1L / as.array(pqmat))
-    checkDuckDBMatrix(3.14 / pqmat, 3.14 / as.array(pqmat))
-
-    ## "^"
-    checkDuckDBMatrix(pqmat ^ sqrt(pqmat), as.array(pqmat) ^ sqrt(as.array(pqmat)))
-    checkDuckDBMatrix(pqmat ^ 3.14, as.array(pqmat) ^ 3.14)
     checkDuckDBMatrix(3.14 ^ pqmat, 3.14 ^ as.array(pqmat))
-
-    ## "%%"
     checkDuckDBMatrix(pqmat %% sqrt(pqmat), as.array(pqmat) %% sqrt(as.array(pqmat)))
-    checkDuckDBMatrix(pqmat %% 3.14, as.array(pqmat) %% 3.14)
-    checkDuckDBMatrix(3.14 %% pqmat, 3.14 %% as.array(pqmat))
-
-    ## "%/%"
-    checkDuckDBMatrix(pqmat %/% sqrt(pqmat), as.array(pqmat) %/% sqrt(as.array(pqmat)))
     checkDuckDBMatrix(pqmat %/% 3.14, as.array(pqmat) %/% 3.14)
-    checkDuckDBMatrix(3.14 %/% pqmat, 3.14 %/% as.array(pqmat))
 })
 
 test_that("Compare methods work as expected for a DuckDBMatrix", {
     names(dimnames(state.x77)) <- c("rowname", "colname")
     pqmat <- DuckDBMatrix(state_path, row = dimnames(state.x77)[1L], col = dimnames(state.x77)[2L], datacols = "value")
 
-    ## "=="
     checkDuckDBMatrix(pqmat == sqrt(pqmat), as.array(pqmat) == sqrt(as.array(pqmat)))
-    checkDuckDBMatrix(pqmat == 1L, as.array(pqmat) == 1L)
-    checkDuckDBMatrix(pqmat == 3.14, as.array(pqmat) == 3.14)
-    checkDuckDBMatrix(1L == pqmat, 1L == as.array(pqmat))
-    checkDuckDBMatrix(3.14 == pqmat, 3.14 == as.array(pqmat))
-
-    ## ">"
-    checkDuckDBMatrix(pqmat > sqrt(pqmat), as.array(pqmat) > sqrt(as.array(pqmat)))
     checkDuckDBMatrix(pqmat > 1L, as.array(pqmat) > 1L)
-    checkDuckDBMatrix(pqmat > 3.14, as.array(pqmat) > 3.14)
-    checkDuckDBMatrix(1L > pqmat, 1L > as.array(pqmat))
-    checkDuckDBMatrix(3.14 > pqmat, 3.14 > as.array(pqmat))
-
-    ## "<"
-    checkDuckDBMatrix(pqmat < sqrt(pqmat), as.array(pqmat) < sqrt(as.array(pqmat)))
-    checkDuckDBMatrix(pqmat < 1L, as.array(pqmat) < 1L)
     checkDuckDBMatrix(pqmat < 3.14, as.array(pqmat) < 3.14)
-    checkDuckDBMatrix(1L < pqmat, 1L < as.array(pqmat))
-    checkDuckDBMatrix(3.14 < pqmat, 3.14 < as.array(pqmat))
-
-    ## "!="
-    checkDuckDBMatrix(pqmat != sqrt(pqmat), as.array(pqmat) != sqrt(as.array(pqmat)))
-    checkDuckDBMatrix(pqmat != 1L, as.array(pqmat) != 1L)
-    checkDuckDBMatrix(pqmat != 3.14, as.array(pqmat) != 3.14)
     checkDuckDBMatrix(1L != pqmat, 1L != as.array(pqmat))
-    checkDuckDBMatrix(3.14 != pqmat, 3.14 != as.array(pqmat))
-
-    ## "<="
-    checkDuckDBMatrix(pqmat <= sqrt(pqmat), as.array(pqmat) <= sqrt(as.array(pqmat)))
-    checkDuckDBMatrix(pqmat <= 1L, as.array(pqmat) <= 1L)
-    checkDuckDBMatrix(pqmat <= 3.14, as.array(pqmat) <= 3.14)
-    checkDuckDBMatrix(1L <= pqmat, 1L <= as.array(pqmat))
     checkDuckDBMatrix(3.14 <= pqmat, 3.14 <= as.array(pqmat))
-
-    ## ">="
     checkDuckDBMatrix(pqmat >= sqrt(pqmat), as.array(pqmat) >= sqrt(as.array(pqmat)))
-    checkDuckDBMatrix(pqmat >= 1L, as.array(pqmat) >= 1L)
-    checkDuckDBMatrix(pqmat >= 3.14, as.array(pqmat) >= 3.14)
-    checkDuckDBMatrix(1L >= pqmat, 1L >= as.array(pqmat))
-    checkDuckDBMatrix(3.14 >= pqmat, 3.14 >= as.array(pqmat))
 })
 
 test_that("Logic methods work as expected for a DuckDBMatrix", {

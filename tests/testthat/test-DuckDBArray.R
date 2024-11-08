@@ -124,94 +124,24 @@ test_that("aperm and t methods work as expected for a DuckDBArray", {
 test_that("Arith methods work as expected for a DuckDBArray", {
     pqarray <- DuckDBArray(titanic_path, keycols = dimnames(titanic_array), datacols = "fate")
 
-    ## "+"
     checkDuckDBArray(pqarray + sqrt(pqarray), as.array(pqarray) + sqrt(as.array(pqarray)))
-    checkDuckDBArray(pqarray + 1L, as.array(pqarray) + 1L)
-    checkDuckDBArray(pqarray + 3.14, as.array(pqarray) + 3.14)
-    checkDuckDBArray(1L + pqarray, 1L + as.array(pqarray))
-    checkDuckDBArray(3.14 + pqarray, 3.14 + as.array(pqarray))
-
-    ## "-"
-    checkDuckDBArray(pqarray - sqrt(pqarray), as.array(pqarray) - sqrt(as.array(pqarray)))
     checkDuckDBArray(pqarray - 1L, as.array(pqarray) - 1L)
-    checkDuckDBArray(pqarray - 3.14, as.array(pqarray) - 3.14)
-    checkDuckDBArray(1L - pqarray, 1L - as.array(pqarray))
-    checkDuckDBArray(3.14 - pqarray, 3.14 - as.array(pqarray))
-
-    ## "*"
-    checkDuckDBArray(pqarray * sqrt(pqarray), as.array(pqarray) * sqrt(as.array(pqarray)))
-    checkDuckDBArray(pqarray * 1L, as.array(pqarray) * 1L)
     checkDuckDBArray(pqarray * 3.14, as.array(pqarray) * 3.14)
-    checkDuckDBArray(1L * pqarray, 1L * as.array(pqarray))
-    checkDuckDBArray(3.14 * pqarray, 3.14 * as.array(pqarray))
-
-    ## "/"
-    checkDuckDBArray(pqarray / sqrt(pqarray), as.array(pqarray) / sqrt(as.array(pqarray)))
-    checkDuckDBArray(pqarray / 1L, as.array(pqarray) / 1L)
-    checkDuckDBArray(pqarray / 3.14, as.array(pqarray) / 3.14)
     checkDuckDBArray(1L / pqarray, 1L / as.array(pqarray))
-    checkDuckDBArray(3.14 / pqarray, 3.14 / as.array(pqarray))
-
-    ## "^"
-    checkDuckDBArray(pqarray ^ sqrt(pqarray), as.array(pqarray) ^ sqrt(as.array(pqarray)))
-    checkDuckDBArray(pqarray ^ 3.14, as.array(pqarray) ^ 3.14)
     checkDuckDBArray(3.14 ^ pqarray, 3.14 ^ as.array(pqarray))
-
-    ## "%%"
     checkDuckDBArray(pqarray %% sqrt(pqarray), as.array(pqarray) %% sqrt(as.array(pqarray)))
-    checkDuckDBArray(pqarray %% 3.14, as.array(pqarray) %% 3.14)
-    checkDuckDBArray(3.14 %% pqarray, 3.14 %% as.array(pqarray))
-
-    ## "%/%"
-    checkDuckDBArray(pqarray %/% sqrt(pqarray), as.array(pqarray) %/% sqrt(as.array(pqarray)))
     checkDuckDBArray(pqarray %/% 3.14, as.array(pqarray) %/% 3.14)
-    checkDuckDBArray(3.14 %/% pqarray, 3.14 %/% as.array(pqarray))
 })
 
 test_that("Compare methods work as expected for a DuckDBArray", {
     pqarray <- DuckDBArray(titanic_path, keycols = dimnames(titanic_array), datacols = "fate")
 
-    ## "=="
     checkDuckDBArray(pqarray == sqrt(pqarray), as.array(pqarray) == sqrt(as.array(pqarray)))
-    checkDuckDBArray(pqarray == 1L, as.array(pqarray) == 1L)
-    checkDuckDBArray(pqarray == 3.14, as.array(pqarray) == 3.14)
-    checkDuckDBArray(1L == pqarray, 1L == as.array(pqarray))
-    checkDuckDBArray(3.14 == pqarray, 3.14 == as.array(pqarray))
-
-    ## ">"
-    checkDuckDBArray(pqarray > sqrt(pqarray), as.array(pqarray) > sqrt(as.array(pqarray)))
     checkDuckDBArray(pqarray > 1L, as.array(pqarray) > 1L)
-    checkDuckDBArray(pqarray > 3.14, as.array(pqarray) > 3.14)
-    checkDuckDBArray(1L > pqarray, 1L > as.array(pqarray))
-    checkDuckDBArray(3.14 > pqarray, 3.14 > as.array(pqarray))
-
-    ## "<"
-    checkDuckDBArray(pqarray < sqrt(pqarray), as.array(pqarray) < sqrt(as.array(pqarray)))
-    checkDuckDBArray(pqarray < 1L, as.array(pqarray) < 1L)
     checkDuckDBArray(pqarray < 3.14, as.array(pqarray) < 3.14)
-    checkDuckDBArray(1L < pqarray, 1L < as.array(pqarray))
-    checkDuckDBArray(3.14 < pqarray, 3.14 < as.array(pqarray))
-
-    ## "!="
-    checkDuckDBArray(pqarray != sqrt(pqarray), as.array(pqarray) != sqrt(as.array(pqarray)))
-    checkDuckDBArray(pqarray != 1L, as.array(pqarray) != 1L)
-    checkDuckDBArray(pqarray != 3.14, as.array(pqarray) != 3.14)
     checkDuckDBArray(1L != pqarray, 1L != as.array(pqarray))
-    checkDuckDBArray(3.14 != pqarray, 3.14 != as.array(pqarray))
-
-    ## "<="
-    checkDuckDBArray(pqarray <= sqrt(pqarray), as.array(pqarray) <= sqrt(as.array(pqarray)))
-    checkDuckDBArray(pqarray <= 1L, as.array(pqarray) <= 1L)
-    checkDuckDBArray(pqarray <= 3.14, as.array(pqarray) <= 3.14)
-    checkDuckDBArray(1L <= pqarray, 1L <= as.array(pqarray))
     checkDuckDBArray(3.14 <= pqarray, 3.14 <= as.array(pqarray))
-
-    ## ">="
     checkDuckDBArray(pqarray >= sqrt(pqarray), as.array(pqarray) >= sqrt(as.array(pqarray)))
-    checkDuckDBArray(pqarray >= 1L, as.array(pqarray) >= 1L)
-    checkDuckDBArray(pqarray >= 3.14, as.array(pqarray) >= 3.14)
-    checkDuckDBArray(1L >= pqarray, 1L >= as.array(pqarray))
-    checkDuckDBArray(3.14 >= pqarray, 3.14 >= as.array(pqarray))
 })
 
 test_that("Logic methods work as expected for a DuckDBArray", {

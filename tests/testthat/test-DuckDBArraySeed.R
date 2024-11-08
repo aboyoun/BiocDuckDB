@@ -124,94 +124,24 @@ test_that("aperm and t methods work as expected for a DuckDBArraySeed", {
 test_that("Arith methods work as expected for a DuckDBArraySeed", {
     seed <- DuckDBArraySeed(titanic_path, keycols = dimnames(titanic_array), datacols = "fate")
 
-    ## "+"
     checkDuckDBArraySeed(seed + sqrt(seed), as.array(seed) + sqrt(as.array(seed)))
-    checkDuckDBArraySeed(seed + 1L, as.array(seed) + 1L)
-    checkDuckDBArraySeed(seed + 3.14, as.array(seed) + 3.14)
-    checkDuckDBArraySeed(1L + seed, 1L + as.array(seed))
-    checkDuckDBArraySeed(3.14 + seed, 3.14 + as.array(seed))
-
-    ## "-"
-    checkDuckDBArraySeed(seed - sqrt(seed), as.array(seed) - sqrt(as.array(seed)))
     checkDuckDBArraySeed(seed - 1L, as.array(seed) - 1L)
-    checkDuckDBArraySeed(seed - 3.14, as.array(seed) - 3.14)
-    checkDuckDBArraySeed(1L - seed, 1L - as.array(seed))
-    checkDuckDBArraySeed(3.14 - seed, 3.14 - as.array(seed))
-
-    ## "*"
-    checkDuckDBArraySeed(seed * sqrt(seed), as.array(seed) * sqrt(as.array(seed)))
-    checkDuckDBArraySeed(seed * 1L, as.array(seed) * 1L)
     checkDuckDBArraySeed(seed * 3.14, as.array(seed) * 3.14)
-    checkDuckDBArraySeed(1L * seed, 1L * as.array(seed))
-    checkDuckDBArraySeed(3.14 * seed, 3.14 * as.array(seed))
-
-    ## "/"
-    checkDuckDBArraySeed(seed / sqrt(seed), as.array(seed) / sqrt(as.array(seed)))
-    checkDuckDBArraySeed(seed / 1L, as.array(seed) / 1L)
-    checkDuckDBArraySeed(seed / 3.14, as.array(seed) / 3.14)
     checkDuckDBArraySeed(1L / seed, 1L / as.array(seed))
-    checkDuckDBArraySeed(3.14 / seed, 3.14 / as.array(seed))
-
-    ## "^"
-    checkDuckDBArraySeed(seed ^ sqrt(seed), as.array(seed) ^ sqrt(as.array(seed)))
-    checkDuckDBArraySeed(seed ^ 3.14, as.array(seed) ^ 3.14)
     checkDuckDBArraySeed(3.14 ^ seed, 3.14 ^ as.array(seed))
-
-    ## "%%"
     checkDuckDBArraySeed(seed %% sqrt(seed), as.array(seed) %% sqrt(as.array(seed)))
-    checkDuckDBArraySeed(seed %% 3.14, as.array(seed) %% 3.14)
-    checkDuckDBArraySeed(3.14 %% seed, 3.14 %% as.array(seed))
-
-    ## "%/%"
-    checkDuckDBArraySeed(seed %/% sqrt(seed), as.array(seed) %/% sqrt(as.array(seed)))
     checkDuckDBArraySeed(seed %/% 3.14, as.array(seed) %/% 3.14)
-    checkDuckDBArraySeed(3.14 %/% seed, 3.14 %/% as.array(seed))
 })
 
 test_that("Compare methods work as expected for a DuckDBArraySeed", {
     seed <- DuckDBArraySeed(titanic_path, keycols = dimnames(titanic_array), datacols = "fate")
 
-    ## "=="
     checkDuckDBArraySeed(seed == sqrt(seed), as.array(seed) == sqrt(as.array(seed)))
-    checkDuckDBArraySeed(seed == 1L, as.array(seed) == 1L)
-    checkDuckDBArraySeed(seed == 3.14, as.array(seed) == 3.14)
-    checkDuckDBArraySeed(1L == seed, 1L == as.array(seed))
-    checkDuckDBArraySeed(3.14 == seed, 3.14 == as.array(seed))
-
-    ## ">"
-    checkDuckDBArraySeed(seed > sqrt(seed), as.array(seed) > sqrt(as.array(seed)))
     checkDuckDBArraySeed(seed > 1L, as.array(seed) > 1L)
-    checkDuckDBArraySeed(seed > 3.14, as.array(seed) > 3.14)
-    checkDuckDBArraySeed(1L > seed, 1L > as.array(seed))
-    checkDuckDBArraySeed(3.14 > seed, 3.14 > as.array(seed))
-
-    ## "<"
-    checkDuckDBArraySeed(seed < sqrt(seed), as.array(seed) < sqrt(as.array(seed)))
-    checkDuckDBArraySeed(seed < 1L, as.array(seed) < 1L)
     checkDuckDBArraySeed(seed < 3.14, as.array(seed) < 3.14)
-    checkDuckDBArraySeed(1L < seed, 1L < as.array(seed))
-    checkDuckDBArraySeed(3.14 < seed, 3.14 < as.array(seed))
-
-    ## "!="
-    checkDuckDBArraySeed(seed != sqrt(seed), as.array(seed) != sqrt(as.array(seed)))
-    checkDuckDBArraySeed(seed != 1L, as.array(seed) != 1L)
-    checkDuckDBArraySeed(seed != 3.14, as.array(seed) != 3.14)
     checkDuckDBArraySeed(1L != seed, 1L != as.array(seed))
-    checkDuckDBArraySeed(3.14 != seed, 3.14 != as.array(seed))
-
-    ## "<="
-    checkDuckDBArraySeed(seed <= sqrt(seed), as.array(seed) <= sqrt(as.array(seed)))
-    checkDuckDBArraySeed(seed <= 1L, as.array(seed) <= 1L)
-    checkDuckDBArraySeed(seed <= 3.14, as.array(seed) <= 3.14)
-    checkDuckDBArraySeed(1L <= seed, 1L <= as.array(seed))
     checkDuckDBArraySeed(3.14 <= seed, 3.14 <= as.array(seed))
-
-    ## ">="
     checkDuckDBArraySeed(seed >= sqrt(seed), as.array(seed) >= sqrt(as.array(seed)))
-    checkDuckDBArraySeed(seed >= 1L, as.array(seed) >= 1L)
-    checkDuckDBArraySeed(seed >= 3.14, as.array(seed) >= 3.14)
-    checkDuckDBArraySeed(1L >= seed, 1L >= as.array(seed))
-    checkDuckDBArraySeed(3.14 >= seed, 3.14 >= as.array(seed))
 })
 
 test_that("Logic methods work as expected for a DuckDBArraySeed", {

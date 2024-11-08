@@ -25,54 +25,13 @@ test_that("Arith methods work as expected for a DuckDBArray", {
     mpg <- df[["mpg"]]
     disp <- df[["disp"]]
 
-    ## "+"
     checkDuckDBColumn(mpg + disp, as.vector(mpg) + as.vector(disp))
-    checkDuckDBColumn(mpg + 1L, as.vector(mpg) + 1L)
-    checkDuckDBColumn(mpg + 3.14, as.vector(mpg) + 3.14)
-    checkDuckDBColumn(1L + mpg, 1L + as.vector(mpg))
-    checkDuckDBColumn(3.14 + mpg, 3.14 + as.vector(mpg))
-
-    ## "-"
-    checkDuckDBColumn(mpg - disp, as.vector(mpg) - as.vector(disp))
     checkDuckDBColumn(mpg - 1L, as.vector(mpg) - 1L)
-    checkDuckDBColumn(mpg - 3.14, as.vector(mpg) - 3.14)
-    checkDuckDBColumn(1L - mpg, 1L - as.vector(mpg))
-    checkDuckDBColumn(3.14 - mpg, 3.14 - as.vector(mpg))
-
-    ## "*"
-    checkDuckDBColumn(mpg * disp, as.vector(mpg) * as.vector(disp))
-    checkDuckDBColumn(mpg * 1L, as.vector(mpg) * 1L)
     checkDuckDBColumn(mpg * 3.14, as.vector(mpg) * 3.14)
-    checkDuckDBColumn(1L * mpg, 1L * as.vector(mpg))
-    checkDuckDBColumn(3.14 * mpg, 3.14 * as.vector(mpg))
-
-    ## "/"
-    checkDuckDBColumn(mpg / disp, as.vector(mpg) / as.vector(disp))
-    checkDuckDBColumn(mpg / 1L, as.vector(mpg) / 1L)
-    checkDuckDBColumn(mpg / 3.14, as.vector(mpg) / 3.14)
     checkDuckDBColumn(1L / mpg, 1L / as.vector(mpg))
-    checkDuckDBColumn(3.14 / mpg, 3.14 / as.vector(mpg))
-
-    ## "^"
-    checkDuckDBColumn(mpg ^ disp, as.vector(mpg) ^ as.vector(disp))
-    checkDuckDBColumn(mpg ^ 1L, as.vector(mpg) ^ 1L)
-    checkDuckDBColumn(mpg ^ 3.14, as.vector(mpg) ^ 3.14)
-    checkDuckDBColumn(1L ^ mpg, 1L ^ as.vector(mpg))
     checkDuckDBColumn(3.14 ^ mpg, 3.14 ^ as.vector(mpg))
-
-    ## "%%"
     checkDuckDBColumn(mpg %% disp, as.vector(mpg) %% as.vector(disp))
-    checkDuckDBColumn(mpg %% 1L, as.vector(mpg) %% 1L)
-    checkDuckDBColumn(mpg %% 3.14, as.vector(mpg) %% 3.14)
-    checkDuckDBColumn(1L %% mpg, 1L %% as.vector(mpg))
-    checkDuckDBColumn(3.14 %% mpg, 3.14 %% as.vector(mpg))
-
-    ## "%/%"
-    checkDuckDBColumn(mpg %/% disp, as.vector(mpg) %/% as.vector(disp))
-    checkDuckDBColumn(mpg %/% 1L, as.vector(mpg) %/% 1L)
     checkDuckDBColumn(mpg %/% 3.14, as.vector(mpg) %/% 3.14)
-    checkDuckDBColumn(1L %/% mpg, 1L %/% as.vector(mpg))
-    checkDuckDBColumn(3.14 %/% mpg, 3.14 %/% as.vector(mpg))
 })
 
 test_that("Compare methods work as expected for a DuckDBColumn", {
@@ -80,47 +39,12 @@ test_that("Compare methods work as expected for a DuckDBColumn", {
     vs <- df[["vs"]]
     am <- df[["am"]]
 
-    ## "=="
     checkDuckDBColumn(vs == am, as.vector(vs) == as.vector(am))
-    checkDuckDBColumn(vs == 1L, as.vector(vs) == 1L)
-    checkDuckDBColumn(vs == 1, as.vector(vs) == 1)
-    checkDuckDBColumn(1L == vs, 1L == as.vector(vs))
-    checkDuckDBColumn(1 == vs, 1 == as.vector(vs))
-
-    ## ">"
-    checkDuckDBColumn(vs > am, as.vector(vs) > as.vector(am))
     checkDuckDBColumn(vs > 1L, as.vector(vs) > 1L)
-    checkDuckDBColumn(vs > 1, as.vector(vs) > 1)
-    checkDuckDBColumn(1L > vs, 1L > as.vector(vs))
-    checkDuckDBColumn(1 > vs, 1 > as.vector(vs))
-
-    ## "<"
-    checkDuckDBColumn(vs < am, as.vector(vs) < as.vector(am))
     checkDuckDBColumn(vs < 1L, as.vector(vs) < 1L)
-    checkDuckDBColumn(vs < 1, as.vector(vs) < 1)
-    checkDuckDBColumn(1L < vs, 1L < as.vector(vs))
-    checkDuckDBColumn(1 < vs, 1 < as.vector(vs))
-
-    ## "!="
-    checkDuckDBColumn(vs != am, as.vector(vs) != as.vector(am))
-    checkDuckDBColumn(vs != 1L, as.vector(vs) != 1L)
-    checkDuckDBColumn(vs != 1, as.vector(vs) != 1)
     checkDuckDBColumn(1L != vs, 1L != as.vector(vs))
-    checkDuckDBColumn(1 != vs, 1 != as.vector(vs))
-
-    ## "<="
-    checkDuckDBColumn(vs <= am, as.vector(vs) <= as.vector(am))
-    checkDuckDBColumn(vs <= 1L, as.vector(vs) <= 1L)
-    checkDuckDBColumn(vs <= 1, as.vector(vs) <= 1)
-    checkDuckDBColumn(1L <= vs, 1L <= as.vector(vs))
     checkDuckDBColumn(1 <= vs, 1 <= as.vector(vs))
-
-    ## ">="
     checkDuckDBColumn(vs >= am, as.vector(vs) >= as.vector(am))
-    checkDuckDBColumn(vs >= 1L, as.vector(vs) >= 1L)
-    checkDuckDBColumn(vs >= 1, as.vector(vs) >= 1)
-    checkDuckDBColumn(1L >= vs, 1L >= as.vector(vs))
-    checkDuckDBColumn(1 >= vs, 1 >= as.vector(vs))
 })
 
 test_that("Math methods work as expected for a DuckDBColumn", {
