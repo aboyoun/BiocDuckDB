@@ -67,7 +67,6 @@
 #' \code{\link{DuckDBArray}},
 #' \code{\link[S4Arrays]{Array}}
 #'
-#' @include acquireTable.R
 #' @include DuckDBTable.R
 #'
 #' @name DuckDBArraySeed

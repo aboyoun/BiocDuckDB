@@ -68,7 +68,6 @@
 #' as.data.frame,DuckDBDataFrame-method
 #' as.env,DuckDBDataFrame-method
 #'
-#' @include acquireTable.R
 #' @include DuckDBColumn.R
 #' @include DuckDBTable.R
 #'
