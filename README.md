@@ -4,7 +4,7 @@ This package implements Bioconductor-friendly bindings to DuckDB so that they ca
 Usage is pretty simple:
 
 ```r
-tf <- tempfile()
+tf <- tempfile(fileext = ".parquet")
 arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 
 library(BiocDuckDB)

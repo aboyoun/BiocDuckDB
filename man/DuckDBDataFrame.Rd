@@ -59,7 +59,7 @@ Thus, users can specialize code paths for a DuckDBDataFrame to operate directly 
 }
 \examples{
 # Mocking up a file:
-tf <- paste0(tempfile(), ".parquet")
+tf <- tempfile(fileext = ".parquet")
 on.exit(unlink(tf))
 arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 

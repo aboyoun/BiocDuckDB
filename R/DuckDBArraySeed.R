@@ -27,7 +27,7 @@
 #' df$fate <- as.integer(Titanic[as.matrix(df)])
 #'
 #' # Write data to a parquet file
-#' tf <- paste0(tempfile(), ".parquet")
+#' tf <- tempfile(fileext = ".parquet")
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'

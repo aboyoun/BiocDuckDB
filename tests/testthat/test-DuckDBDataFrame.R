@@ -216,7 +216,7 @@ test_that("cbind operations that produce errors", {
     expect_error(cbind(df, mtcars))
 
     # Different paths causes an error.
-    tmp <- paste0(tempfile(), ".parquet")
+    tmp <- tempfile(fileext = ".parquet")
     file.symlink(mtcars_path, tmp)
     df2 <- DuckDBDataFrame(tmp, keycols = list(model = rownames(mtcars)))
     expect_error(cbind(df, df2))

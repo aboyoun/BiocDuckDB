@@ -33,7 +33,7 @@ Given a path to a Parquet file, we can just supply the path to the `DuckDBDataFr
 
 ```{r}
 # Mocking up a file.
-tf <- paste0(tempfile(), ".parquet")
+tf <- tempfile(fileext = ".parquet")
 arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 
 # Creating the DuckDBDataFrame.
