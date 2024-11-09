@@ -230,6 +230,8 @@ setReplaceMethod("colnames", "DuckDBTable", function(x, value) {
         "integer64"
     } else if (inherits(column, "Date")) {
         "Date"
+    } else if (inherits(column, "POSIXct")) {
+        "POSIXct"
     } else if (is.list(column)) {
         "raw"
     } else {
