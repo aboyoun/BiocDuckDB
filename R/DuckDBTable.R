@@ -621,30 +621,45 @@ function(x, row.names = NULL, optional = FALSE, ...) {
     df
 })
 
+file_ext <- function(x) {
+    xsplit <- strsplit(basename(x), "\\.")
+    sapply(xsplit, function(y) paste(y[-1L], collapse = "."), USE.NAMES = FALSE)
+}
+
+.wrapFile <- function(x, read) {
+    x <- sprintf("'%s'", x)
+    if (length(x) > 1L) {
+        x <- sprintf("[%s]", paste(x, collapse = ", "))
+    }
+    sprintf("%s(%s)", read, x)
+}
+
+#' @importFrom S4Vectors isSingleString
+.wrapConn <- function(x) {
+    ext <- unique(tolower(file_ext(x)))
+    if (all(ext %in% c("csv", "tsv", "csv.gz", "tsv.gz"))) {
+        x <- .wrapFile(x, "read_csv")
+    } else if (all(ext %in% c("parquet", "pq"))) {
+        x <- .wrapFile(x, "read_parquet")
+    } else if (isSingleString(x) && dir.exists(x)) {
+            ext <- unique(tolower(file_ext(list.files(x, recursive = TRUE))))
+            if (any(ext %in% c("parquet", "pq"))) {
+                x <- .wrapFile(file.path(x, "**"), "read_parquet")
+            }
+        }
+    x
+}
+
 #' @export
 #' @importFrom dplyr distinct mutate pull select tbl
-#' @importFrom S4Vectors isSingleString new2
+#' @importFrom S4Vectors new2
 #' @importFrom stats setNames
-#' @importFrom tools file_ext
 #' @rdname DuckDBTable
 DuckDBTable <-
 function(conn, keycols, datacols = setdiff(colnames(conn), names(keycols)), type = NULL) {
     # Acquire the connection if it is a string
     if (is.character(conn)) {
-        if (isSingleString(conn) && dir.exists(conn)) {
-            ext <- unique(tolower(file_ext(list.files(conn, recursive = TRUE))))
-            if (any(ext %in% c("parquet", "pq"))) {
-                conn <- sprintf("read_parquet('%s')", file.path(conn, "**"))
-            }
-        } else if (isSingleString(conn) && file.exists(conn)) {
-            ext <- tolower(file_ext(conn))
-            if (ext %in% c("parquet", "pq")) {
-                conn <- sprintf("read_parquet('%s')", conn)
-            } else if (ext %in% c("csv", "tsv")) {
-                conn <- sprintf("read_csv('%s')", conn)
-            }
-        }
-        conn <- tbl(acquireDuckDBConn(), conn)
+        conn <- tbl(acquireDuckDBConn(), .wrapConn(conn))
     }
     if (!inherits(conn, "tbl_duckdb_connection")) {
         stop("'conn' must be a 'tbl_duckdb_connection' object")

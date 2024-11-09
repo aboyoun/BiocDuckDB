@@ -23,7 +23,6 @@ Depends:
     duckdb
 Imports:
     stats,
-    tools,
     BiocGenerics (>= 0.51.2),
     S4Vectors,
     S4Arrays (>= 1.1.1),
