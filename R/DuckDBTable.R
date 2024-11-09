@@ -261,7 +261,7 @@ setGeneric("coltypes", function(x) standardGeneric("coltypes"))
 
 #' @export
 setMethod("coltypes", "DuckDBTable", function(x) {
-    i <- sapply(names(x@keycols), function(x) character(), simplify = FALSE)
+    i <- sapply(names(x@keycols), function(x) integer(), simplify = FALSE)
     empty <- .subset_DuckDBTable(x, i, drop = FALSE)
     vapply(as.data.frame(empty)[names(x@datacols)], .get_type, character(1L))
 })
