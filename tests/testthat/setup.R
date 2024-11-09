@@ -3,18 +3,33 @@ esoph_df <- esoph
 for (i in 1:3) {
   esoph_df[[i]] <- as.character(esoph_df[[i]])
 }
+esoph_csv <- tempfile(fileext = ".csv")
+write.csv(esoph_df, esoph_csv, row.names = FALSE)
+esoph_csv_gz <- tempfile(fileext = ".csv.gz")
+write.csv(esoph_df, gzfile(esoph_csv_gz), row.names = FALSE)
 esoph_parquet <- tempfile(fileext = ".parquet")
 arrow::write_parquet(esoph_df, esoph_parquet)
 
+
 # Infertility after Spontaneous and Induced Abortion
+infert_csv <- tempfile(fileext = ".csv")
+write.csv(infert, infert_csv, row.names = FALSE)
+infert_csv_gz <- tempfile(fileext = ".csv.gz")
+write.csv(infert, gzfile(infert_csv_gz), row.names = FALSE)
 infert_parquet <- tempfile(fileext = ".parquet")
 arrow::write_parquet(infert, infert_parquet)
 
 # Motor Trend Car Road Tests
 mtcars_df <- cbind(model = rownames(mtcars), mtcars)
 rownames(mtcars_df) <- NULL
+
+mtcars_csv <- tempfile(fileext = ".csv")
+write.csv(mtcars_df, mtcars_csv, row.names = FALSE)
+mtcars_csv_gz <- tempfile(fileext = ".csv.gz")
+write.csv(mtcars_df, gzfile(mtcars_csv_gz), row.names = FALSE)
 mtcars_parquet <- tempfile(fileext = ".parquet")
 arrow::write_parquet(mtcars_df, mtcars_parquet)
+
 mtcars_mcols <- DataFrame(description = c("Miles/(US) gallon", "Number of cylinders",
                                           "Displacement (cu.in.)", "Gross horsepower",
                                           "Rear axle ratio", "Weight (1000 lbs)",
@@ -22,6 +37,7 @@ mtcars_mcols <- DataFrame(description = c("Miles/(US) gallon", "Number of cylind
                                           "Transmission (0 = automatic, 1 = manual)",
                                           "Number of forward gears", "Number of carburetors"),
                           row.names = colnames(mtcars))
+
 
 # State dataset
 state_df <- data.frame(
@@ -34,14 +50,20 @@ state_df <- data.frame(
 state_path <- tempfile()
 arrow::write_dataset(state_df, state_path, format = "parquet", partitioning = c("region", "division"))
 
+
 # Titanic dataset
 titanic_array <- unclass(Titanic)
 storage.mode(titanic_array) <- "integer"
 titanic_df <- do.call(expand.grid, c(dimnames(Titanic), stringsAsFactors = FALSE))
 titanic_df$fate <- as.integer(Titanic[as.matrix(titanic_df)])
 titanic_df[titanic_df$fate != 0L, ]
+titanic_csv <- tempfile(fileext = ".csv")
+write.csv(titanic_df, titanic_csv, row.names = FALSE)
+titanic_csv_gz <- tempfile(fileext = ".csv.gz")
+write.csv(titanic_df, gzfile(titanic_csv_gz), row.names = FALSE)
 titanic_parquet <- tempfile(fileext = ".parquet")
 arrow::write_parquet(titanic_df, titanic_parquet)
+
 
 # Random array
 set.seed(123)
@@ -54,6 +76,10 @@ sparse_df <- sparse_df[order(sparse_df$dim1, sparse_df$dim2, sparse_df$dim3),]
 rownames(sparse_df) <- NULL
 sparse_array <- array(0L, dim = c(26L, 26L, 12L), dimnames = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb))
 sparse_array[as.matrix(sparse_df[,1:3])] <- sparse_df[["value"]]
+sparse_csv <- tempfile(fileext = ".csv")
+write.csv(sparse_df, sparse_csv, row.names = FALSE)
+sparse_csv_gz <- tempfile(fileext = ".csv.gz")
+write.csv(sparse_df, gzfile(sparse_csv_gz), row.names = FALSE)
 sparse_parquet <- tempfile(fileext = ".parquet")
 arrow::write_parquet(sparse_df, sparse_parquet)
 
