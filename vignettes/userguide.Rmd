@@ -48,11 +48,13 @@ args(DuckDBMatrix)
 : Either a character vector containing the paths to parquet, csv, or gzipped
 csv data files; a string that defines a duckdb `read_*` data source; or a
 `tbl_duckdb_connection` object.
+
 `keycols`
 : Either a character vector of column names from `conn` that will define the
 dimension names of the object, or a named list of character vectors where the
 names of the list define the dimension names and the character vectors define
 distinct values for each dimension.
+
 `datacols`
 : Either a character vector of column names from `conn` or a named `expression`
 that will be evaluated in the context of `conn` that defines the data.
