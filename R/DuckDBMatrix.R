@@ -7,19 +7,24 @@
 #' All the operations available for \link[DelayedArray]{DelayedMatrix}
 #' objects work on DuckDBMatrix objects.
 #'
-#' @param conn Either a string containing the path to the underlying data files
-#' or a \code{tbl_duckdb_connection} object.
-#' @param row Either a character vector or a named list of character vectors
-#' containing the names of the columns in the DuckDB table that specify the
-#' rows of the matrix.
-#' @param col Either a character vector or a named list of character vectors
-#' containing the names of the columns in the DuckDB table that specify the
-#' columns of the matrix.
-#' @param keycols Either a character vector or a list of character vectors
-#' containing the names of the columns in the DuckDB table that specify the
-#' rows and columns of the matrix.
-#' @param datacols String containing the name of the column in the DuckDB table
-#' that specifies the value of the matrix.
+#' @param conn Either a character vector containing the paths to parquet, csv,
+#' or gzipped csv data files; a string that defines a duckdb \code{read_*} data
+#' source; or a \code{tbl_duckdb_connection} object.
+#' @param row Either a string that specifies the column in \code{conn} that
+#' specifies the row names of the matrix, or a named list containing a single
+#' character vector that defines the column in \code{conn} for the row names
+#' and its values.
+#' @param col Either a string that specifies the column in \code{conn} that
+#' specifies the column names of the matrix, or a named list containing a single
+#' character vector that defines the column in \code{conn} for the column names
+#' and its values.
+#' @param keycols An optional character vector that define the names of the
+#' columns in \code{conn} for the rows and columns of the matrix, or a named
+#' list of character vectors where the names of the list define rows and columns
+#' and the character vectors define distinct values for the rows and columns.
+#' @param datacols Either a string specifying the column from \code{conn} or a
+#' named \code{expression} that will be evaluated in the context of \code{conn}
+#' that defines the values in the matrix.
 #' @param type String specifying the type of the data values; one of
 #' \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
 #' \code{"character"}. If \code{NULL}, it is determined by inspecting the data.

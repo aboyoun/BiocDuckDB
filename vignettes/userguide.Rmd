@@ -1,10 +1,12 @@
 ---
-title: Using DuckDB-backed DataFrames
+title: Using DuckDB-backed DataFrames, Arrays, and Matrices
 author:
+- name: Patrick Aboyoun
+  email: aboyounp@gene.com
 - name: Aaron Lun
   email: infinite.monkeys.with.keyboards@gmail.com
 package: BiocDuckDB
-date: "Revised: October 9, 2023"
+date: "Revised: November 9, 2024"
 output:
   BiocStyle::html_document
 vignette: >
@@ -22,72 +24,218 @@ knitr::opts_chunk$set(error=FALSE, warning=FALSE, message=FALSE)
 
 # Overview
 
-The `DuckDBDataFrame`, as its name suggests, is a `DataFrame` where the columns are derived from a DuckDB table.
-This is fully file-backed so no data is actually loaded into memory until requested, allowing users to represent large datasets in limited memory.
-As the `DuckDBDataFrame` inherits from `r Biocpkg("S4Vectors")`' `DataFrame`, it can be used anywhere in Bioconductor's ecosystem that accepts a `DataFrame`, 
-e.g., as the column data of a `SummarizedExperiment`, or inside a `BumpyDataFrameMatrix` from the `r Biocpkg("BumpyMatrix")` package.
+The  `BiocDuckDB` package provide a set of classes that use DuckDB as a backend
+for Bioconductor's `r Biocpkg("S4Vectors")` `DataFrame` and
+`r Biocpkg("S4Arrays")` `Array` by extending the `r Biocpkg("DelayedArray")`
+package. It is designed to allow users to extend the reach of
+`r Biocpkg("SummarizedExperiment")` by having `DuckDBMatrix` assays with
+`DuckDBDataFrame` column data.
 
-# Basic usage
-
-Given a path to a Parquet file, we can just supply the path to the `DuckDBDataFrame` constructor:
+The three user-facing classes (`DuckDBDataFrame`, `DuckDBArray`, and `DuckDBMatrix`)
+are defined by a connection to a DuckDB table, a set of column names for that table
+that serve as a key that will define dimension names, and a set of column names that
+define the data that populate the object.
 
 ```{r}
-# Mocking up a file.
-tf <- tempfile(fileext = ".parquet")
-arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
-
-# Creating the DuckDBDataFrame.
 library(BiocDuckDB)
-df <- DuckDBDataFrame(tf, keycols = "model")
-df
+
+args(DuckDBDataFrame)
+args(DuckDBArray)
+args(DuckDBMatrix)
 ```
 
-These support all the usual methods for a `DataFrame`, except that the data is kept on disk and referenced as needed:
+`conn`
+: Either a character vector containing the paths to parquet, csv, or gzipped
+csv data files; a string that defines a duckdb `read_*` data source; or a
+`tbl_duckdb_connection` object.
+`keycols`
+: Either a character vector of column names from `conn` that will define the
+dimension names of the object, or a named list of character vectors where the
+names of the list define the dimension names and the character vectors define
+distinct values for each dimension.
+`datacols`
+: Either a character vector of column names from `conn` or a named `expression`
+that will be evaluated in the context of `conn` that defines the data.
+
+# Illustration using common example datasets
+
+We can familiarize ourselves with the `BiocDuckDB` package by wrapping commonly
+used `data.frame`, `array`, and `matrix` objects in `DuckDBDataFrame`,
+`DuckDBArray`, and `DuckDBMatrix` objects, respectively. This illustration will
+use the following datasets:
+
+1. `mtcars`: `data.frame` with row names
+2. `infert`: `data.frame` without row names
+3. `Titanic`: `array` with 4 dimensions
+4. `state.x77`: `matrix`
+
+## `DuckDBDataFrame` with row names
+
+The `DuckDBDataFrame` class extends `r Biocpkg("S4Vectors")` `DataFrame` to
+provide access to DuckDB tables. They may or may not have a key column that
+defines the row names of the object. When a key column is supplied, the
+resulting `DuckDBDataFrame` object will have row names that can be used for row
+subscripting.
 
 ```{r}
-nrow(df)
-colnames(df)
-class(as.data.frame(df))
+# Write a csv file to contain the mtcars data
+mtcars_tf <- tempfile(fileext = ".csv")
+write.csv(cbind(model = rownames(mtcars), mtcars), mtcars_tf, row.names = FALSE)
+
+# Create a DuckDBDataFrame that uses a key column as row names
+mtcars_ddb <- DuckDBDataFrame(mtcars_tf, keycol = "model")
+
+# Since the resulting object is not guaranteed to have the samme row ordering,
+# reorder the rows to conform to the original mtcars data
+mtcars_ddb <- mtcars_ddb[rownames(mtcars), ]
+
+# Assign column descriptions as mcols
+mcols(mtcars_ddb) <-
+    DataFrame(description = c("Miles/(US) gallon", "Number of cylinders",
+                              "Displacement (cu.in.)", "Gross horsepower",
+                              "Rear axle ratio", "Weight (1000 lbs)",
+                              "1/4 mile time", "Engine (0 = V-shaped, 1 = straight)",
+                              "Transmission (0 = automatic, 1 = manual)",
+                              "Number of forward gears", "Number of carburetors"),
+              row.names = colnames(mtcars_ddb))
 ```
 
-We extract individual columns as `DuckDBColumn` objects.
-These are 1-dimensional file-backed `DelayedArray`s that pull a single column's data from the DuckDB table on demand.
+We extract individual columns as `DuckDBColumn` objects and opporate on them
+as if they were ordinary vectors.
 
 ```{r}
-df$mpg
+# Extract the miles per gallon column
+mtcars_ddb$mpg
 
-# These can participate in usual vector operations:
-df$mpg * 10
-log(df$mpg)
+# Use a linear model to motivate DuckDBColumn operations
+coeff <- coef(lm(log(mpg) ~ hp + wt, data = mtcars))
+hp <- mtcars_ddb$hp
+wt <- mtcars_ddb$wt
+pred <- exp(coeff["(Intercept)"] + coeff["hp"] * hp + coeff["wt"] * wt)
+pred
 
-# Realize this into an ordinary vector.
-as.vector(df$mpg)
+# Can assign the result back to the DuckDBDataFrame
+copy <- mtcars_ddb
+copy$mpg_pred <- pred
+copy[, c("mpg", "mpg_pred")]
 ```
 
-These transformed columns can be assigned back to `DuckDBDataFrame` objects.
+## `DuckDBDataFrame` without row names
+
+In most real world scenarios, the data will not have row names. In those cases,
+the `DuckDBDataFrame` object will contain a `row_number`-generated column that
+will provide some level of row idenification. 
 
 ```{r}
-copy <- df
-copy$wt <- copy$wt * 1000
-top.hits <- head(copy)
-top.hits
+# Write a gzipped csv file to contain the infert data
+infert_tf <- tempfile(fileext = ".csv.gz")
+write.csv(infert, gzfile(infert_tf), row.names = FALSE)
+
+# Create a DuckDBDataFrame that doesn't use a key column as row names
+infert_ddb <- DuckDBDataFrame(infert_tf)
+
+# Unlike subscripting by row name, subscripting by row number does not
+# preserve row order
+infert_ddb[c(8,6,7,5,3,9), ]
+
+# Assign column descriptions as mcols
+mcols(infert_ddb) <-
+    DataFrame(description = c("Education level",
+                              "Age in years of case",
+                              "Parity count",
+                              "Number of prior induced abortions",
+                              "Case status",
+                              "Number of prior spontaneous abortions",
+                              "Matched set number",
+                              "Stratum number"),
+              row.names = colnames(infert_ddb))
+```
+
+## `DuckDBArray` with more that two dimensions
+
+The `DuckDBArray` class extends `r Biocpkg("DelayedArray")` `DelayedArray` to
+provide access to DuckDB tables. The `DuckDBArray` object uses key columns to
+define the dimensions of the array. If the values in the key columns are known,
+they can be supplied as named lists to the `keycols` argument to speed up
+object creation by avoiding a table scan.
+
+```{r}
+# Write a parquet file to contain the titanic data
+titanic <- do.call(expand.grid, c(dimnames(Titanic), stringsAsFactors = TRUE))
+titanic$fate <- as.integer(Titanic[as.matrix(titanic)])
+titanic_tf <- tempfile(fileext = ".parquet")
+arrow::write_parquet(titanic, titanic_tf)
+
+# Create a DuckDBArray
+titanic_ddb <- DuckDBArray(titanic_tf, keycols = c("Class", "Sex", "Age", "Survived"), datacol = "fate")
+
+# Create a DuckDBArray using pre-defined dimension values
+titanic_ddb <- DuckDBArray(titanic_tf, keycols = dimnames(Titanic), datacol = "fate")
+
+# Susbcript by dimension name to learn the fate of the crew
+titanic_ddb["Crew", , "Adult", ]
+```
+
+## `DuckDBMatrix`
+
+The `DuckDBMatrix` class extends `r Biocpkg("DelayedArray")` `DelayedMatrix` to
+provide access to DuckDB tables. The `DuckDBMatrix` object uses columns in the
+underlying table to define the row and column names. If the row and column
+names are known, they can be supplied as named lists to the `row` and `col` or
+`keycols` arguments to speed up object creation by avoiding a table scan.
+
+```{r}
+# Write a set of parquet files to contain state data
+state <- data.frame(
+  region = rep(as.character(state.region), times = ncol(state.x77)),
+  division = rep(as.character(state.division), times = ncol(state.x77)),
+  rowname = rep(rownames(state.x77), times = ncol(state.x77)),
+  colname = rep(colnames(state.x77), each = nrow(state.x77)),
+  value = as.vector(state.x77)
+)
+state_tf <- tempfile()
+arrow::write_dataset(state, state_tf, format = "parquet", partitioning = c("region", "division"))
+list.files(state_tf, recursive = TRUE)
+
+# Create a DuckDBMatrix and reorder the rows and columns to conform to state.x77
+state_ddb <- DuckDBMatrix(state_tf, row = "rowname", col = "colname", datacol = "value")
+state_ddb <- state_ddb[rownames(state.x77), colnames(state.x77)]
+
+# Create a DuckDBMatrix using pre-defined row and column values
+keycols <- setNames(dimnames(state.x77), c("rowname", "colname"))
+state_ddb <- DuckDBMatrix(state_tf, keycols = keycols, datacol = "value")
+```
+
+## `DuckDBArray` using a random sparse array
+
+The `DuckDBArray` and `DuckDBMatrix` classes support sparse arrays and matrices
+in a seemless manner. The following toy example creates a 26 x 26 x 12 sparse
+array, but this can be scaled to out to accommodate larger data.
+
+```{r}
+set.seed(123)
+ind <- arrayInd(sort(sample(26 * 26 * 12, 1000)), c(26, 26, 12))
+sparse_df <- data.frame(dim1 = letters[ind[, 1]],
+                        dim2 = LETTERS[ind[, 2]],
+                        dim3 = month.abb[ind[, 3]],
+                        value = sample(10L, 1000, replace = TRUE, prob = 2^(10:1)))
+sparse_tf <- tempfile(fileext = ".parquet")
+arrow::write_parquet(sparse_df, sparse_tf)
+
+# Create a DuckDBMatrix
+sparse_ddb <- DuckDBArray(sparse_tf, keycols = list("dim1" = letters, "dim2" = LETTERS, "dim3" = month.abb), datacol = "value")
+sparse_ddb
 ```
 
 # Retrieving the DuckDB table connection
 
-At any point, users can retrieve the query to the underlying DuckDB table via the `dbconn` method.
-This can be used with methods in the `r CRANpkg("duckdb")` package to push more complex operations to the C++ libraries for greater efficiency.
+At any point, users can retrieve the query to the underlying DuckDB table via the
+`dbconn` method. This can be used with methods in the `r CRANpkg("duckdb")` package
+to push more complex operations to the DuckDB for greater efficiency.
 
 ```{r}
-dbconn(df)
+dbconn(mtcars_ddb)
 ```
-
-Note that the acquired query will not capture any delayed subsetting/mutation operations that have been applied in the R session.
-In theory, it is possible to convert a subset of `r Biocpkg("DelayedArray")` operations into their `r CRANpkg("duckdb")` equivalents,
-which would improve performance by avoiding the R interpreter when executing a query on the DuckDB table.
-In practice, any performance boost tends to be rather fragile as only a subset of operations are supported,
-meaning that it is easy to silently fall back to R-based evaluation when an unsupported operation is executed.
-Users wanting to optimize performance should just operate on the query directly.
 
 # Session information {-}
 

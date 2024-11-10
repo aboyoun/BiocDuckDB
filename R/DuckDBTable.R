@@ -4,13 +4,17 @@
 #' DuckDBTable is a low-level helper class for representing a
 #' pointer to a \code{tbl_duckdb_connection} object.
 #'
-#' @param conn Either a string containing the path to the underlying data files
-#' or a \code{tbl_duckdb_connection} object.
-#' @param keycols An optional character vector or a list of character vectors
-#' containing the names of the columns that comprise the primary key. If missing,
-#' a \code{row_number} column is created as an identifier.
-#' @param datacols Either a character vector containing the names of the columns
-#' in the DuckDB table that specify the data columns.
+#' @param conn Either a character vector containing the paths to parquet, csv,
+#' or gzipped csv data files; a string that defines a duckdb \code{read_*} data
+#' source; or a \code{tbl_duckdb_connection} object.
+#' @param keycols An optional character vector of column names from \code{conn}
+#' that will define the primary key, or a named list of character vectors where
+#' the names of the list define the key and the character vectors set the
+#' distinct values for the key. If missing, a \code{row_number} column is
+#' created as an identifier.
+#' @param datacols Either a character vector of column names from \code{conn}
+#' or a named \code{expression} that will be evaluated in the context of `conn`
+#' that defines the data.
 #' @param type An optional named character vector where the names specify the
 #' column names and the values specify the column type; one of
 #' \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or

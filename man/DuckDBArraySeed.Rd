@@ -34,14 +34,18 @@
 DuckDBArraySeed(conn, keycols, datacols, type = NULL)
 }
 \arguments{
-\item{conn}{Either a string containing the path to the data files or a
-\code{tbl_duckdb_connection} object.}
+\item{conn}{Either a character vector containing the paths to parquet, csv,
+or gzipped csv data files; a string that defines a duckdb \code{read_*} data
+source; or a \code{tbl_duckdb_connection} object.}
 
-\item{keycols}{Either a character vector or a list of character vectors
-containing the names of the columns that comprise the primary key.}
+\item{keycols}{Either a character vector of column names from \code{conn}
+that will specify the dimension names, or a named list of character vectors
+where the names of the list specify the dimension names and the character
+vectors set the distinct values for the dimension names.}
 
-\item{datacols}{String containing the name of the column in the DuckDB table
-that specifies the value of the array.}
+\item{datacols}{Either a string specifying the column from \code{conn} or a
+named \code{expression} that will be evaluated in the context of \code{conn}
+that defines the values in the array.}
 
 \item{type}{String specifying the type of the data values; one of
 \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or

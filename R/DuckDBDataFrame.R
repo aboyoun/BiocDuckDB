@@ -317,7 +317,7 @@ function(value, x) {
 
 #' @export
 #' @importFrom stats setNames
-#' @importFrom S4Vectors replaceCOLS normalizeSingleBracketSubscript
+#' @importFrom S4Vectors replaceCOLS combineRows DataFrame normalizeSingleBracketSubscript
 setMethod("replaceCOLS", "DuckDBDataFrame", function(x, i, value) {
     xstub <- setNames(seq_along(x), names(x))
     i2 <- normalizeSingleBracketSubscript(i, xstub, allow.append = TRUE)
@@ -328,14 +328,20 @@ setMethod("replaceCOLS", "DuckDBDataFrame", function(x, i, value) {
             if (is.character(i)) {
                 names(datacols)[i2] <- i
             }
-            return(initialize2(x, datacols = datacols, check = FALSE))
+            mc <- mcols(x)
+            if (!is.null(mc) && !setequal(names(datacols), rownames(mc))) {
+                newnames <- setdiff(names(datacols), rownames(mc))
+                mc <- combineRows(mc, DataFrame(row.names = newnames))
+                mc <- mc[names(datacols), , drop = FALSE]
+            }
+            return(initialize2(x, datacols = datacols, elementMetadata = mc, check = FALSE))
         }
     }
     stop("not compatible DuckDBDataFrame objects")
 })
 
 #' @export
-#' @importFrom S4Vectors normalizeDoubleBracketSubscript
+#' @importFrom S4Vectors combineRows DataFrame normalizeDoubleBracketSubscript
 setMethod("[[<-", "DuckDBDataFrame", function(x, i, j, ..., value) {
     if (is.character(i)) {
         i2 <- i
@@ -347,7 +353,11 @@ setMethod("[[<-", "DuckDBDataFrame", function(x, i, j, ..., value) {
             if (isTRUE(all.equal(as(x, "DuckDBTable"), value@table))) {
                 datacols <- x@datacols
                 datacols[[i2]] <- value@table@datacols[[1L]]
-                return(initialize2(x, datacols = datacols, check = FALSE))
+                mc <- mcols(x)
+                if (!is.null(mc) && is.character(i) && !(i %in% colnames(x))) {
+                    mc <- combineRows(mc, DataFrame(row.names = i))
+                }
+                return(initialize2(x, datacols = datacols, elementMetadata = mc, check = FALSE))
             }
         }
     }
