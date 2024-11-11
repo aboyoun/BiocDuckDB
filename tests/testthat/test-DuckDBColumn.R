@@ -20,7 +20,15 @@ test_that("nonzero functions work for DuckDBColumn", {
     expect_equal(nzcount(am), nzcount(as.vector(am)))
 })
 
-test_that("Arith methods work as expected for a DuckDBArray", {
+test_that("unique works as expected for a DuckDBColumn", {
+    df <- DuckDBDataFrame(mtcars_parquet, keycols = "model")
+    cyl <- df[["cyl"]]
+    expected <- unique(as.vector(cyl))
+    names(expected) <- NULL
+    checkDuckDBColumn(unique(cyl), expected)
+})
+
+test_that("Arith methods work as expected for a DuckDBColumn", {
     df <- DuckDBDataFrame(mtcars_parquet, keycols = "model")
     mpg <- df[["mpg"]]
     disp <- df[["disp"]]

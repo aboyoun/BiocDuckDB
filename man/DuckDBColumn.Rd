@@ -16,6 +16,7 @@
 \alias{tail,DuckDBColumn-method}
 \alias{type,DuckDBColumn-method}
 \alias{type<-,DuckDBColumn-method}
+\alias{unique,DuckDBColumn-method}
 \alias{Ops,DuckDBColumn,DuckDBColumn-method}
 \alias{Ops,DuckDBColumn,atomic-method}
 \alias{Ops,atomic,DuckDBColumn-method}

@@ -53,6 +53,7 @@
 #' nrow,DuckDBTable-method
 #' nzcount,DuckDBTable-method
 #' rownames,DuckDBTable-method
+#' unique,DuckDBTable-method
 #' Ops,DuckDBTable,DuckDBTable-method
 #' Ops,DuckDBTable,atomic-method
 #' Ops,atomic,DuckDBTable-method
@@ -277,6 +278,24 @@ setGeneric("coltypes<-", function(x, value) standardGeneric("coltypes<-"))
 setReplaceMethod("coltypes", "DuckDBTable", function(x, value) {
     datacols <- .cast_fact(x@datacols, value)
     initialize2(x, datacols = datacols, check = FALSE)
+})
+
+#' @export
+#' @importFrom BiocGenerics unique
+#' @importFrom dplyr distinct mutate
+setMethod("unique", "DuckDBTable",
+function (x, incomparables = FALSE, fromLast = FALSE, ...)  {
+    if (!isFALSE(incomparables)) {
+        .NotYetUsed("incomparables != FALSE")
+    }
+    conn <- x@conn
+    datacols <- x@datacols
+    keycols <- tail(make.unique(c(colnames(conn), "row_number"), sep = "_"), 1L)
+    keycols <- setNames(list(call("row_number")), keycols)
+    conn <- distinct(conn, !!!as.list(datacols))
+    conn <- mutate(conn, !!!keycols)
+    keycols[[1L]] <- .keycols.row_number(conn)
+    initialize2(x, conn = conn, keycols = keycols, check = FALSE)
 })
 
 #' @importFrom bit64 as.integer64
@@ -602,7 +621,7 @@ function(x, row.names = NULL, optional = FALSE, ...) {
         }
     }
 
-    conn <- mutate(conn, !!!datacols)
+    conn <- mutate(conn, !!!as.list(datacols))
     conn <- select(conn, c(names(keycols), names(datacols)))
 
     # Allow for 1 extra row to check for duplicate keys

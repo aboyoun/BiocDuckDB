@@ -20,6 +20,7 @@
 \alias{nrow,DuckDBTable-method}
 \alias{nzcount,DuckDBTable-method}
 \alias{rownames,DuckDBTable-method}
+\alias{unique,DuckDBTable-method}
 \alias{Ops,DuckDBTable,DuckDBTable-method}
 \alias{Ops,DuckDBTable,atomic-method}
 \alias{Ops,atomic,DuckDBTable-method}

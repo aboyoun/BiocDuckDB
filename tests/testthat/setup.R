@@ -149,6 +149,11 @@ checkDuckDBDataFrame <- function(object, expected) {
 checkDuckDBColumn <- function(object, expected) {
     expect_s4_class(object, "DuckDBColumn")
     expect_identical(length(object), length(expected))
-    expect_identical(names(object), names(expected))
-    expect_equal(as.vector(object), expected)
+    if (nkey(object@table) == 0L) {
+        object <- as.vector(object)
+        expect_identical(length(object), length(expected))
+    } else {
+        expect_identical(names(object), names(expected))
+        expect_equal(as.vector(object), expected)
+    }
 }

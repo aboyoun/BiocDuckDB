@@ -19,6 +19,7 @@
 #' tail,DuckDBColumn-method
 #' type,DuckDBColumn-method
 #' type<-,DuckDBColumn-method
+#' unique,DuckDBColumn-method
 #' Ops,DuckDBColumn,DuckDBColumn-method
 #' Ops,DuckDBColumn,atomic-method
 #' Ops,atomic,DuckDBColumn-method
@@ -115,6 +116,13 @@ setReplaceMethod("type", "DuckDBColumn", function(x, value) {
     table <- x@table
     coltypes(table) <- value
     initialize2(x, table = table, check = FALSE)
+})
+
+#' @export
+#' @importFrom BiocGenerics unique
+setMethod("unique", "DuckDBColumn",
+function (x, incomparables = FALSE, fromLast = FALSE, ...)  {
+    initialize2(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export

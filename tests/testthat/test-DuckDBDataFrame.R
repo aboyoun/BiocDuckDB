@@ -148,6 +148,13 @@ test_that("tail works for a DuckDBDataFrame", {
     checkDuckDBDataFrame(tail(df, 20), tail(mtcars, 20))
 })
 
+test_that("unique works for a DuckDBDataFrame", {
+    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    expected <- unique(mtcars[,8:11])
+    rownames(expected) <- NULL
+    checkDuckDBDataFrame(unique(df[,8:11]), expected)
+})
+
 test_that("subset assignments that produce errors", {
     df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
     expect_error(df[1:5,] <- df[9:13,])
