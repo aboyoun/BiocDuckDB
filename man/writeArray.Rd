@@ -33,8 +33,7 @@ array.}
 \item{...}{Additional arguments to pass to \code{arrow::write_dataset}.}
 }
 \description{
-A function for writing an array-like object to a using
-\code{arrow::write_dataset}.
+An \code{arrow::write_dataset} wrapper function to write array-like objects.
 }
 \examples{
 # Write the Titanic dataset to a single Parquet file
@@ -54,7 +53,7 @@ list.files(tf3, full.names = TRUE, recursive = TRUE)
 
 # Write a random array to multiple Parquet files
 tf4 <- tempfile()
-X <- Matrix::rsparsematrix(50000, 2^17, density = 0.0001)
+X <- randomSparseMatrix(50000, 2^17, density = 0.0001)
 writeArray(X, tf4, partition_size = c(nrow(X), 100000))
 files <- list.files(tf4, full.names = TRUE, recursive = TRUE)
 files <- setNames(sprintf("\%.1f MB", file.size(files) / 2^20), files)
