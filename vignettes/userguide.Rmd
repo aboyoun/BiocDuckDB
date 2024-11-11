@@ -161,12 +161,14 @@ define the dimensions of the array. If the values in the key columns are known,
 they can be supplied as named lists to the `keycols` argument to speed up
 object creation by avoiding a table scan.
 
+In this example we will write the 4-dimensional `Titanic` dataset to a parquet
+file using `BiocDuckDB::writeArray`.
+
 ```{r}
 # Write a parquet file to contain the titanic data
-titanic <- do.call(expand.grid, c(dimnames(Titanic), stringsAsFactors = TRUE))
-titanic$fate <- as.integer(Titanic[as.matrix(titanic)])
-titanic_tf <- tempfile(fileext = ".parquet")
-arrow::write_parquet(titanic, titanic_tf)
+titanic_tf <- tempfile()
+writeArray(Titanic, titanic_tf, value_name = "fate")
+list.files(titanic_tf, full.names = TRUE, recursive = TRUE)
 
 # Create a DuckDBArray
 titanic_ddb <- DuckDBArray(titanic_tf, keycols = c("Class", "Sex", "Age", "Survived"), datacol = "fate")
@@ -216,7 +218,7 @@ array, but this can be scaled to out to accommodate larger data.
 
 ```{r}
 set.seed(123)
-ind <- arrayInd(sort(sample(26 * 26 * 12, 1000)), c(26, 26, 12))
+ind <- arrayInd(sort(sample.int(26 * 26 * 12, 1000)), c(26, 26, 12))
 sparse_df <- data.frame(dim1 = letters[ind[, 1]],
                         dim2 = LETTERS[ind[, 2]],
                         dim3 = month.abb[ind[, 3]],

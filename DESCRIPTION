@@ -27,13 +27,13 @@ Imports:
     S4Vectors,
     S4Arrays (>= 1.1.1),
     DBI,
-    dplyr
+    dplyr,
+    arrow
 Suggests:
     knitr,
     rmarkdown,
     BiocStyle,
-    testthat,
-    arrow
+    testthat
 biocViews: DataRepresentation, Infrastructure, Software
 VignetteBuilder: knitr
 BugReports: https://github.com/LTLA/DuckDBDataFrame
@@ -49,3 +49,4 @@ Collate:
     'DuckDBColumn.R'
     'DuckDBDataFrame.R'
     'DuckDBMatrix.R'
+    'writeArray.R'
