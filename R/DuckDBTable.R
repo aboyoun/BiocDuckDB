@@ -668,11 +668,6 @@ function(x, row.names = NULL, optional = FALSE, ...) {
     df
 })
 
-file_ext <- function(x) {
-    xsplit <- strsplit(basename(x), "\\.")
-    sapply(xsplit, function(y) paste(y[-1L], collapse = "."), USE.NAMES = FALSE)
-}
-
 .wrapFile <- function(x, read) {
     x <- sprintf("'%s'", x)
     if (length(x) > 1L) {
@@ -683,14 +678,13 @@ file_ext <- function(x) {
 
 #' @importFrom S4Vectors isSingleString
 .wrapConn <- function(x) {
-    ext <- unique(tolower(file_ext(x)))
-    if (all(ext %in% c("csv", "tsv", "csv.gz", "tsv.gz"))) {
+    if (all(grepl("(?i)\\.(csv|tsv)(\\.gz)?$", x))) {
         x <- .wrapFile(x, "read_csv")
-    } else if (all(ext %in% c("parquet", "pq"))) {
+    } else if (all(grepl("(?i)\\.(parquet|pq)$", x))) {
         x <- .wrapFile(x, "read_parquet")
     } else if (isSingleString(x) && dir.exists(x)) {
-            ext <- unique(tolower(file_ext(list.files(x, recursive = TRUE))))
-            if (any(ext %in% c("parquet", "pq"))) {
+            files <- list.files(x, recursive = TRUE)
+            if (any(all(grepl("(?i)\\.(parquet|pq)$", files)))) {
                 x <- .wrapFile(file.path(x, "**"), "read_parquet")
             }
         }
