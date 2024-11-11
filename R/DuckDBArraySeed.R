@@ -49,6 +49,9 @@
 #' extract_sparse_array,DuckDBArraySeed-method
 #' is_nonzero,DuckDBArraySeed-method
 #' is_sparse,DuckDBArraySeed-method
+#' is.finite,DuckDBArraySeed-method
+#' is.infinite,DuckDBArraySeed-method
+#' is.nan,DuckDBArraySeed-method
 #' nzcount,DuckDBArraySeed-method
 #' t,DuckDBArraySeed-method
 #' type,DuckDBArraySeed-method
@@ -222,6 +225,21 @@ setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBArraySeed"), function(e1, e2) {
 #' @export
 setMethod("Math", "DuckDBArraySeed", function(x) {
     initialize2(x, table = callGeneric(x@table), check = FALSE)
+})
+
+#' @export
+setMethod("is.finite", "DuckDBArraySeed", function(x) {
+    initialize2(x, table = is.finite(x@table), check = FALSE)
+})
+
+#' @export
+setMethod("is.infinite", "DuckDBArraySeed", function(x) {
+    initialize2(x, table = is.infinite(x@table), check = FALSE)
+})
+
+#' @export
+setMethod("is.nan", "DuckDBArraySeed", function(x) {
+    initialize2(x, table = is.nan(x@table), check = FALSE)
 })
 
 #' @export

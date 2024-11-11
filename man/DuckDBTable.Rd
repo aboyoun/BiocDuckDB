@@ -16,6 +16,9 @@
 \alias{dbconn,DuckDBTable-method}
 \alias{is_nonzero,DuckDBTable-method}
 \alias{is_sparse,DuckDBTable-method}
+\alias{is.finite,DuckDBTable-method}
+\alias{is.infinite,DuckDBTable-method}
+\alias{is.nan,DuckDBTable-method}
 \alias{ncol,DuckDBTable-method}
 \alias{nrow,DuckDBTable-method}
 \alias{nzcount,DuckDBTable-method}

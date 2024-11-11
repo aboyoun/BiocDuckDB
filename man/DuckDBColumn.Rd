@@ -8,6 +8,9 @@
 \alias{extractROWS,DuckDBColumn,ANY-method}
 \alias{head,DuckDBColumn-method}
 \alias{is_nonzero,DuckDBColumn-method}
+\alias{is.finite,DuckDBColumn-method}
+\alias{is.infinite,DuckDBColumn-method}
+\alias{is.nan,DuckDBColumn-method}
 \alias{length,DuckDBColumn-method}
 \alias{names,DuckDBColumn-method}
 \alias{nzcount,DuckDBColumn-method}

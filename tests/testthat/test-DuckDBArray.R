@@ -221,6 +221,14 @@ test_that("Math methods work as expected for a DuckDBArray", {
     expect_error(trigamma(illiteracy))
 })
 
+test_that("Special numeric functions work as expected for a DuckDBArray", {
+    pqarray <- DuckDBArray(special_path, keycols = list(id = letters[1:4]), datacols = "x")
+
+    checkDuckDBArray(is.finite(pqarray), is.finite(as.array(pqarray)))
+    checkDuckDBArray(is.infinite(pqarray), is.infinite(as.array(pqarray)))
+    checkDuckDBArray(is.nan(pqarray), is.nan(as.array(pqarray)))
+})
+
 test_that("Summary methods work as expected for a DuckDBArray", {
     pqarray <- DuckDBArray(titanic_parquet, keycols = dimnames(titanic_array), datacols = "fate")
     expect_identical(max(pqarray), max(as.array(pqarray)))

@@ -29,6 +29,9 @@
 #' aperm,DuckDBArray-method
 #' dbconn,DuckDBArray-method
 #' is_nonzero,DuckDBArray-method
+#' is.finite,DuckDBArray-method
+#' is.infinite,DuckDBArray-method
+#' is.nan,DuckDBArray-method
 #' nzcount,DuckDBArray-method
 #' t,DuckDBArray-method
 #' type,DuckDBArray-method
@@ -123,6 +126,21 @@ setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBArray"), function(e1, e2) {
 #' @export
 setMethod("Math", "DuckDBArray", function(x) {
     initialize2(x, seed = callGeneric(x@seed), check = FALSE)
+})
+
+#' @export
+setMethod("is.finite", "DuckDBArray", function(x) {
+    initialize2(x, seed = is.finite(x@seed), check = FALSE)
+})
+
+#' @export
+setMethod("is.infinite", "DuckDBArray", function(x) {
+    initialize2(x, seed = is.infinite(x@seed), check = FALSE)
+})
+
+#' @export
+setMethod("is.nan", "DuckDBArray", function(x) {
+    initialize2(x, seed = is.nan(x@seed), check = FALSE)
 })
 
 #' @export

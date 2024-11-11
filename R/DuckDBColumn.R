@@ -11,6 +11,9 @@
 #' extractROWS,DuckDBColumn,ANY-method
 #' head,DuckDBColumn-method
 #' is_nonzero,DuckDBColumn-method
+#' is.finite,DuckDBColumn-method
+#' is.infinite,DuckDBColumn-method
+#' is.nan,DuckDBColumn-method
 #' length,DuckDBColumn-method
 #' names,DuckDBColumn-method
 #' nzcount,DuckDBColumn-method
@@ -206,6 +209,21 @@ setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBColumn"), function(e1, e2) {
 #' @export
 setMethod("Math", "DuckDBColumn", function(x) {
     initialize2(x, table = callGeneric(x@table), check = FALSE)
+})
+
+#' @export
+setMethod("is.finite", "DuckDBColumn", function(x) {
+    initialize2(x, table = is.finite(x@table), check = FALSE)
+})
+
+#' @export
+setMethod("is.infinite", "DuckDBColumn", function(x) {
+    initialize2(x, table = is.infinite(x@table), check = FALSE)
+})
+
+#' @export
+setMethod("is.nan", "DuckDBColumn", function(x) {
+    initialize2(x, table = is.nan(x@table), check = FALSE)
 })
 
 #' @export

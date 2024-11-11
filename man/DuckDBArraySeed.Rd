@@ -13,6 +13,9 @@
 \alias{extract_sparse_array,DuckDBArraySeed-method}
 \alias{is_nonzero,DuckDBArraySeed-method}
 \alias{is_sparse,DuckDBArraySeed-method}
+\alias{is.finite,DuckDBArraySeed-method}
+\alias{is.infinite,DuckDBArraySeed-method}
+\alias{is.nan,DuckDBArraySeed-method}
 \alias{nzcount,DuckDBArraySeed-method}
 \alias{t,DuckDBArraySeed-method}
 \alias{type,DuckDBArraySeed-method}

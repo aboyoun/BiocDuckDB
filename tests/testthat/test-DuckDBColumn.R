@@ -77,6 +77,15 @@ test_that("Math methods work as expected for a DuckDBColumn", {
     expect_error(log1p(mpg))
 })
 
+test_that("Special numeric functions work as expected for a DuckDBColumn", {
+    df <- DuckDBDataFrame(special_path, keycols = list(id = letters[1:4]), datacols = "x")
+    x <- df[["x"]]
+
+    checkDuckDBColumn(is.finite(x), is.finite(as.vector(x)))
+    checkDuckDBColumn(is.infinite(x), is.infinite(as.vector(x)))
+    checkDuckDBColumn(is.nan(x), is.nan(as.vector(x)))
+})
+
 test_that("Summary methods work as expected for a DuckDBColumn", {
     df <- DuckDBDataFrame(mtcars_parquet, keycols = "model")
     mpg <- df[["mpg"]]

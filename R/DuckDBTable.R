@@ -49,6 +49,9 @@
 #' dbconn,DuckDBTable-method
 #' is_nonzero,DuckDBTable-method
 #' is_sparse,DuckDBTable-method
+#' is.finite,DuckDBTable-method
+#' is.infinite,DuckDBTable-method
+#' is.nan,DuckDBTable-method
 #' ncol,DuckDBTable-method
 #' nrow,DuckDBTable-method
 #' nzcount,DuckDBTable-method
@@ -508,6 +511,27 @@ setMethod("Math", "DuckDBTable", function(x) {
                 endoapply(x@datacols, function(j) call(.Generic, j))
              },
              stop("unsupported Math operator: ", .Generic))
+    initialize2(x, datacols = datacols, check = FALSE)
+})
+
+#' @export
+#' @importFrom S4Vectors endoapply
+setMethod("is.finite", "DuckDBTable", function(x) {
+    datacols <- endoapply(x@datacols, function(j) call("isfinite", j))
+    initialize2(x, datacols = datacols, check = FALSE)
+})
+
+#' @export
+#' @importFrom S4Vectors endoapply
+setMethod("is.infinite", "DuckDBTable", function(x) {
+    datacols <- endoapply(x@datacols, function(j) call("isinf", j))
+    initialize2(x, datacols = datacols, check = FALSE)
+})
+
+#' @export
+#' @importFrom S4Vectors endoapply
+setMethod("is.nan", "DuckDBTable", function(x) {
+    datacols <- endoapply(x@datacols, function(j) call("isnan", j))
     initialize2(x, datacols = datacols, check = FALSE)
 })
 

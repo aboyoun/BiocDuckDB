@@ -221,6 +221,14 @@ test_that("Math methods work as expected for a DuckDBArraySeed", {
     expect_error(trigamma(illiteracy))
 })
 
+test_that("Special numeric functions work as expected for a DuckDBArraySeed", {
+    seed <- DuckDBArraySeed(special_path, keycols = list(id = letters[1:4]), datacols = "x")
+
+    checkDuckDBArraySeed(is.finite(seed), is.finite(as.array(seed)))
+    checkDuckDBArraySeed(is.infinite(seed), is.infinite(as.array(seed)))
+    checkDuckDBArraySeed(is.nan(seed), is.nan(as.array(seed)))
+})
+
 test_that("Summary methods work as expected for a DuckDBArraySeed", {
     seed <- DuckDBArraySeed(titanic_parquet, keycols = dimnames(titanic_array), datacols = "fate")
     expect_identical(max(seed), max(as.array(seed)))

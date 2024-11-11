@@ -7,6 +7,9 @@
 \alias{aperm,DuckDBArray-method}
 \alias{dbconn,DuckDBArray-method}
 \alias{is_nonzero,DuckDBArray-method}
+\alias{is.finite,DuckDBArray-method}
+\alias{is.infinite,DuckDBArray-method}
+\alias{is.nan,DuckDBArray-method}
 \alias{nzcount,DuckDBArray-method}
 \alias{t,DuckDBArray-method}
 \alias{type,DuckDBArray-method}

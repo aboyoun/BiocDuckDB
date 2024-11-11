@@ -84,6 +84,12 @@ sparse_parquet <- tempfile(fileext = ".parquet")
 arrow::write_parquet(sparse_df, sparse_parquet)
 
 
+# Special characters
+special_df <- data.frame(id = letters[1:4], x = c(-Inf, 0, Inf, NaN))
+special_path <- tempfile(fileext = ".parquet")
+arrow::write_parquet(special_df, special_path)
+
+
 # Helper functions
 checkDuckDBTable <- function(object, expected) {
     expect_s4_class(object, "DuckDBTable")

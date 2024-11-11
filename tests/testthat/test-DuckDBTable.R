@@ -230,6 +230,22 @@ test_that("Math methods work as expected for a DuckDBTable", {
     expect_error(trigamma(illiteracy))
 })
 
+test_that("Special numeric functions work as expected for a DuckDBTable", {
+    tbl <- DuckDBTable(special_path, keycols = list(id = letters[1:4]), datacols = "x")
+
+    expected <- as.data.frame(tbl)
+    expected$x <- is.finite(expected$x)
+    checkDuckDBTable(is.finite(tbl), expected)
+
+    expected <- as.data.frame(tbl)
+    expected$x <- is.infinite(expected$x)
+    checkDuckDBTable(is.infinite(tbl), expected)
+
+    expected <- as.data.frame(tbl)
+    expected$x <- is.nan(expected$x)
+    checkDuckDBTable(is.nan(tbl), expected)
+})
+
 test_that("Summary methods work as expected for a DuckDBTable", {
     tbl <- DuckDBTable(titanic_parquet, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
     expect_identical(max(tbl), max(as.data.frame(tbl)[["fate"]]))
