@@ -48,7 +48,8 @@ DuckDBTable(
 \arguments{
 \item{conn}{Either a character vector containing the paths to parquet, csv,
 or gzipped csv data files; a string that defines a duckdb \code{read_*} data
-source; or a \code{tbl_duckdb_connection} object.}
+source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
+object.}
 
 \item{keycols}{An optional character vector of column names from \code{conn}
 that will define the primary key, or a named list of character vectors where

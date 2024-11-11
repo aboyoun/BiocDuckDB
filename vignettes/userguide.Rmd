@@ -213,6 +213,22 @@ keycols <- setNames(dimnames(state.x77), c("rowname", "colname"))
 state_ddb <- DuckDBMatrix(state_tf, keycols = keycols, datacol = "value")
 ```
 
+We can extract sub-matrices from the underlying parquet data by either reading
+from a subdirectory or using a `DuckDBDataFrame` to filter the data prior to
+constructing the matrix.
+
+```{r}
+# Use the data files for just the Western states
+western_state_ddb <- DuckDBMatrix(file.path(state_tf, "region=West"), row = "rowname", col = "colname", datacol = "value")
+western_state_ddb <- western_state_ddb[sort(rownames(western_state_ddb)), colnames(state.x77)]
+
+# Use a DuckDBDataFrame to filter the Southern states
+full_df <- DuckDBDataFrame(state_tf)
+southern_df <- full_df[full_df$region == "South", ]
+southern_state_ddb <- DuckDBMatrix(southern_df, row = "rowname", col = "colname", datacol = "value")
+southern_state_ddb <- southern_state_ddb[sort(rownames(southern_state_ddb)), colnames(state.x77)]
+```
+
 ## `DuckDBArray` using a random sparse array
 
 The `DuckDBArray` and `DuckDBMatrix` classes support sparse arrays and matrices

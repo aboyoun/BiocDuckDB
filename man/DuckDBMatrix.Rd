@@ -12,7 +12,8 @@ DuckDBMatrix(conn, row, col, datacols, keycols = c(row, col), type = NULL)
 \arguments{
 \item{conn}{Either a character vector containing the paths to parquet, csv,
 or gzipped csv data files; a string that defines a duckdb \code{read_*} data
-source; or a \code{tbl_duckdb_connection} object.}
+source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
+object.}
 
 \item{row}{Either a string that specifies the column in \code{conn} that
 specifies the row names of the matrix, or a named list containing a single

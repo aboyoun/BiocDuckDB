@@ -33,7 +33,8 @@ DuckDBArray(conn, keycols, datacols, type = NULL)
 \arguments{
 \item{conn}{Either a character vector containing the paths to parquet, csv,
 or gzipped csv data files; a string that defines a duckdb \code{read_*} data
-source; or a \code{tbl_duckdb_connection} object.}
+source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
+object.}
 
 \item{keycols}{Either a character vector of column names from \code{conn}
 that will specify the dimension names, or a named list of character vectors

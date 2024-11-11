@@ -6,7 +6,8 @@
 #'
 #' @param conn Either a character vector containing the paths to parquet, csv,
 #' or gzipped csv data files; a string that defines a duckdb \code{read_*} data
-#' source; or a \code{tbl_duckdb_connection} object.
+#' source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
+#' object.
 #' @param keycols An optional character vector of column names from \code{conn}
 #' that will define the primary key, or a named list of character vectors where
 #' the names of the list define the key and the character vectors set the
@@ -701,8 +702,9 @@ function(conn, keycols, datacols = setdiff(colnames(conn), names(keycols)), type
     # Acquire the connection if it is a string
     if (is.character(conn)) {
         conn <- tbl(acquireDuckDBConn(), .wrapConn(conn))
-    }
-    if (!inherits(conn, "tbl_duckdb_connection")) {
+    } else if (is(conn, "DuckDBTable")) {
+        conn <- conn@conn
+    } else if (!inherits(conn, "tbl_duckdb_connection")) {
         stop("'conn' must be a 'tbl_duckdb_connection' object")
     }
 
