@@ -40,11 +40,12 @@
 #' files <- setNames(sprintf("%.1f MB", file.size(files) / 2^20), files)
 #' files
 #'
+#' @name writeArray
+
 #' @export
 #' @importFrom arrow write_dataset
 #' @importFrom SparseArray nzwhich nzvals
 #' @importFrom stats setNames
-#'
 #' @rdname writeArray
 writeArray <-
 function(x,

@@ -49,4 +49,5 @@ Collate:
     'DuckDBColumn.R'
     'DuckDBDataFrame.R'
     'DuckDBMatrix.R'
+    'listParquetDirs.R'
     'writeArray.R'
