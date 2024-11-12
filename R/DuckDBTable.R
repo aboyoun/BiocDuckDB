@@ -154,7 +154,8 @@ setMethod("show", "DuckDBTable", function(object) {
                     paste(keynames(object), collapse = ", ")))
     }
     print(object@conn)
-    expr <- deparse(object@datacols)
+    expr <- deparse(object@datacols,
+                    width.cutoff = getOption("width", 60L) - 6L)
     expr <- sub("^[ \t\r\n]+", "      ", sub("\\)", "",
                 sub("^expression\\(", "", expr)))
     cat(sprintf("cols: %s\n", paste(expr, collapse = "\n")))
