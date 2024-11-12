@@ -37,6 +37,7 @@
 #'
 #' @aliases
 #' DuckDBTable-class
+#' show,DuckDBTable-method
 #' [,DuckDBTable,ANY,ANY,ANY-method
 #' all.equal.DuckDBTable
 #' as.data.frame,DuckDBTable-method
@@ -140,6 +141,24 @@ setValidity2("DuckDBTable", function(x) {
     } else {
         msg
     }
+})
+
+#' @export
+#' @importFrom S4Vectors classNameForDisplay
+setMethod("show", "DuckDBTable", function(object) {
+    if (nkey(object) == 0L) {
+        cat(sprintf("%s object\n", classNameForDisplay(object)))
+    } else {
+        cat(sprintf("%s object with key (%s)\n",
+                    classNameForDisplay(object),
+                    paste(keynames(object), collapse = ", ")))
+    }
+    print(object@conn)
+    expr <- deparse(object@datacols)
+    expr <- sub("^[ \t\r\n]+", "      ", sub("\\)", "",
+                sub("^expression\\(", "", expr)))
+    cat(sprintf("cols: %s\n", paste(expr, collapse = "\n")))
+    invisible(NULL)
 })
 
 #' @export
