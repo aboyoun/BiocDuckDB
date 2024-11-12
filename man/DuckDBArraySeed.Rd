@@ -3,6 +3,7 @@
 \name{DuckDBArraySeed}
 \alias{DuckDBArraySeed}
 \alias{DuckDBArraySeed-class}
+\alias{show,DuckDBArraySeed-method}
 \alias{[,DuckDBArraySeed,ANY,ANY,ANY-method}
 \alias{aperm,DuckDBArraySeed-method}
 \alias{dbconn,DuckDBArraySeed-method}

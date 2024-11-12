@@ -40,6 +40,7 @@
 #'
 #' @aliases
 #' DuckDBArraySeed-class
+#' show,DuckDBArraySeed-method
 #' [,DuckDBArraySeed,ANY,ANY,ANY-method
 #' aperm,DuckDBArraySeed-method
 #' dbconn,DuckDBArraySeed-method
@@ -93,6 +94,16 @@ setValidity2("DuckDBArraySeed", function(x) {
         return("'drop' slot must be TRUE or FALSE")
     }
     TRUE
+})
+
+#' @export
+#' @importFrom S4Vectors classNameForDisplay
+setMethod("show", "DuckDBArraySeed", function(object) {
+    cat(sprintf("<%s>%s %s object of type \"%s\"\n",
+                paste(dim(object), collapse = " x "),
+                if (is_sparse(object)) " sparse" else "",
+                classNameForDisplay(object), type(object)))
+    invisible(NULL)
 })
 
 #' @export
