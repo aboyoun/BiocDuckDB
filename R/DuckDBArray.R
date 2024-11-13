@@ -34,6 +34,7 @@
 #' is.nan,DuckDBArray-method
 #' nzcount,DuckDBArray-method
 #' t,DuckDBArray-method
+#' tblconn,DuckDBArray-method
 #' type,DuckDBArray-method
 #' type<-,DuckDBArray-method
 #' Ops,DuckDBArray,DuckDBArray-method
@@ -53,6 +54,7 @@
 #' \code{\link{DuckDBArraySeed}},
 #' \code{\link[DelayedArray]{DelayedArray}}
 #'
+#' @include tblconn.R
 #' @include DuckDBArraySeed.R
 #'
 #' @name DuckDBArray
@@ -65,6 +67,9 @@ setClass("DuckDBArray", contains = "DelayedArray", slots = c(seed = "DuckDBArray
 #' @export
 #' @importFrom BiocGenerics dbconn
 setMethod("dbconn", "DuckDBArray", function(x) callGeneric(x@seed))
+
+#' @export
+setMethod("tblconn", "DuckDBArray", function(x) callGeneric(x@seed))
 
 #' @export
 setMethod("[", "DuckDBArray", function(x, i, j, ..., drop = TRUE) {

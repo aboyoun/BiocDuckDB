@@ -12,6 +12,7 @@
 \alias{is.nan,DuckDBArray-method}
 \alias{nzcount,DuckDBArray-method}
 \alias{t,DuckDBArray-method}
+\alias{tblconn,DuckDBArray-method}
 \alias{type,DuckDBArray-method}
 \alias{type<-,DuckDBArray-method}
 \alias{Ops,DuckDBArray,DuckDBArray-method}

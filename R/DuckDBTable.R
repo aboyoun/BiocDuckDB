@@ -58,6 +58,7 @@
 #' nrow,DuckDBTable-method
 #' nzcount,DuckDBTable-method
 #' rownames,DuckDBTable-method
+#' tblconn,DuckDBTable-method
 #' unique,DuckDBTable-method
 #' Ops,DuckDBTable,DuckDBTable-method
 #' Ops,DuckDBTable,atomic-method
@@ -74,6 +75,7 @@
 #'
 #' @include DuckDBConnection.R
 #' @include keynames.R
+#' @include tblconn.R
 #'
 #' @name DuckDBTable
 NULL
@@ -164,7 +166,10 @@ setMethod("show", "DuckDBTable", function(object) {
 
 #' @export
 #' @importFrom BiocGenerics dbconn
-setMethod("dbconn", "DuckDBTable", function(x) x@conn)
+setMethod("dbconn", "DuckDBTable", function(x) x@conn$src$con)
+
+#' @export
+setMethod("tblconn", "DuckDBTable", function(x) x@conn)
 
 #' @export
 setMethod("nkey", "DuckDBTable", function(x) {

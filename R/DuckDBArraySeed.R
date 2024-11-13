@@ -56,6 +56,7 @@
 #' is.nan,DuckDBArraySeed-method
 #' nzcount,DuckDBArraySeed-method
 #' t,DuckDBArraySeed-method
+#' tblconn,DuckDBArraySeed-method
 #' type,DuckDBArraySeed-method
 #' type<-,DuckDBArraySeed-method
 #' Ops,DuckDBArraySeed,DuckDBArraySeed-method
@@ -75,6 +76,7 @@
 #' \code{\link{DuckDBArray}},
 #' \code{\link[S4Arrays]{Array}}
 #'
+#' @include tblconn.R
 #' @include DuckDBTable.R
 #'
 #' @name DuckDBArraySeed
@@ -109,6 +111,9 @@ setMethod("show", "DuckDBArraySeed", function(object) {
 #' @export
 #' @importFrom BiocGenerics dbconn
 setMethod("dbconn", "DuckDBArraySeed", function(x) callGeneric(x@table))
+
+#' @export
+setMethod("tblconn", "DuckDBArraySeed", function(x) callGeneric(x@table))
 
 #' @export
 setMethod("dim", "DuckDBArraySeed", function(x) {

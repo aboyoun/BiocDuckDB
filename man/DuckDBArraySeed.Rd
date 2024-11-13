@@ -19,6 +19,7 @@
 \alias{is.nan,DuckDBArraySeed-method}
 \alias{nzcount,DuckDBArraySeed-method}
 \alias{t,DuckDBArraySeed-method}
+\alias{tblconn,DuckDBArraySeed-method}
 \alias{type,DuckDBArraySeed-method}
 \alias{type<-,DuckDBArraySeed-method}
 \alias{Ops,DuckDBArraySeed,DuckDBArraySeed-method}

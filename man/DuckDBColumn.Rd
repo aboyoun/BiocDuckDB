@@ -17,6 +17,7 @@
 \alias{show,DuckDBColumn-method}
 \alias{showAsCell,DuckDBColumn-method}
 \alias{tail,DuckDBColumn-method}
+\alias{tblconn,DuckDBColumn-method}
 \alias{type,DuckDBColumn-method}
 \alias{type<-,DuckDBColumn-method}
 \alias{unique,DuckDBColumn-method}

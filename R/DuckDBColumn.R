@@ -20,6 +20,7 @@
 #' show,DuckDBColumn-method
 #' showAsCell,DuckDBColumn-method
 #' tail,DuckDBColumn-method
+#' tblconn,DuckDBColumn-method
 #' type,DuckDBColumn-method
 #' type<-,DuckDBColumn-method
 #' unique,DuckDBColumn-method
@@ -35,6 +36,8 @@
 #' sd,DuckDBColumn-method
 #' mad,DuckDBColumn-method
 #' IQR,DuckDBColumn-method
+#'
+#' @include tblconn.R
 #'
 #' @name DuckDBColumn
 NULL
@@ -100,6 +103,9 @@ setMethod("showAsCell", "DuckDBColumn", function(object) {
 #' @export
 #' @importFrom BiocGenerics dbconn
 setMethod("dbconn", "DuckDBColumn", function(x) callGeneric(x@table))
+
+#' @export
+setMethod("tblconn", "DuckDBColumn", function(x) callGeneric(x@table))
 
 #' @export
 setMethod("length", "DuckDBColumn", function(x) nrow(x@table))
