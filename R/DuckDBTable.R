@@ -285,7 +285,7 @@ setReplaceMethod("colnames", "DuckDBTable", function(x, value) {
     }
 }
 
-.cast_fact <- function(datacols, value) {
+.cast_cols <- function(datacols, value) {
     if (is.null(names(value)) && (length(value) == length(datacols))) {
         names(value) <- names(datacols)
     }
@@ -317,7 +317,7 @@ setGeneric("coltypes<-", function(x, value) standardGeneric("coltypes<-"))
 
 #' @export
 setReplaceMethod("coltypes", "DuckDBTable", function(x, value) {
-    datacols <- .cast_fact(x@datacols, value)
+    datacols <- .cast_cols(x@datacols, value)
     initialize2(x, datacols = datacols, check = FALSE)
 })
 
@@ -770,7 +770,7 @@ function(conn, keycols, datacols = setdiff(colnames(conn), names(keycols)), type
             if (is.null(names(type)) || length(setdiff(names(type), names(datacols)))) {
                 stop("all names in 'type' must have a corresponding name in 'datacols'")
             }
-            datacols <- .cast_fact(datacols, type)
+            datacols <- .cast_cols(datacols, type)
         }
     }
     datacols <- as.expression(datacols)
