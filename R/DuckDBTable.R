@@ -259,11 +259,7 @@ setMethod("rownames", "DuckDBTable", function(x, do.NULL = TRUE, prefix = "row")
 #' @export
 #' @importFrom BiocGenerics colnames
 setMethod("colnames", "DuckDBTable", function(x, do.NULL = TRUE, prefix = "col") {
-    if (length(x@conn) == 0L) {
-        character(0L)
-    } else {
-        names(x@datacols)
-    }
+    names(x@datacols)
 })
 
 #' @export
