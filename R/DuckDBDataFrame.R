@@ -80,8 +80,10 @@ setClass("DuckDBDataFrame", contains = c("DuckDBTable", "DataFrame"))
 
 #' @importFrom S4Vectors setValidity2
 setValidity2("DuckDBDataFrame", function(x) {
-    if (nkey(x) != 1L) {
-        return("'keycols' slot must be a named list containing a single named character vector")
+    if (length(x@conn) > 0L) {
+        if (nkey(x) != 1L) {
+            return("'keycols' slot must be a named list containing a single named character vector")
+        }
     }
     TRUE
 })

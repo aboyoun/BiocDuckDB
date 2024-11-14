@@ -49,11 +49,13 @@ setClass("DuckDBColumn", contains = "Vector", slots = c(table = "DuckDBTable"))
 #' @importFrom S4Vectors isTRUEorFALSE setValidity2
 setValidity2("DuckDBColumn", function(x) {
     table <- x@table
-    if (ncol(table) != 1L) {
-        return("'table' slot must be a single-column DuckDBTable")
-    }
-    if (nkey(table) != 1L) {
-        return("'table' slot must have a 'keycols' with a named list containing a single named character vector")
+    if (length(table@conn) > 0L) {
+        if (ncol(table) != 1L) {
+            return("'table' slot must be a single-column DuckDBTable")
+        }
+        if (nkey(table) != 1L) {
+            return("'table' slot must have a 'keycols' with a named list containing a single named character vector")
+        }
     }
     TRUE
 })
@@ -63,6 +65,9 @@ setValidity2("DuckDBColumn", function(x) {
 setMethod("show", "DuckDBColumn", function(object) {
     len <- length(object)
     cat(sprintf("%s of length %s\n", classNameForDisplay(object), len))
+    if (length(object@table@conn) == 0L) {
+        return(invisible(NULL))
+    }
     if (.has.row_number(object@table)) {
         n1 <- 5L
         n2 <- 0L
@@ -111,7 +116,14 @@ setMethod("tblconn", "DuckDBColumn", function(x) callGeneric(x@table))
 setMethod("length", "DuckDBColumn", function(x) nrow(x@table))
 
 #' @export
-setMethod("names", "DuckDBColumn", function(x) keydimnames(x@table)[[1L]])
+setMethod("names", "DuckDBColumn", function(x) {
+    table <- x@table
+    if (length(table@conn) == 0L) {
+        NULL
+    } else {
+        keydimnames(table)[[1L]]
+    }
+})
 
 #' @export
 #' @importFrom BiocGenerics type

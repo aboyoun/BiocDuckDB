@@ -114,8 +114,14 @@ initialize2 <- function(..., check = TRUE)
 #' @export
 #' @importClassesFrom BiocGenerics OutOfMemoryObject
 #' @importClassesFrom S4Vectors RectangularData
+#' @importFrom stats setNames
 setClass("DuckDBTable", contains = c("RectangularData", "OutOfMemoryObject"),
-    slots = c(conn = "tbl_duckdb_connection", keycols = "list", datacols = "expression"))
+    slots = c(conn = "tbl_duckdb_connection", keycols = "list", datacols = "expression"),
+    prototype = prototype(conn = structure(list(),
+                                           class = c("tbl_duckdb_connection", "tbl_dbi",
+                                                     "tbl_sql", "tbl_lazy", "tbl")),
+                          keycols = setNames(list(), character()),
+                          datacols = setNames(expression(), character())))
 
 #' @importFrom S4Vectors setValidity2
 setValidity2("DuckDBTable", function(x) {
@@ -155,12 +161,14 @@ setMethod("show", "DuckDBTable", function(object) {
                     classNameForDisplay(object),
                     paste(keynames(object), collapse = ", ")))
     }
-    print(object@conn)
-    expr <- deparse(object@datacols,
-                    width.cutoff = getOption("width", 60L) - 6L)
-    expr <- sub("^[ \t\r\n]+", "      ", sub("\\)", "",
-                sub("^expression\\(", "", expr)))
-    cat(sprintf("cols: %s\n", paste(expr, collapse = "\n")))
+    if (length(object@conn) > 0L) {
+        print(object@conn)
+        expr <- deparse(object@datacols,
+                        width.cutoff = getOption("width", 60L) - 6L)
+        expr <- sub("^[ \t\r\n]+", "      ", sub("\\)", "",
+                    sub("^expression\\(", "", expr)))
+        cat(sprintf("cols: %s\n", paste(expr, collapse = "\n")))
+    }
     invisible(NULL)
 })
 
@@ -178,7 +186,9 @@ setMethod("nkey", "DuckDBTable", function(x) {
 
 #' @export
 setMethod("nkeydim", "DuckDBTable", function(x) {
-    if (.has.row_number(x)) {
+    if (length(x@conn) == 0L) {
+        0L
+    } else if (.has.row_number(x)) {
         abs(x@keycols[[1L]][2L])
     } else {
         lengths(x@keycols, use.names = FALSE)
@@ -237,7 +247,9 @@ setReplaceMethod("keydimnames", "DuckDBTable", function(x, value) {
 #' @export
 #' @importFrom BiocGenerics rownames
 setMethod("rownames", "DuckDBTable", function(x, do.NULL = TRUE, prefix = "row") {
-    if (length(x@keycols) == 1L) {
+    if (length(x@conn) == 0L) {
+        NULL
+    } else if (length(x@keycols) == 1L) {
         keydimnames(x)[[1L]]
     } else {
         stop("rownames is not supported for multi-dimensional keys")
@@ -247,7 +259,11 @@ setMethod("rownames", "DuckDBTable", function(x, do.NULL = TRUE, prefix = "row")
 #' @export
 #' @importFrom BiocGenerics colnames
 setMethod("colnames", "DuckDBTable", function(x, do.NULL = TRUE, prefix = "col") {
-    names(x@datacols)
+    if (length(x@conn) == 0L) {
+        character(0L)
+    } else {
+        names(x@datacols)
+    }
 })
 
 #' @export
