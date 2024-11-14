@@ -54,7 +54,7 @@ column names and the values specify the column type; one of
 A DuckDBDataFrame where each column is a \linkS4class{DuckDBColumn}.
 }
 \description{
-Create a DuckDB-backed \linkS4class{DataFrame}
+Create a DuckDB-backed \linkS4class{DataFrame} object.
 }
 \details{
 The DuckDBDataFrame is essentially just a \linkS4class{DataFrame} of \linkS4class{DuckDBColumn} objects.

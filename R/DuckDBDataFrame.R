@@ -1,6 +1,6 @@
 #' DuckDB-backed DataFrame
 #'
-#' Create a DuckDB-backed \linkS4class{DataFrame}
+#' Create a DuckDB-backed \linkS4class{DataFrame} object.
 #'
 #' @inheritParams DuckDBTable
 #'
@@ -350,6 +350,17 @@ setMethod("[[<-", "DuckDBDataFrame", function(x, i, j, ..., value) {
     } else {
         i2 <- normalizeDoubleBracketSubscript(i, x, allow.nomatch = TRUE)
     }
+
+    if (is.null(value)) {
+        datacols <- x@datacols
+        datacols[[i2]] <- NULL
+        mc <- mcols(x)
+        if (!is.null(mc)) {
+            mc <- mc[-i2, , drop = FALSE]
+        }
+        return(initialize2(x, datacols = datacols, elementMetadata = mc, check = FALSE))
+    }
+
     if (length(i2) == 1L && !is.na(i2)) {
         if (is(value, "DuckDBColumn")) {
             if (isTRUE(all.equal(as(x, "DuckDBTable"), value@table))) {
@@ -363,6 +374,7 @@ setMethod("[[<-", "DuckDBDataFrame", function(x, i, j, ..., value) {
             }
         }
     }
+
     stop("not compatible DuckDBDataFrame and DuckDBColumn objects")
 })
 
