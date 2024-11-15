@@ -88,6 +88,44 @@ setValidity2("DuckDBDataFrame", function(x) {
     TRUE
 })
 
+.makePrettyCharacterMatrixForDisplay <- function(x) {
+    x_nrow <- nrow(x)
+    x_ncol <- ncol(x)
+
+    if (.has_row_number(x)) {
+        nhead <- get_showHeadLines() + get_showTailLines()
+        ntail <- 0L
+    } else {
+        nhead <- get_showHeadLines()
+        ntail <- get_showTailLines()
+    }
+
+    if (x_nrow <= nhead + ntail + 1L) {
+        m <- makeNakedCharacterMatrixForDisplay(x)
+        x_rownames <- rownames(x)
+        if (!is.null(x_rownames)) {
+            rownames(m) <- x_rownames
+        }
+    } else {
+        x_head <- head(x, nhead)
+        x_rownames <- rownames(x_head)
+        if (ntail == 0L) {
+            m <- rbind(makeNakedCharacterMatrixForDisplay(x_head),
+                       rbind(rep.int("...", x_ncol)))
+        } else {
+            i <- c(seq_len(nhead), (x_nrow + 1L) - rev(seq_len(ntail)))
+            df <- DataFrame(as.data.frame(x[i, , drop = FALSE]))
+            m <- rbind(makeNakedCharacterMatrixForDisplay(head(df, nhead)),
+                       rbind(rep.int("...", x_ncol)),
+                       makeNakedCharacterMatrixForDisplay(tail(df, ntail)))
+            x_rownames <- c(x_rownames, rownames(tail(x, ntail)))
+        }
+        rownames(m) <- S4Vectors:::make_rownames_for_RectangularData_display(x_rownames, x_nrow, nhead, ntail)
+    }
+
+    rbind(sprintf("<%s>", coltypes(x)), m)
+}
+
 #' @export
 #' @importFrom S4Vectors DataFrame makeNakedCharacterMatrixForDisplay
 setMethod("makeNakedCharacterMatrixForDisplay", "DuckDBDataFrame", function(x) {
@@ -104,38 +142,8 @@ setMethod("show", "DuckDBDataFrame", function(object) {
         x_nrow, " row", ifelse(x_nrow == 1L, "", "s"), " and ",
         x_ncol, " column", ifelse(x_ncol == 1L, "", "s"), "\n", sep = "")
 
-    if (.has.row_number(object)) {
-        nhead <- get_showHeadLines() + get_showTailLines()
-        ntail <- 0L
-    } else {
-        nhead <- get_showHeadLines()
-        ntail <- get_showTailLines()
-    }
-
     if (x_nrow != 0L && x_ncol != 0L) {
-        if (x_nrow <= nhead + ntail + 1L) {
-            m <- makeNakedCharacterMatrixForDisplay(object)
-            x_rownames <- rownames(object)
-            if (!is.null(x_rownames)) {
-                rownames(m) <- x_rownames
-            }
-        } else {
-            x_head <- head(object, nhead)
-            x_rownames <- rownames(x_head)
-            if (ntail == 0L) {
-                m <- rbind(makeNakedCharacterMatrixForDisplay(x_head),
-                           rbind(rep.int("...", x_ncol)))
-            } else {
-                i <- c(seq_len(nhead), (x_nrow + 1L) - rev(seq_len(ntail)))
-                df <- DataFrame(as.data.frame(object[i, , drop = FALSE]))
-                m <- rbind(makeNakedCharacterMatrixForDisplay(head(df, nhead)),
-                           rbind(rep.int("...", x_ncol)),
-                           makeNakedCharacterMatrixForDisplay(tail(df, ntail)))
-                x_rownames <- c(x_rownames, rownames(tail(object, ntail)))
-            }
-            rownames(m) <- S4Vectors:::make_rownames_for_RectangularData_display(x_rownames, x_nrow, nhead, ntail)
-        }
-        m <- rbind(rep.int("<DuckDBColumn>", ncol(object)), m)
+        m <- .makePrettyCharacterMatrixForDisplay(object)
         print(m, quote = FALSE, right = TRUE)
     }
 
@@ -152,7 +160,7 @@ setMethod("names", "DuckDBDataFrame", function(x) colnames(x))
 #' @export
 #' @importFrom BiocGenerics rownames<-
 setReplaceMethod("rownames", "DuckDBDataFrame", function(x, value) {
-    if (.has.row_number(x)) {
+    if (.has_row_number(x)) {
         stop("cannot replace row numbers with rownames")
     }
     keydimnames(x) <- list(value)
@@ -195,7 +203,7 @@ setMethod("head", "DuckDBDataFrame", function(x, n = 6L, ...) {
     if (!isSingleNumber(n)) {
         stop("'n' must be a single number")
     }
-    if (.has.row_number(x)) {
+    if (.has_row_number(x)) {
         return(.head_conn(x, n))
     }
     n <- as.integer(n)
@@ -216,7 +224,7 @@ setMethod("tail", "DuckDBDataFrame", function(x, n = 6L, ...) {
     if (!isSingleNumber(n)) {
         stop("'n' must be a single number")
     }
-    if ((n > 0L) && .has.row_number(x)) {
+    if ((n > 0L) && .has_row_number(x)) {
         stop("tail requires a keycols to be efficient")
     }
     n <- as.integer(n)

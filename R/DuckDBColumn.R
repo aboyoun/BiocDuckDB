@@ -68,7 +68,7 @@ setMethod("show", "DuckDBColumn", function(object) {
     if (length(object@table@conn) == 0L) {
         return(invisible(NULL))
     }
-    if (.has.row_number(object@table)) {
+    if (.has_row_number(object)) {
         n1 <- 5L
         n2 <- 0L
     } else {
@@ -111,6 +111,8 @@ setMethod("dbconn", "DuckDBColumn", function(x) callGeneric(x@table))
 
 #' @export
 setMethod("tblconn", "DuckDBColumn", function(x) callGeneric(x@table))
+
+setMethod(".has_row_number", "DuckDBColumn", function(x) callGeneric(x@table))
 
 #' @export
 setMethod("length", "DuckDBColumn", function(x) nrow(x@table))
@@ -173,7 +175,7 @@ setMethod("head", "DuckDBColumn", function(x, n = 6L, ...) {
     if (!isSingleNumber(n)) {
         stop("'n' must be a single number")
     }
-    if (.has.row_number(x@table)) {
+    if (.has_row_number(x)) {
         return(initialize2(x, table = .head_conn(x@table, n), check = FALSE))
     }
     n <- as.integer(n)
@@ -194,7 +196,7 @@ setMethod("tail", "DuckDBColumn", function(x, n = 6L, ...) {
     if (!isSingleNumber(n)) {
         stop("'n' must be a single number")
     }
-    if ((n > 0L) && .has.row_number(x)) {
+    if ((n > 0L) && .has_row_number(x)) {
         stop("tail requires a keycols to be efficient")
     }
     n <- as.integer(n)

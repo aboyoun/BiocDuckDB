@@ -95,16 +95,6 @@ initialize2 <- function(..., check = TRUE)
     initialize(...)
 }
 
-#' @importFrom bit64 as.integer64 is.integer64
-.has.row_number <- function(x) {
-    if (length(x@keycols) == 1L) {
-        key1 <- x@keycols[[1L]]
-        is.integer64(key1) && (length(key1) == 2L) && is.na(key1[1L]) && (key1[2L] <= as.integer64(0L))
-    } else {
-        FALSE
-    }
-}
-
 #' @importFrom bit64 NA_integer64_
 #' @importFrom dplyr n pull summarize
 .keycols.row_number <- function(conn) {
@@ -179,16 +169,28 @@ setMethod("dbconn", "DuckDBTable", function(x) x@conn$src$con)
 #' @export
 setMethod("tblconn", "DuckDBTable", function(x) x@conn)
 
+setGeneric(".has_row_number", function(x) standardGeneric(".has_row_number"))
+
+#' @importFrom bit64 as.integer64 is.integer64
+setMethod(".has_row_number", "DuckDBTable", function(x) {
+    if (length(x@keycols) == 1L) {
+        key1 <- x@keycols[[1L]]
+        is.integer64(key1) && (length(key1) == 2L) && is.na(key1[1L]) && (key1[2L] <= as.integer64(0L))
+    } else {
+        FALSE
+    }
+})
+
 #' @export
 setMethod("nkey", "DuckDBTable", function(x) {
-    if (.has.row_number(x)) 0L else length(x@keycols)
+    if (.has_row_number(x)) 0L else length(x@keycols)
 })
 
 #' @export
 setMethod("nkeydim", "DuckDBTable", function(x) {
     if (length(x@conn) == 0L) {
         0L
-    } else if (.has.row_number(x)) {
+    } else if (.has_row_number(x)) {
         abs(x@keycols[[1L]][2L])
     } else {
         lengths(x@keycols, use.names = FALSE)
@@ -213,13 +215,13 @@ setMethod("ncol", "DuckDBTable", function(x) length(x@datacols))
 
 #' @export
 setMethod("keynames", "DuckDBTable", function(x) {
-    if (.has.row_number(x)) character(0L) else names(x@keycols)
+    if (.has_row_number(x)) character(0L) else names(x@keycols)
 })
 
 #' @export
 #' @importFrom dplyr pull select
 setMethod("keydimnames", "DuckDBTable", function(x) {
-    if (.has.row_number(x)) {
+    if (.has_row_number(x)) {
         list(as.character(pull(select(x@conn, !!as.name(names(x@keycols))))))
     } else {
         lapply(x@keycols, function(y) names(y) %||% as.character(y))
@@ -399,7 +401,7 @@ setMethod("is_sparse", "DuckDBTable", function(x) {
         for (k in intersect(names(keycols), names(i))) {
             sub <- i[[k]]
             if (is.atomic(sub)) {
-                if (.has.row_number(x)) {
+                if (.has_row_number(x)) {
                     if (is.numeric(sub)) {
                         keep <- call("%in%", as.name(k), as.integer64(sub))
                         conn <- filter(conn, !!keep)
@@ -417,7 +419,7 @@ setMethod("is_sparse", "DuckDBTable", function(x) {
                        isTRUE(all.equal(as(x, "DuckDBTable"), sub@table))) {
                 keep <- sub@table@datacols[[1L]]
                 conn <- filter(conn, !!keep)
-                if (.has.row_number(x)) {
+                if (.has_row_number(x)) {
                     keycols[[1L]] <- .keycols.row_number(conn)
                 } else {
                     for (kname in names(keycols)) {
@@ -676,7 +678,7 @@ function(x, row.names = NULL, optional = FALSE, ...) {
     keycols <- x@keycols
     datacols <- as.list(x@datacols)
 
-    if (!.has.row_number(x)) {
+    if (!.has_row_number(x)) {
         for (i in names(keycols)) {
             set <- keycols[[i]]
             conn <- filter(conn, !!as.name(i) %in% set)
