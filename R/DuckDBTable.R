@@ -764,18 +764,22 @@ function(conn, keycols, datacols = setdiff(colnames(conn), names(keycols)), type
     }
 
     # Ensure 'datacols' is a named expression
-    if (is.character(datacols)) {
-        datacols <- sapply(datacols, as.name, simplify = FALSE)
-        if (!is.null(type)) {
-            if (is.null(names(type)) || length(setdiff(names(type), names(datacols)))) {
-                stop("all names in 'type' must have a corresponding name in 'datacols'")
+    if (length(datacols) == 0L) {
+        datacols <- setNames(expression(), character())
+    } else {
+        if (is.character(datacols)) {
+            datacols <- sapply(datacols, as.name, simplify = FALSE)
+            if (!is.null(type)) {
+                if (is.null(names(type)) || length(setdiff(names(type), names(datacols)))) {
+                    stop("all names in 'type' must have a corresponding name in 'datacols'")
+                }
+                datacols <- .cast_cols(datacols, type)
             }
-            datacols <- .cast_cols(datacols, type)
         }
-    }
-    datacols <- as.expression(datacols)
-    if (is.null(names(datacols))) {
-        stop("'datacols' must be a named expression")
+        datacols <- as.expression(datacols)
+        if (is.null(names(datacols))) {
+            stop("'datacols' must be a named expression")
+        }
     }
 
     new2("DuckDBTable", conn = conn, keycols = keycols, datacols = datacols, check = FALSE)
