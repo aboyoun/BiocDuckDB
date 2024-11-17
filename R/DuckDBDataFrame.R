@@ -89,9 +89,6 @@ setValidity2("DuckDBDataFrame", function(x) {
 })
 
 .makePrettyCharacterMatrixForDisplay <- function(x) {
-    x_nrow <- nrow(x)
-    x_ncol <- ncol(x)
-
     if (.has_row_number(x)) {
         nhead <- get_showHeadLines() + get_showTailLines()
         ntail <- 0L
@@ -100,6 +97,7 @@ setValidity2("DuckDBDataFrame", function(x) {
         ntail <- get_showTailLines()
     }
 
+    x_nrow <- NROW(x)
     if (x_nrow <= nhead + ntail + 1L) {
         m <- makeNakedCharacterMatrixForDisplay(x)
         x_rownames <- rownames(x)
@@ -110,20 +108,19 @@ setValidity2("DuckDBDataFrame", function(x) {
         x_head <- head(x, nhead)
         x_rownames <- rownames(x_head)
         if (ntail == 0L) {
-            m <- rbind(makeNakedCharacterMatrixForDisplay(x_head),
-                       rbind(rep.int("...", x_ncol)))
+            m <- rbind(makeNakedCharacterMatrixForDisplay(x_head), "...")
         } else {
             i <- c(seq_len(nhead), (x_nrow + 1L) - rev(seq_len(ntail)))
             df <- DataFrame(as.data.frame(x[i, , drop = FALSE]))
             m <- rbind(makeNakedCharacterMatrixForDisplay(head(df, nhead)),
-                       rbind(rep.int("...", x_ncol)),
+                       "...",
                        makeNakedCharacterMatrixForDisplay(tail(df, ntail)))
             x_rownames <- c(x_rownames, rownames(tail(x, ntail)))
         }
         rownames(m) <- S4Vectors:::make_rownames_for_RectangularData_display(x_rownames, x_nrow, nhead, ntail)
     }
 
-    rbind(sprintf("<%s>", coltypes(x)), m)
+    m
 }
 
 #' @export
@@ -144,6 +141,7 @@ setMethod("show", "DuckDBDataFrame", function(object) {
 
     if (x_nrow != 0L && x_ncol != 0L) {
         m <- .makePrettyCharacterMatrixForDisplay(object)
+        m <- rbind(sprintf("<%s>", coltypes(object)), m)
         print(m, quote = FALSE, right = TRUE)
     }
 
