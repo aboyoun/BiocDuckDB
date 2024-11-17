@@ -395,17 +395,13 @@ setMethod("extract_sparse_array", "DuckDBArraySeed", function(x, index) {
 setMethod("DelayedArray", "DuckDBArraySeed", function(seed) DuckDBArray(seed))
 
 #' @export
-#' @importFrom dplyr select
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
 #' @rdname DuckDBArraySeed
 DuckDBArraySeed <- function(conn, keycols, datacols, type = NULL) {
-    if (is.null(type)) {
-        table <- DuckDBTable(conn, keycols = keycols, datacols = datacols)
-        column <- as.data.frame(select(head(table@conn, 0L), !!datacols))[[datacols]]
-        type <- .get_type(column)
-    } else {
-        table <- DuckDBTable(conn, keycols = keycols, datacols = datacols, type = setNames(type, datacols))
+    if (!is.null(type)) {
+        type <- setNames(type, names(datacols) %||% datacols)
     }
+    table <- DuckDBTable(conn, keycols = keycols, datacols = datacols, type = type)
     new2("DuckDBArraySeed", table = table, drop = FALSE, check = FALSE)
 }
