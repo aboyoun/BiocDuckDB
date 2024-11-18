@@ -63,14 +63,6 @@
 #' Ops,DuckDBArraySeed,atomic-method
 #' Ops,atomic,DuckDBArraySeed-method
 #' Math,DuckDBArraySeed-method
-#' Summary,DuckDBArraySeed-method
-#' mean,DuckDBArraySeed-method
-#' median.DuckDBArraySeed
-#' quantile.DuckDBArraySeed
-#' var,DuckDBArraySeed,ANY-method
-#' sd,DuckDBArraySeed-method
-#' mad,DuckDBArraySeed-method
-#' IQR,DuckDBArraySeed-method
 #'
 #' @seealso
 #' \code{\link{DuckDBArray}},
@@ -261,55 +253,6 @@ setMethod("is.infinite", "DuckDBArraySeed", function(x) {
 #' @export
 setMethod("is.nan", "DuckDBArraySeed", function(x) {
     initialize2(x, table = is.nan(x@table), check = FALSE)
-})
-
-#' @export
-setMethod("Summary", "DuckDBArraySeed", function(x, ..., na.rm = FALSE) {
-    callGeneric(x@table)
-})
-
-#' @export
-#' @importFrom BiocGenerics mean
-setMethod("mean", "DuckDBArraySeed", function(x, ...) {
-    callGeneric(x@table)
-})
-
-#' @exportS3Method stats::median
-#' @importFrom stats median
-median.DuckDBArraySeed <- function(x, na.rm = FALSE, ...) {
-    median(x@table, na.rm = na.rm, ...)
-}
-
-#' @exportS3Method stats::quantile
-#' @importFrom stats quantile
-quantile.DuckDBArraySeed <-
-function(x, probs = seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7, digits = 7, ...) {
-    quantile(x@table, probs = probs, na.rm = na.rm, names = names, type = type, digits = digits, ...)
-}
-
-#' @export
-#' @importFrom BiocGenerics var
-setMethod("var", "DuckDBArraySeed", function(x, y = NULL, na.rm = FALSE, use)  {
-    callGeneric(x@table)
-})
-
-#' @export
-#' @importFrom BiocGenerics sd
-setMethod("sd", "DuckDBArraySeed", function(x, na.rm = FALSE) {
-    callGeneric(x@table)
-})
-
-#' @export
-#' @importFrom BiocGenerics mad
-setMethod("mad", "DuckDBArraySeed",
-function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, high = FALSE) {
-    callGeneric(x@table, constant = constant)
-})
-
-#' @export
-#' @importFrom BiocGenerics IQR
-setMethod("IQR", "DuckDBArraySeed", function(x, na.rm = FALSE, type = 7) {
-    callGeneric(x@table, type = type)
 })
 
 .extract_array_index <- function(x, index) {

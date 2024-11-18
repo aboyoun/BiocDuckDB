@@ -19,14 +19,6 @@
 \alias{Ops,DuckDBArray,atomic-method}
 \alias{Ops,atomic,DuckDBArray-method}
 \alias{Math,DuckDBArray-method}
-\alias{Summary,DuckDBArray-method}
-\alias{mean,DuckDBArray-method}
-\alias{median.DuckDBArray}
-\alias{quantile.DuckDBArray}
-\alias{var,DuckDBArray,ANY-method}
-\alias{sd,DuckDBArray-method}
-\alias{mad,DuckDBArray-method}
-\alias{IQR,DuckDBArray-method}
 \title{DuckDB tables as DelayedArray objects}
 \usage{
 DuckDBArray(conn, datacols, keycols, type = NULL)

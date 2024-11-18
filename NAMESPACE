@@ -2,12 +2,8 @@
 
 S3method(base::all.equal,DuckDBTable)
 S3method(cbind,DuckDBDataFrame)
-S3method(stats::median,DuckDBArray)
-S3method(stats::median,DuckDBArraySeed)
 S3method(stats::median,DuckDBColumn)
 S3method(stats::median,DuckDBTable)
-S3method(stats::quantile,DuckDBArray)
-S3method(stats::quantile,DuckDBArraySeed)
 S3method(stats::quantile,DuckDBColumn)
 S3method(stats::quantile,DuckDBTable)
 export("coltypes<-")

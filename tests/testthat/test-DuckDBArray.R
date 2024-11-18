@@ -228,32 +228,3 @@ test_that("Special numeric functions work as expected for a DuckDBArray", {
     checkDuckDBArray(is.infinite(pqarray), is.infinite(as.array(pqarray)))
     checkDuckDBArray(is.nan(pqarray), is.nan(as.array(pqarray)))
 })
-
-test_that("Summary methods work as expected for a DuckDBArray", {
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array))
-    expect_identical(max(pqarray), max(as.array(pqarray)))
-    expect_identical(min(pqarray), min(as.array(pqarray)))
-    expect_identical(range(pqarray), range(as.array(pqarray)))
-    expect_equal(prod(pqarray), prod(as.array(pqarray)))
-    expect_equal(sum(pqarray), sum(as.array(pqarray)))
-    expect_identical(any(pqarray == 0L), any(as.array(pqarray) == 0L))
-    expect_identical(all(pqarray == 0L), all(as.array(pqarray) == 0L))
-})
-
-test_that("Other aggregate methods work as expected for a DuckDBArray", {
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array))
-    expect_equal(mean(pqarray), mean(as.array(pqarray)))
-    expect_equal(median(pqarray), median(as.array(pqarray)))
-    expect_equal(var(pqarray), var(as.array(pqarray)))
-    expect_equal(sd(pqarray), sd(as.array(pqarray)))
-    expect_equal(mad(pqarray), mad(as.array(pqarray)))
-    expect_equal(mad(pqarray, constant = 1), mad(as.array(pqarray), constant = 1))
-
-    expect_equal(quantile(pqarray), quantile(as.array(pqarray)))
-    expect_equal(quantile(pqarray, probs = seq(0, 1, by = 0.05)), quantile(as.array(pqarray), probs = seq(0, 1, by = 0.05)))
-    expect_equal(quantile(pqarray, names = FALSE), quantile(as.array(pqarray), names = FALSE))
-    expect_equal(quantile(pqarray, type = 1), quantile(as.array(pqarray), type = 1))
-
-    expect_equal(IQR(pqarray), IQR(as.array(pqarray)))
-    expect_equal(IQR(pqarray, type = 1), IQR(as.array(pqarray), type = 1))
-})

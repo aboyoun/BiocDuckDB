@@ -26,14 +26,6 @@
 \alias{Ops,DuckDBArraySeed,atomic-method}
 \alias{Ops,atomic,DuckDBArraySeed-method}
 \alias{Math,DuckDBArraySeed-method}
-\alias{Summary,DuckDBArraySeed-method}
-\alias{mean,DuckDBArraySeed-method}
-\alias{median.DuckDBArraySeed}
-\alias{quantile.DuckDBArraySeed}
-\alias{var,DuckDBArraySeed,ANY-method}
-\alias{sd,DuckDBArraySeed-method}
-\alias{mad,DuckDBArraySeed-method}
-\alias{IQR,DuckDBArraySeed-method}
 \title{DuckDBArraySeed objects}
 \usage{
 DuckDBArraySeed(conn, datacols, keycols, type = NULL)

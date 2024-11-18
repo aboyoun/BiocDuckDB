@@ -41,14 +41,6 @@
 #' Ops,DuckDBArray,atomic-method
 #' Ops,atomic,DuckDBArray-method
 #' Math,DuckDBArray-method
-#' Summary,DuckDBArray-method
-#' mean,DuckDBArray-method
-#' median.DuckDBArray
-#' quantile.DuckDBArray
-#' var,DuckDBArray,ANY-method
-#' sd,DuckDBArray-method
-#' mad,DuckDBArray-method
-#' IQR,DuckDBArray-method
 #'
 #' @seealso
 #' \code{\link{DuckDBArraySeed}},
@@ -145,55 +137,6 @@ setMethod("is.infinite", "DuckDBArray", function(x) {
 #' @export
 setMethod("is.nan", "DuckDBArray", function(x) {
     initialize2(x, seed = is.nan(x@seed), check = FALSE)
-})
-
-#' @export
-setMethod("Summary", "DuckDBArray", function(x, ..., na.rm = FALSE) {
-    callGeneric(x@seed)
-})
-
-#' @export
-#' @importFrom BiocGenerics mean
-setMethod("mean", "DuckDBArray", function(x, ...) {
-    callGeneric(x@seed)
-})
-
-#' @exportS3Method stats::median
-#' @importFrom stats median
-median.DuckDBArray <- function(x, na.rm = FALSE, ...) {
-    median(x@seed, na.rm = na.rm, ...)
-}
-
-#' @exportS3Method stats::quantile
-#' @importFrom stats quantile
-quantile.DuckDBArray <-
-function(x, probs = seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7, digits = 7, ...) {
-    quantile(x@seed, probs = probs, na.rm = na.rm, names = names, type = type, digits = digits, ...)
-}
-
-#' @export
-#' @importFrom BiocGenerics var
-setMethod("var", "DuckDBArray", function(x, y = NULL, na.rm = FALSE, use)  {
-    callGeneric(x@seed)
-})
-
-#' @export
-#' @importFrom BiocGenerics sd
-setMethod("sd", "DuckDBArray", function(x, na.rm = FALSE) {
-    callGeneric(x@seed)
-})
-
-#' @export
-#' @importFrom BiocGenerics mad
-setMethod("mad", "DuckDBArray",
-function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, high = FALSE) {
-    callGeneric(x@seed, constant = constant)
-})
-
-#' @export
-#' @importFrom BiocGenerics IQR
-setMethod("IQR", "DuckDBArray", function(x, na.rm = FALSE, type = 7) {
-    callGeneric(x@seed, type = type)
 })
 
 #' @export
