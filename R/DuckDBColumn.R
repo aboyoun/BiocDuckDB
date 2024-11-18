@@ -2,8 +2,6 @@
 #'
 #' @author Patrick Aboyoun
 #'
-#' @include DuckDBTable.R
-#'
 #' @aliases
 #' DuckDBColumn-class
 #' as.vector,DuckDBColumn-method
@@ -37,7 +35,7 @@
 #' mad,DuckDBColumn-method
 #' IQR,DuckDBColumn-method
 #'
-#' @include tblconn.R
+#' @include DuckDBTable.R
 #'
 #' @name DuckDBColumn
 NULL

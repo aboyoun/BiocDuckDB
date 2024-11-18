@@ -54,7 +54,6 @@
 #' \code{\link{DuckDBArraySeed}},
 #' \code{\link[DelayedArray]{DelayedArray}}
 #'
-#' @include tblconn.R
 #' @include DuckDBArraySeed.R
 #'
 #' @name DuckDBArray

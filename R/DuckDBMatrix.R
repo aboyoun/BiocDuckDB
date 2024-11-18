@@ -52,7 +52,6 @@
 #' [,DuckDBMatrix,ANY,ANY,ANY-method
 #' matrixClass,DuckDBArray-method
 #'
-#' @include DuckDBArraySeed.R
 #' @include DuckDBArray.R
 #'
 #' @name DuckDBMatrix

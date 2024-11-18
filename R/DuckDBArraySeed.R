@@ -76,7 +76,6 @@
 #' \code{\link{DuckDBArray}},
 #' \code{\link[S4Arrays]{Array}}
 #'
-#' @include tblconn.R
 #' @include DuckDBTable.R
 #'
 #' @name DuckDBArraySeed
