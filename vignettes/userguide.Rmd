@@ -85,7 +85,7 @@ mtcars_tf <- tempfile(fileext = ".csv")
 write.csv(cbind(model = rownames(mtcars), mtcars), mtcars_tf, row.names = FALSE)
 
 # Create a DuckDBDataFrame that uses a key column as row names
-mtcars_ddb <- DuckDBDataFrame(mtcars_tf, keycol = "model")
+mtcars_ddb <- DuckDBDataFrame(mtcars_tf, datacols = colnames(mtcars), keycol = "model")
 
 # Since the resulting object is not guaranteed to have the samme row ordering,
 # reorder the rows to conform to the original mtcars data
@@ -171,10 +171,10 @@ writeArray(Titanic, titanic_tf, value_name = "fate")
 list.files(titanic_tf, full.names = TRUE, recursive = TRUE)
 
 # Create a DuckDBArray
-titanic_ddb <- DuckDBArray(titanic_tf, keycols = c("Class", "Sex", "Age", "Survived"), datacol = "fate")
+titanic_ddb <- DuckDBArray(titanic_tf, datacol = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
 
 # Create a DuckDBArray using pre-defined dimension values
-titanic_ddb <- DuckDBArray(titanic_tf, keycols = dimnames(Titanic), datacol = "fate")
+titanic_ddb <- DuckDBArray(titanic_tf, datacol = "fate", keycols = dimnames(Titanic))
 
 # Susbcript by dimension name to learn the fate of the crew
 titanic_ddb["Crew", , "Adult", ]
@@ -210,7 +210,7 @@ state_ddb <- state_ddb[rownames(state.x77), colnames(state.x77)]
 
 # Create a DuckDBMatrix using pre-defined row and column values
 keycols <- setNames(dimnames(state.x77), c("rowname", "colname"))
-state_ddb <- DuckDBMatrix(state_tf, keycols = keycols, datacol = "value")
+state_ddb <- DuckDBMatrix(state_tf, datacol = "value", keycols = keycols)
 ```
 
 We can extract sub-matrices from the underlying parquet data by either reading
@@ -246,7 +246,7 @@ sparse_tf <- tempfile(fileext = ".parquet")
 arrow::write_parquet(sparse_df, sparse_tf)
 
 # Create a DuckDBMatrix
-sparse_ddb <- DuckDBArray(sparse_tf, keycols = list("dim1" = letters, "dim2" = LETTERS, "dim3" = month.abb), datacol = "value")
+sparse_ddb <- DuckDBArray(sparse_tf, datacol = "value", keycols = list("dim1" = letters, "dim2" = LETTERS, "dim3" = month.abb))
 sparse_ddb
 ```
 

@@ -8,14 +8,14 @@
 #' or gzipped csv data files; a string that defines a duckdb \code{read_*} data
 #' source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
 #' object.
+#' @param datacols Either a character vector of column names from \code{conn}
+#' or a named \code{expression} that will be evaluated in the context of `conn`
+#' that defines the data.
 #' @param keycols An optional character vector of column names from \code{conn}
 #' that will define the primary key, or a named list of character vectors where
 #' the names of the list define the key and the character vectors set the
 #' distinct values for the key. If missing, a \code{row_number} column is
 #' created as an identifier.
-#' @param datacols Either a character vector of column names from \code{conn}
-#' or a named \code{expression} that will be evaluated in the context of `conn`
-#' that defines the data.
 #' @param type An optional named character vector where the names specify the
 #' column names and the values specify the column type; one of
 #' \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
@@ -33,7 +33,7 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' tbl <- DuckDBTable(tf, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
+#' tbl <- DuckDBTable(tf, datacols = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
 #'
 #' @aliases
 #' DuckDBTable-class
@@ -106,12 +106,12 @@ initialize2 <- function(..., check = TRUE)
 #' @importClassesFrom S4Vectors RectangularData
 #' @importFrom stats setNames
 setClass("DuckDBTable", contains = c("RectangularData", "OutOfMemoryObject"),
-    slots = c(conn = "tbl_duckdb_connection", keycols = "list", datacols = "expression"),
+    slots = c(conn = "tbl_duckdb_connection", datacols = "expression", keycols = "list"),
     prototype = prototype(conn = structure(list(),
                                            class = c("tbl_duckdb_connection", "tbl_dbi",
                                                      "tbl_sql", "tbl_lazy", "tbl")),
-                          keycols = setNames(list(), character()),
-                          datacols = setNames(expression(), character())))
+                          datacols = setNames(expression(), character()),
+                          keycols = setNames(list(), character())))
 
 #' @importFrom S4Vectors setValidity2
 setValidity2("DuckDBTable", function(x) {
@@ -433,7 +433,7 @@ setMethod("is_sparse", "DuckDBTable", function(x) {
         }
     }
 
-    initialize2(x, conn = conn, keycols = keycols, datacols = datacols, ..., check = FALSE)
+    initialize2(x, conn = conn, datacols = datacols, keycols = keycols, ..., check = FALSE)
 }
 
 #' @export
@@ -484,7 +484,7 @@ all.equal.DuckDBTable <- function(target, current, check.datacols = FALSE, ...) 
 #' @importFrom stats setNames
 .Ops.DuckDBTable <- function(.Generic, conn, keycols, fin1, fin2, fout) {
     datacols <- setNames(as.expression(Map(function(x, y) call(.Generic, x, y), fin1, fin2)), fout)
-    new2("DuckDBTable", conn = conn, keycols = keycols, datacols = datacols, check = FALSE)
+    new2("DuckDBTable", conn = conn, datacols = datacols, keycols = keycols, check = FALSE)
 }
 
 #' @export
@@ -737,7 +737,7 @@ function(x, row.names = NULL, optional = FALSE, ...) {
 #' @importFrom stats setNames
 #' @rdname DuckDBTable
 DuckDBTable <-
-function(conn, keycols, datacols = setdiff(colnames(conn), names(keycols)), type = NULL) {
+function(conn, datacols = colnames(conn), keycols = NULL, type = NULL) {
     # Acquire the connection if it is a string
     if (is.character(conn)) {
         conn <- tbl(acquireDuckDBConn(), .wrapConn(conn))
@@ -745,24 +745,6 @@ function(conn, keycols, datacols = setdiff(colnames(conn), names(keycols)), type
         conn <- conn@conn
     } else if (!inherits(conn, "tbl_duckdb_connection")) {
         stop("'conn' must be a 'tbl_duckdb_connection' object")
-    }
-
-    # Ensure 'keycols' is a named list of vectors
-    if (missing(keycols)) {
-        keycols <- tail(make.unique(c(colnames(conn), "row_number"), sep = "_"), 1L)
-        keycols <- setNames(list(call("row_number")), keycols)
-        conn <- mutate(conn, !!!keycols)
-        keycols[[1L]] <- .keycols.row_number(conn)
-    } else if (is.character(keycols)) {
-        keycols <- sapply(keycols, function(x) NULL, simplify = FALSE)
-    }
-    if (!is.list(keycols) || is.null(names(keycols))) {
-        stop("'keycols' must be a character vector or a named list of vectors")
-    }
-    for (k in names(keycols)) {
-        if (is.null(keycols[[k]])) {
-            keycols[[k]] <- pull(distinct(select(conn, !!as.name(k))))
-        }
     }
 
     # Ensure 'datacols' is a named expression
@@ -784,5 +766,23 @@ function(conn, keycols, datacols = setdiff(colnames(conn), names(keycols)), type
         }
     }
 
-    new2("DuckDBTable", conn = conn, keycols = keycols, datacols = datacols, check = FALSE)
+    # Ensure 'keycols' is a named list of vectors
+    if (is.null(keycols)) {
+        keycols <- tail(make.unique(c(colnames(conn), "row_number"), sep = "_"), 1L)
+        keycols <- setNames(list(call("row_number")), keycols)
+        conn <- mutate(conn, !!!keycols)
+        keycols[[1L]] <- .keycols.row_number(conn)
+    } else if (is.character(keycols)) {
+        keycols <- sapply(keycols, function(x) NULL, simplify = FALSE)
+    }
+    if (!is.list(keycols) || is.null(names(keycols))) {
+        stop("'keycols' must be a character vector or a named list of vectors")
+    }
+    for (k in names(keycols)) {
+        if (is.null(keycols[[k]])) {
+            keycols[[k]] <- pull(distinct(select(conn, !!as.name(k))))
+        }
+    }
+
+    new2("DuckDBTable", conn = conn, datacols = datacols, keycols = keycols, check = FALSE)
 }

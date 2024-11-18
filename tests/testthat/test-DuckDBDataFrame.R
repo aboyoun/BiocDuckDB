@@ -2,10 +2,10 @@
 # library(testthat); library(BiocDuckDB); source("setup.R"); source("test-DuckDBDataFrame.R")
 
 test_that("basic methods work for a DuckDBDataFrame", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = "model")
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = "model")
     checkDuckDBDataFrame(df, mtcars)
 
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     checkDuckDBDataFrame(df, mtcars)
     expect_identical(rownames(df), rownames(mtcars))
     expect_identical(as.data.frame(df), mtcars)
@@ -18,7 +18,7 @@ test_that("basic methods work for a DuckDBDataFrame", {
 })
 
 test_that("renaming columns works for a DuckDBDataFrame", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     expected <- mtcars
 
     replacements <- sprintf("COL%d", seq_len(ncol(df)))
@@ -28,7 +28,7 @@ test_that("renaming columns works for a DuckDBDataFrame", {
 })
 
 test_that("renaming rownames works for a DuckDBDataFrame with a keycol", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = "model")
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = "model")
     expected <- mtcars
 
     replacements <- sprintf("ROW%d", seq_len(nrow(df)))
@@ -36,7 +36,7 @@ test_that("renaming rownames works for a DuckDBDataFrame with a keycol", {
     rownames(expected) <- setNames(names(df@keycols[[1L]]), df@keycols[[1L]])[rownames(expected)]
     checkDuckDBDataFrame(df, expected)
 
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     expected <- mtcars
 
     replacements <- sprintf("ROW%d", seq_len(nrow(df)))
@@ -52,7 +52,7 @@ test_that("renaming rownames doesn't works for a DuckDBDataFrame with row_number
 })
 
 test_that("slicing by columns works for a DuckDBDataFrame", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
 
     keep <- 1:2
     checkDuckDBDataFrame(df[,keep], mtcars[,keep])
@@ -86,7 +86,7 @@ test_that("slicing by columns works for a DuckDBDataFrame", {
 })
 
 test_that("extraction of a column yields a DuckDBColumn", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
 
     keep <- 5
     checkDuckDBColumn(df[,keep], setNames(mtcars[,keep], rownames(mtcars)))
@@ -96,7 +96,7 @@ test_that("extraction of a column yields a DuckDBColumn", {
 })
 
 test_that("conditional slicing by rows works for a DuckDBDataFrame", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     checkDuckDBDataFrame(df[df$cyl > 6,], mtcars[mtcars$cyl > 6,])
 
     df <- DuckDBDataFrame(infert_parquet)
@@ -104,7 +104,7 @@ test_that("conditional slicing by rows works for a DuckDBDataFrame", {
 })
 
 test_that("positional slicing by rows works for a DuckDBDataFrame", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     i <- sample(nrow(df))
     checkDuckDBDataFrame(df[i,], mtcars[i,])
 
@@ -114,7 +114,7 @@ test_that("positional slicing by rows works for a DuckDBDataFrame", {
 })
 
 test_that("subset works for a DuckDBDataFrame", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     checkDuckDBDataFrame(subset(df, cyl > 6, mpg:wt), subset(mtcars, cyl > 6, mpg:wt))
 
     df <- DuckDBDataFrame(infert_parquet)
@@ -127,10 +127,10 @@ test_that("subset works for a DuckDBDataFrame", {
 })
 
 test_that("head works for a DuckDBDataFrame", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     checkDuckDBDataFrame(head(df, 0), head(mtcars, 0))
 
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     checkDuckDBDataFrame(head(df, 20), head(mtcars, 20))
 
     df <- DuckDBDataFrame(infert_parquet)
@@ -141,29 +141,29 @@ test_that("head works for a DuckDBDataFrame", {
 })
 
 test_that("tail works for a DuckDBDataFrame", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     checkDuckDBDataFrame(tail(df, 0), tail(mtcars, 0))
 
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     checkDuckDBDataFrame(tail(df, 20), tail(mtcars, 20))
 })
 
 test_that("unique works for a DuckDBDataFrame", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     expected <- unique(mtcars[,8:11])
     rownames(expected) <- NULL
     checkDuckDBDataFrame(unique(df[,8:11]), expected)
 })
 
 test_that("subset assignments that produce errors", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     expect_error(df[1:5,] <- df[9:13,])
     expect_error(df[,"foobar"] <- runif(nrow(df)))
     expect_error(df$some_random_thing <- runif(nrow(df)))
 })
 
 test_that("subset assignments works for a DuckDBDataFrame", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
 
     copy <- df
     copy[,1] <- copy[,1]
@@ -191,12 +191,12 @@ test_that("subset assignments works for a DuckDBDataFrame", {
 })
 
 test_that("rbind produces errors", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     expect_error(rbind(df, df))
 })
 
 test_that("cbind operations that works for DuckDBDataFrame", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
 
     # Same path, we get another PDF.
     checkDuckDBDataFrame(cbind(df, foo=df[["carb"]]), cbind(mtcars, foo=mtcars[["carb"]]))
@@ -218,20 +218,20 @@ test_that("cbind operations that works for DuckDBDataFrame", {
 })
 
 test_that("cbind operations that produce errors", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
 
     expect_error(cbind(df, mtcars))
 
     # Different paths causes an error.
     tmp <- tempfile(fileext = ".parquet")
     file.symlink(mtcars_parquet, tmp)
-    df2 <- DuckDBDataFrame(tmp, keycols = list(model = rownames(mtcars)))
+    df2 <- DuckDBDataFrame(tmp, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     expect_error(cbind(df, df2))
     expect_error(cbind(df, carb=df2[["carb"]]))
 })
 
 test_that("cbinding carries forward any metadata", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
 
     df1 <- df
     colnames(df1) <- paste0(colnames(df1), "_1")
@@ -258,12 +258,12 @@ test_that("cbinding carries forward any metadata", {
 })
 
 test_that("extracting duplicate columns produces errors", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     expect_error(df[,c(1,1,2,2,3,4,3,5)])
 })
 
 test_that("as.env works for a DuckDBDataFrame", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     env <- as.env(df)
     expect_identical(env[["mpg"]], df[["mpg"]])
     expect_identical(env[["cyl"]], df[["cyl"]])
@@ -279,7 +279,7 @@ test_that("as.env works for a DuckDBDataFrame", {
 })
 
 test_that("column replacement works for a DuckDBDataFrame", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     expected <- mtcars
 
     df[["wt"]] <- df[["wt"]] * 1000
@@ -292,7 +292,7 @@ test_that("column replacement works for a DuckDBDataFrame", {
 })
 
 test_that("transform works for a DuckDBDataFrame", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     checkDuckDBDataFrame(transform(df, wt = wt * 1000, gpm = 1 / mpg),
                          transform(mtcars, wt = wt * 1000, gpm = 1 / mpg))
 })

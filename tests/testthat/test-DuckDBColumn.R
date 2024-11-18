@@ -2,7 +2,7 @@
 # library(testthat); library(BiocDuckDB); source("setup.R"); source("test-DuckDBColumn.R")
 
 test_that("DuckDBColumn can be cast to a different type", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = "model")
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = "model")
     cyl <- df[["cyl"]]
 
     checkDuckDBColumn(cyl, as.vector(cyl))
@@ -14,14 +14,14 @@ test_that("DuckDBColumn can be cast to a different type", {
 })
 
 test_that("nonzero functions work for DuckDBColumn", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = "model")
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = "model")
     am <- df[["am"]]
     checkDuckDBColumn(is_nonzero(am), is_nonzero(as.vector(am)))
     expect_equal(nzcount(am), nzcount(as.vector(am)))
 })
 
 test_that("unique works as expected for a DuckDBColumn", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = "model")
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = "model")
     cyl <- df[["cyl"]]
     expected <- unique(as.vector(cyl))
     names(expected) <- NULL
@@ -29,7 +29,7 @@ test_that("unique works as expected for a DuckDBColumn", {
 })
 
 test_that("Arith methods work as expected for a DuckDBColumn", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = "model")
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = "model")
     mpg <- df[["mpg"]]
     disp <- df[["disp"]]
 
@@ -43,7 +43,7 @@ test_that("Arith methods work as expected for a DuckDBColumn", {
 })
 
 test_that("Compare methods work as expected for a DuckDBColumn", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = "model")
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = "model")
     vs <- df[["vs"]]
     am <- df[["am"]]
 
@@ -56,7 +56,7 @@ test_that("Compare methods work as expected for a DuckDBColumn", {
 })
 
 test_that("Math methods work as expected for a DuckDBColumn", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = "model")
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = "model")
     mpg <- df[["mpg"]]
 
     checkDuckDBColumn(abs(mpg), abs(as.vector(mpg)))
@@ -78,7 +78,7 @@ test_that("Math methods work as expected for a DuckDBColumn", {
 })
 
 test_that("Special numeric functions work as expected for a DuckDBColumn", {
-    df <- DuckDBDataFrame(special_path, keycols = list(id = letters[1:4]), datacols = "x")
+    df <- DuckDBDataFrame(special_path, datacols = "x", keycols = list(id = letters[1:4]))
     x <- df[["x"]]
 
     checkDuckDBColumn(is.finite(x), is.finite(as.vector(x)))
@@ -87,7 +87,7 @@ test_that("Special numeric functions work as expected for a DuckDBColumn", {
 })
 
 test_that("Summary methods work as expected for a DuckDBColumn", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = "model")
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = "model")
     mpg <- df[["mpg"]]
     am <- df[["am"]]
     expect_identical(max(mpg), max(as.vector(mpg)))
@@ -100,7 +100,7 @@ test_that("Summary methods work as expected for a DuckDBColumn", {
 })
 
 test_that("Other aggregate methods work as expected for a DuckDBColumn", {
-    df <- DuckDBDataFrame(mtcars_parquet, keycols = "model")
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = "model")
     mpg <- df[["mpg"]]
     expect_equal(mean(mpg), mean(as.vector(mpg)))
     expect_equal(median(mpg), median(as.vector(mpg)))

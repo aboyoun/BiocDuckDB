@@ -13,13 +13,13 @@
 #' or gzipped csv data files; a string that defines a duckdb \code{read_*} data
 #' source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
 #' object.
+#' @param datacols Either a string specifying the column from \code{conn} or a
+#' named \code{expression} that will be evaluated in the context of \code{conn}
+#' that defines the values in the array.
 #' @param keycols Either a character vector of column names from \code{conn}
 #' that will specify the dimension names, or a named list of character vectors
 #' where the names of the list specify the dimension names and the character
 #' vectors set the distinct values for the dimension names.
-#' @param datacols Either a string specifying the column from \code{conn} or a
-#' named \code{expression} that will be evaluated in the context of \code{conn}
-#' that defines the values in the array.
 #' @param type String specifying the type of the data values; one of
 #' \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
 #' \code{"character"}. If \code{NULL}, it is determined by inspecting the data.
@@ -36,7 +36,7 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' pqaseed <- DuckDBArraySeed(tf, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
+#' pqaseed <- DuckDBArraySeed(tf, datacols = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
 #'
 #' @aliases
 #' DuckDBArraySeed-class
@@ -398,10 +398,10 @@ setMethod("DelayedArray", "DuckDBArraySeed", function(seed) DuckDBArray(seed))
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
 #' @rdname DuckDBArraySeed
-DuckDBArraySeed <- function(conn, keycols, datacols, type = NULL) {
+DuckDBArraySeed <- function(conn, datacols, keycols, type = NULL) {
     if (!is.null(type)) {
         type <- setNames(type, names(datacols) %||% datacols)
     }
-    table <- DuckDBTable(conn, keycols = keycols, datacols = datacols, type = type)
+    table <- DuckDBTable(conn, datacols = datacols, keycols = keycols, type = type)
     new2("DuckDBArraySeed", table = table, drop = FALSE, check = FALSE)
 }

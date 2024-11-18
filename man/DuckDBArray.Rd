@@ -29,7 +29,7 @@
 \alias{IQR,DuckDBArray-method}
 \title{DuckDB tables as DelayedArray objects}
 \usage{
-DuckDBArray(conn, keycols, datacols, type = NULL)
+DuckDBArray(conn, datacols, keycols, type = NULL)
 }
 \arguments{
 \item{conn}{Either a character vector containing the paths to parquet, csv,
@@ -37,14 +37,14 @@ or gzipped csv data files; a string that defines a duckdb \code{read_*} data
 source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
 object.}
 
+\item{datacols}{Either a string specifying the column from \code{conn} or a
+named \code{expression} that will be evaluated in the context of \code{conn}
+that defines the values in the array.}
+
 \item{keycols}{Either a character vector of column names from \code{conn}
 that will specify the dimension names, or a named list of character vectors
 where the names of the list specify the dimension names and the character
 vectors set the distinct values for the dimension names.}
-
-\item{datacols}{Either a string specifying the column from \code{conn} or a
-named \code{expression} that will be evaluated in the context of \code{conn}
-that defines the values in the array.}
 
 \item{type}{String specifying the type of the data values; one of
 \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
@@ -67,7 +67,7 @@ tf <- tempfile(fileext = ".parquet")
 on.exit(unlink(tf))
 arrow::write_parquet(df, tf)
 
-pqarray <- DuckDBArray(tf, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
+pqarray <- DuckDBArray(tf, datacols = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
 
 }
 \seealso{

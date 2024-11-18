@@ -27,7 +27,7 @@
 \alias{as.env,DuckDBDataFrame-method}
 \title{DuckDB-backed DataFrame}
 \usage{
-DuckDBDataFrame(conn, keycols, datacols, type = NULL)
+DuckDBDataFrame(conn, datacols = colnames(conn), keycols = NULL, type = NULL)
 }
 \arguments{
 \item{conn}{Either a character vector containing the paths to parquet, csv,
@@ -35,15 +35,15 @@ or gzipped csv data files; a string that defines a duckdb \code{read_*} data
 source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
 object.}
 
+\item{datacols}{Either a character vector of column names from \code{conn}
+or a named \code{expression} that will be evaluated in the context of `conn`
+that defines the data.}
+
 \item{keycols}{An optional character vector of column names from \code{conn}
 that will define the primary key, or a named list of character vectors where
 the names of the list define the key and the character vectors set the
 distinct values for the key. If missing, a \code{row_number} column is
 created as an identifier.}
-
-\item{datacols}{Either a character vector of column names from \code{conn}
-or a named \code{expression} that will be evaluated in the context of `conn`
-that defines the data.}
 
 \item{type}{An optional named character vector where the names specify the
 column names and the values specify the column type; one of
@@ -69,7 +69,7 @@ on.exit(unlink(tf))
 arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 
 # Creating our DuckDB-backed data frame:
-df <- DuckDBDataFrame(tf, keycols = "model")
+df <- DuckDBDataFrame(tf, datacols = colnames(mtcars), keycols = "model")
 df
 
 # Extraction yields a DuckDBColumn:

@@ -11,6 +11,9 @@
 #' or gzipped csv data files; a string that defines a duckdb \code{read_*} data
 #' source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
 #' object.
+#' @param datacols Either a string specifying the column from \code{conn} or a
+#' named \code{expression} that will be evaluated in the context of \code{conn}
+#' that defines the values in the matrix.
 #' @param row Either a string that specifies the column in \code{conn} that
 #' specifies the row names of the matrix, or a named list containing a single
 #' character vector that defines the column in \code{conn} for the row names
@@ -23,9 +26,6 @@
 #' columns in \code{conn} for the rows and columns of the matrix, or a named
 #' list of character vectors where the names of the list define rows and columns
 #' and the character vectors define distinct values for the rows and columns.
-#' @param datacols Either a string specifying the column from \code{conn} or a
-#' named \code{expression} that will be evaluated in the context of \code{conn}
-#' that defines the values in the matrix.
 #' @param type String specifying the type of the data values; one of
 #' \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
 #' \code{"character"}. If \code{NULL}, it is determined by inspecting the data.
@@ -89,7 +89,7 @@ setMethod("[", "DuckDBMatrix", function(x, i, j, ..., drop = TRUE) {
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
 #' @rdname DuckDBMatrix
-DuckDBMatrix <- function(conn, row, col, datacols, keycols = c(row, col), type = NULL) {
+DuckDBMatrix <- function(conn, datacols, row, col, keycols = c(row, col), type = NULL) {
     if (!missing(row) && isSingleString(row)) {
         row <- setNames(list(NULL), row)
     }
@@ -100,7 +100,7 @@ DuckDBMatrix <- function(conn, row, col, datacols, keycols = c(row, col), type =
         if (length(keycols) != 2L) {
             stop("'keycols' must contain exactly 2 elements: rows and columns")
         }
-        conn <- DuckDBArraySeed(conn, keycols = keycols, datacols = datacols, type = type)
+        conn <- DuckDBArraySeed(conn, datacols = datacols, keycols = keycols, type = type)
     }
     new2("DuckDBMatrix", seed = conn, check = FALSE)
 }

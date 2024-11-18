@@ -40,12 +40,7 @@
 \alias{IQR,DuckDBTable-method}
 \title{DuckDBTable objects}
 \usage{
-DuckDBTable(
-  conn,
-  keycols,
-  datacols = setdiff(colnames(conn), names(keycols)),
-  type = NULL
-)
+DuckDBTable(conn, datacols = colnames(conn), keycols = NULL, type = NULL)
 }
 \arguments{
 \item{conn}{Either a character vector containing the paths to parquet, csv,
@@ -53,15 +48,15 @@ or gzipped csv data files; a string that defines a duckdb \code{read_*} data
 source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
 object.}
 
+\item{datacols}{Either a character vector of column names from \code{conn}
+or a named \code{expression} that will be evaluated in the context of `conn`
+that defines the data.}
+
 \item{keycols}{An optional character vector of column names from \code{conn}
 that will define the primary key, or a named list of character vectors where
 the names of the list define the key and the character vectors set the
 distinct values for the key. If missing, a \code{row_number} column is
 created as an identifier.}
-
-\item{datacols}{Either a character vector of column names from \code{conn}
-or a named \code{expression} that will be evaluated in the context of `conn`
-that defines the data.}
 
 \item{type}{An optional named character vector where the names specify the
 column names and the values specify the column type; one of
@@ -82,7 +77,7 @@ tf <- tempfile(fileext = ".parquet")
 on.exit(unlink(tf))
 arrow::write_parquet(df, tf)
 
-tbl <- DuckDBTable(tf, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
+tbl <- DuckDBTable(tf, datacols = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
 
 }
 \author{

@@ -21,7 +21,7 @@
 #' arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 #'
 #' # Creating our DuckDB-backed data frame:
-#' df <- DuckDBDataFrame(tf, keycols = "model")
+#' df <- DuckDBDataFrame(tf, datacols = colnames(mtcars), keycols = "model")
 #' df
 #'
 #' # Extraction yields a DuckDBColumn:
@@ -483,11 +483,11 @@ function(x, row.names = NULL, optional = FALSE, ...) {
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
 #' @rdname DuckDBDataFrame
-DuckDBDataFrame <- function(conn, keycols, datacols, type = NULL) {
+DuckDBDataFrame <- function(conn, datacols = colnames(conn), keycols = NULL, type = NULL) {
     if (missing(datacols)) {
         tbl <- DuckDBTable(conn, keycols = keycols, type = NULL)
     } else {
-        tbl <- DuckDBTable(conn, keycols = keycols, datacols = datacols, type = NULL)
+        tbl <- DuckDBTable(conn, datacols = datacols, keycols = keycols, type = NULL)
     }
     new2("DuckDBDataFrame", tbl, check = FALSE)
 }

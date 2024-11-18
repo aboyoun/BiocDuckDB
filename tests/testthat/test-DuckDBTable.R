@@ -3,17 +3,14 @@
 
 test_that("basic methods work as expected for a DuckDBTable", {
     # esoph dataset
-    tbl <- DuckDBTable(esoph_parquet, keycols = c("agegp", "alcgp", "tobgp"))
+    tbl <- DuckDBTable(esoph_parquet, datacols = c("ncases", "ncontrols"), keycols = c("agegp", "alcgp", "tobgp"))
     checkDuckDBTable(tbl, esoph_df)
 
-    tbl <- DuckDBTable(esoph_parquet, keycols = list("agegp" = NULL, "alcgp" = levels(esoph[["alcgp"]]), "tobgp" = NULL))
+    tbl <- DuckDBTable(esoph_parquet, datacols = c("ncases", "ncontrols"), keycols = list("agegp" = NULL, "alcgp" = levels(esoph[["alcgp"]]), "tobgp" = NULL))
     checkDuckDBTable(tbl, esoph_df)
 
-    tbl <- DuckDBTable(esoph_parquet,
+    tbl <- DuckDBTable(esoph_parquet, datacols = c("ncases", "ncontrols"),
                             keycols = list("agegp" = levels(esoph[["agegp"]]), "alcgp" = levels(esoph[["alcgp"]]), "tobgp" = levels(esoph[["tobgp"]])))
-    checkDuckDBTable(tbl, esoph_df)
-
-    tbl <- DuckDBTable(esoph_parquet, keycols = c("agegp", "alcgp", "tobgp"), datacols = c("ncases", "ncontrols"))
     checkDuckDBTable(tbl, esoph_df)
 
     # infert dataset
@@ -24,34 +21,24 @@ test_that("basic methods work as expected for a DuckDBTable", {
     checkDuckDBTable(tbl, infert)
 
     # mtcars dataset
-    tbl <- DuckDBTable(mtcars_parquet, keycols = "model")
+    tbl <- DuckDBTable(mtcars_parquet, datacols = colnames(mtcars), keycols = "model")
     checkDuckDBTable(tbl, mtcars_df)
 
-    tbl <- DuckDBTable(mtcars_parquet, keycols = "model", datacols = head(colnames(mtcars)))
+    tbl <- DuckDBTable(mtcars_parquet, datacols = head(colnames(mtcars)), keycols = "model")
     checkDuckDBTable(tbl, mtcars_df[, 1:7])
 
-    tbl <- DuckDBTable(mtcars_parquet, keycols = "model", datacols = colnames(mtcars))
-    checkDuckDBTable(tbl, mtcars_df)
-
     # state dataset
-    tbl <- DuckDBTable(state_path, keycols = c("region", "division", "rowname", "colname"))
-    checkDuckDBTable(tbl, state_df)
-
-    tbl <- DuckDBTable(state_path, keycols = c("region", "division", "rowname", "colname"), datacols = "value")
+    tbl <- DuckDBTable(state_path, datacols = "value", keycols = c("region", "division", "rowname", "colname"))
     checkDuckDBTable(tbl, state_df)
 
     # titanic dataset
-    tbl <- DuckDBTable(titanic_parquet, keycols = c("Class", "Sex", "Age", "Survived"))
-    checkDuckDBTable(tbl, titanic_df)
-
-    tbl <- DuckDBTable(titanic_parquet, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
+    tbl <- DuckDBTable(titanic_parquet, datacols = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
     checkDuckDBTable(tbl, titanic_df)
 })
 
 test_that("keycols names can be modified for a DuckDBTable", {
-    tbl <- DuckDBTable(esoph_parquet,
-                            keycols = list("agegp" = levels(esoph[["agegp"]]), "alcgp" = levels(esoph[["alcgp"]]), "tobgp" = levels(esoph[["tobgp"]])),
-                            datacols = c("ncases", "ncontrols"))
+    tbl <- DuckDBTable(esoph_parquet, datacols = c("ncases", "ncontrols"),
+                       keycols = list("agegp" = levels(esoph[["agegp"]]), "alcgp" = levels(esoph[["alcgp"]]), "tobgp" = levels(esoph[["tobgp"]])))
     expect_identical(nkey(tbl), 3L)
     expect_identical(keynames(tbl), c("agegp", "alcgp", "tobgp"))
     expect_identical(keydimnames(tbl), lapply(esoph[, c("agegp", "alcgp", "tobgp")], levels))
@@ -78,7 +65,7 @@ test_that("keycols names can be modified for a DuckDBTable", {
 })
 
 test_that("datacols columns of a DuckDBTable can be cast to a different type", {
-    tbl <- DuckDBTable(esoph_parquet, keycols = c("agegp", "alcgp", "tobgp"), datacols = c("ncases", "ncontrols"))
+    tbl <- DuckDBTable(esoph_parquet, datacols = c("ncases", "ncontrols"), keycols = c("agegp", "alcgp", "tobgp"))
     checkDuckDBTable(tbl, esoph_df)
     expect_identical(coltypes(tbl), c("ncases" = "double", "ncontrols" = "double"))
 
@@ -86,16 +73,16 @@ test_that("datacols columns of a DuckDBTable can be cast to a different type", {
     checkDuckDBTable(tbl, esoph_df)
     expect_identical(coltypes(tbl), c("ncases" = "integer", "ncontrols" = "integer"))
 
-    tbl <- DuckDBTable(esoph_parquet, keycols = c("agegp", "alcgp", "tobgp"),
-                            datacols = c("ncases", "ncontrols"),
-                            type = c("ncases" = "integer", "ncontrols" = "integer"))
+    tbl <- DuckDBTable(esoph_parquet, datacols = c("ncases", "ncontrols"),
+                       keycols = c("agegp", "alcgp", "tobgp"),
+                       type = c("ncases" = "integer", "ncontrols" = "integer"))
     checkDuckDBTable(tbl, esoph_df)
     expect_is(as.data.frame(tbl)[["ncases"]], "integer")
     expect_is(as.data.frame(tbl)[["ncontrols"]], "integer")
 })
 
 test_that("DuckDBTable column names can be modified", {
-    tbl <- DuckDBTable(mtcars_parquet, keycols = "model", datacols = colnames(mtcars))
+    tbl <- DuckDBTable(mtcars_parquet, datacols = colnames(mtcars), keycols = "model")
     replacements <- sprintf("COL%d", seq_len(ncol(tbl)))
     colnames(tbl) <- replacements
     expected <- mtcars_df 
@@ -104,14 +91,14 @@ test_that("DuckDBTable column names can be modified", {
 })
 
 test_that("nonzero functions work for DuckDBTable", {
-    tbl <- DuckDBTable(esoph_parquet, keycols = c("agegp", "alcgp", "tobgp"), datacols = c("ncases", "ncontrols"))
+    tbl <- DuckDBTable(esoph_parquet, datacols = c("ncases", "ncontrols"), keycols = c("agegp", "alcgp", "tobgp"))
     expected <- cbind(esoph_df[1:3], data.frame(lapply(esoph_df[4:5], is_nonzero)))
     checkDuckDBTable(is_nonzero(tbl), expected)
     expect_equal(nzcount(tbl), sum(expected[, 4:5]))
 })
 
 test_that("DuckDBTable can be bound across columns", {
-    tbl <- DuckDBTable(mtcars_parquet, keycols = "model", datacols = colnames(mtcars))
+    tbl <- DuckDBTable(mtcars_parquet, datacols = colnames(mtcars), keycols = "model")
 
     # Same path, we get another PDF.
     checkDuckDBTable(cbind(tbl, foo=tbl[,"carb"]), cbind(mtcars_df, foo=mtcars[["carb"]]))
@@ -128,7 +115,7 @@ test_that("DuckDBTable can be bound across columns", {
 })
 
 test_that("Arith methods work as expected for a DuckDBTable", {
-    tbl <- DuckDBTable(mtcars_parquet, keycols = "model", datacols = colnames(mtcars))
+    tbl <- DuckDBTable(mtcars_parquet, datacols = colnames(mtcars), keycols = "model")
 
     checkDuckDBTable(tbl + sqrt(tbl), cbind(model = rownames(mtcars), mtcars + sqrt(mtcars)))
     checkDuckDBTable(tbl - tbl[,"carb"], cbind(model = rownames(mtcars), mtcars - mtcars[, "carb"]))
@@ -140,7 +127,7 @@ test_that("Arith methods work as expected for a DuckDBTable", {
 })
 
 test_that("Compare methods work as expected for a DuckDBTable", {
-    tbl <- DuckDBTable(titanic_parquet, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
+    tbl <- DuckDBTable(titanic_parquet, datacols = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
 
     checkDuckDBTable(tbl == sqrt(tbl), cbind(titanic_df[,1:4], fate = titanic_df$fate == sqrt(titanic_df$fate)))
     checkDuckDBTable(tbl > 1L, cbind(titanic_df[,1:4], fate = titanic_df$fate > 1L))
@@ -151,7 +138,7 @@ test_that("Compare methods work as expected for a DuckDBTable", {
 })
 
 test_that("Logic methods work as expected for a DuckDBTable", {
-    tbl <- DuckDBTable(titanic_parquet, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
+    tbl <- DuckDBTable(titanic_parquet, datacols = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
 
     ## "&"
     x <- tbl > 70
@@ -165,7 +152,7 @@ test_that("Logic methods work as expected for a DuckDBTable", {
 })
 
 test_that("Math methods work as expected for a DuckDBTable", {
-    tbl <- DuckDBTable(state_path, keycols = c("region", "division", "rowname", "colname"), datacols = "value")
+    tbl <- DuckDBTable(state_path, datacols = "value", keycols = c("region", "division", "rowname", "colname"))
 
     income <- tbl[list(colname = "Income"), ]
     income_df <- state_df[state_df$colname == "Income", ]
@@ -231,7 +218,7 @@ test_that("Math methods work as expected for a DuckDBTable", {
 })
 
 test_that("Special numeric functions work as expected for a DuckDBTable", {
-    tbl <- DuckDBTable(special_path, keycols = list(id = letters[1:4]), datacols = "x")
+    tbl <- DuckDBTable(special_path, datacols = "x", keycols = list(id = letters[1:4]))
 
     expected <- as.data.frame(tbl)
     expected$x <- is.finite(expected$x)
@@ -247,7 +234,7 @@ test_that("Special numeric functions work as expected for a DuckDBTable", {
 })
 
 test_that("Summary methods work as expected for a DuckDBTable", {
-    tbl <- DuckDBTable(titanic_parquet, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
+    tbl <- DuckDBTable(titanic_parquet, datacols = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
     expect_identical(max(tbl), max(as.data.frame(tbl)[["fate"]]))
     expect_identical(min(tbl), min(as.data.frame(tbl)[["fate"]]))
     expect_identical(range(tbl), range(as.data.frame(tbl)[["fate"]]))
@@ -258,7 +245,7 @@ test_that("Summary methods work as expected for a DuckDBTable", {
 })
 
 test_that("Other aggregate methods work as expected for a DuckDBTable", {
-    tbl <- DuckDBTable(titanic_parquet, keycols = c("Class", "Sex", "Age", "Survived"), datacols = "fate")
+    tbl <- DuckDBTable(titanic_parquet, datacols = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
     expect_equal(mean(tbl), mean(as.data.frame(tbl)[["fate"]]))
     expect_equal(median(tbl), median(as.data.frame(tbl)[["fate"]]))
     expect_equal(var(tbl), var(as.data.frame(tbl)[["fate"]]))
