@@ -136,20 +136,20 @@ setMethod("type", "DuckDBColumn", function(x) {
 setReplaceMethod("type", "DuckDBColumn", function(x, value) {
     table <- x@table
     coltypes(table) <- value
-    initialize2(x, table = table, check = FALSE)
+    replaceSlots(x, table = table, check = FALSE)
 })
 
 #' @export
 #' @importFrom BiocGenerics unique
 setMethod("unique", "DuckDBColumn",
 function (x, incomparables = FALSE, fromLast = FALSE, ...)  {
-    initialize2(x, table = callGeneric(x@table), check = FALSE)
+    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export
 #' @importFrom SparseArray is_nonzero
 setMethod("is_nonzero", "DuckDBColumn", function(x) {
-    initialize2(x, table = callGeneric(x@table), check = FALSE)
+    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export
@@ -164,7 +164,7 @@ setMethod("extractROWS", "DuckDBColumn", function(x, i) {
         i <- i@table
     }
     i <- setNames(list(i), names(x@table@keycols))
-    initialize2(x, table = .subset_DuckDBTable(x@table, i = i), check = FALSE)
+    replaceSlots(x, table = .subset_DuckDBTable(x@table, i = i), check = FALSE)
 })
 
 #' @export
@@ -174,7 +174,7 @@ setMethod("head", "DuckDBColumn", function(x, n = 6L, ...) {
         stop("'n' must be a single number")
     }
     if (.has_row_number(x)) {
-        return(initialize2(x, table = .head_conn(x@table, n), check = FALSE))
+        return(replaceSlots(x, table = .head_conn(x@table, n), check = FALSE))
     }
     n <- as.integer(n)
     len <- length(x)
@@ -211,37 +211,37 @@ setMethod("tail", "DuckDBColumn", function(x, n = 6L, ...) {
 
 #' @export
 setMethod("Ops", c(e1 = "DuckDBColumn", e2 = "DuckDBColumn"), function(e1, e2) {
-    initialize2(e1, table = callGeneric(e1@table, e2@table), check = FALSE)
+    replaceSlots(e1, table = callGeneric(e1@table, e2@table), check = FALSE)
 })
 
 #' @export
 setMethod("Ops", c(e1 = "DuckDBColumn", e2 = "atomic"), function(e1, e2) {
-    initialize2(e1, table = callGeneric(e1@table, e2), check = FALSE)
+    replaceSlots(e1, table = callGeneric(e1@table, e2), check = FALSE)
 })
 
 #' @export
 setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBColumn"), function(e1, e2) {
-    initialize2(e2, table = callGeneric(e1, e2@table), check = FALSE)
+    replaceSlots(e2, table = callGeneric(e1, e2@table), check = FALSE)
 })
 
 #' @export
 setMethod("Math", "DuckDBColumn", function(x) {
-    initialize2(x, table = callGeneric(x@table), check = FALSE)
+    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export
 setMethod("is.finite", "DuckDBColumn", function(x) {
-    initialize2(x, table = is.finite(x@table), check = FALSE)
+    replaceSlots(x, table = is.finite(x@table), check = FALSE)
 })
 
 #' @export
 setMethod("is.infinite", "DuckDBColumn", function(x) {
-    initialize2(x, table = is.infinite(x@table), check = FALSE)
+    replaceSlots(x, table = is.infinite(x@table), check = FALSE)
 })
 
 #' @export
 setMethod("is.nan", "DuckDBColumn", function(x) {
-    initialize2(x, table = is.nan(x@table), check = FALSE)
+    replaceSlots(x, table = is.nan(x@table), check = FALSE)
 })
 
 #' @export

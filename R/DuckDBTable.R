@@ -82,18 +82,7 @@ NULL
 
 setOldClass("tbl_duckdb_connection")
 
-#' @importFrom S4Vectors isTRUEorFALSE
-initialize2 <- function(..., check = TRUE)
-{
-    if (!isTRUEorFALSE(check)) {
-        stop("'check' must be TRUE or FALSE")
-    }
-    disableValidity <- S4Vectors:::disableValidity
-    old_val <- disableValidity()
-    on.exit(disableValidity(old_val))
-    disableValidity(!check)
-    initialize(...)
-}
+replaceSlots <- BiocGenerics:::replaceSlots
 
 #' @importFrom bit64 NA_integer64_
 #' @importFrom dplyr n pull summarize
@@ -243,7 +232,7 @@ setReplaceMethod("keydimnames", "DuckDBTable", function(x, value) {
     for (i in names(value)) {
         names(keycols[[i]]) <- value[[i]]
     }
-    initialize2(x, keycols = keycols, check = FALSE)
+    replaceSlots(x, keycols = keycols, check = FALSE)
 })
 
 #' @export
@@ -269,7 +258,7 @@ setMethod("colnames", "DuckDBTable", function(x, do.NULL = TRUE, prefix = "col")
 setReplaceMethod("colnames", "DuckDBTable", function(x, value) {
     datacols <- x@datacols
     names(datacols) <- value
-    initialize2(x, datacols = datacols, check = FALSE)
+    replaceSlots(x, datacols = datacols, check = FALSE)
 })
 
 #' @importFrom bit64 is.integer64
@@ -320,7 +309,7 @@ setGeneric("coltypes<-", function(x, value) standardGeneric("coltypes<-"))
 #' @export
 setReplaceMethod("coltypes", "DuckDBTable", function(x, value) {
     datacols <- .cast_cols(x@datacols, value)
-    initialize2(x, datacols = datacols, check = FALSE)
+    replaceSlots(x, datacols = datacols, check = FALSE)
 })
 
 #' @export
@@ -338,7 +327,7 @@ function (x, incomparables = FALSE, fromLast = FALSE, ...)  {
     conn <- distinct(conn, !!!as.list(datacols))
     conn <- mutate(conn, !!!keycols)
     keycols[[1L]] <- .keycols.row_number(conn)
-    initialize2(x, conn = conn, keycols = keycols, check = FALSE)
+    replaceSlots(x, conn = conn, keycols = keycols, check = FALSE)
 })
 
 #' @importFrom bit64 as.integer64
@@ -364,7 +353,7 @@ setMethod("is_nonzero", "DuckDBTable", function(x) {
                             raw = call("!=", datacols[[j]], .zeros[[ctypes[j]]]),
                             TRUE)
     }
-    initialize2(x, datacols = datacols, check = FALSE)
+    replaceSlots(x, datacols = datacols, check = FALSE)
 })
 
 #' @export
@@ -374,7 +363,7 @@ setMethod("nzcount", "DuckDBTable", function(x) {
     tbl <- is_nonzero(x)
     coltypes(tbl) <- rep.int("integer", ncol(tbl))
     datacols <- setNames(as.expression(Reduce(function(x, y) call("+", x, y), tbl@datacols)), "nonzero")
-    tbl <- initialize2(tbl, datacols = datacols, check = FALSE)
+    tbl <- replaceSlots(tbl, datacols = datacols, check = FALSE)
     sum(tbl)
 })
 
@@ -433,7 +422,7 @@ setMethod("is_sparse", "DuckDBTable", function(x) {
         }
     }
 
-    initialize2(x, conn = conn, datacols = datacols, keycols = keycols, ..., check = FALSE)
+    replaceSlots(x, conn = conn, datacols = datacols, keycols = keycols, ..., check = FALSE)
 }
 
 #' @export
@@ -463,7 +452,7 @@ function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TR
         datacols <- c(datacols, obj@datacols)
     }
     names(datacols) <- make.unique(names(datacols), sep = "_")
-    initialize2(x, datacols = datacols, check = FALSE)
+    replaceSlots(x, datacols = datacols, check = FALSE)
 })
 
 #' @exportS3Method base::all.equal
@@ -551,28 +540,28 @@ setMethod("Math", "DuckDBTable", function(x) {
                 endoapply(x@datacols, function(j) call(.Generic, j))
              },
              stop("unsupported Math operator: ", .Generic))
-    initialize2(x, datacols = datacols, check = FALSE)
+    replaceSlots(x, datacols = datacols, check = FALSE)
 })
 
 #' @export
 #' @importFrom S4Vectors endoapply
 setMethod("is.finite", "DuckDBTable", function(x) {
     datacols <- endoapply(x@datacols, function(j) call("isfinite", j))
-    initialize2(x, datacols = datacols, check = FALSE)
+    replaceSlots(x, datacols = datacols, check = FALSE)
 })
 
 #' @export
 #' @importFrom S4Vectors endoapply
 setMethod("is.infinite", "DuckDBTable", function(x) {
     datacols <- endoapply(x@datacols, function(j) call("isinf", j))
-    initialize2(x, datacols = datacols, check = FALSE)
+    replaceSlots(x, datacols = datacols, check = FALSE)
 })
 
 #' @export
 #' @importFrom S4Vectors endoapply
 setMethod("is.nan", "DuckDBTable", function(x) {
     datacols <- endoapply(x@datacols, function(j) call("isnan", j))
-    initialize2(x, datacols = datacols, check = FALSE)
+    replaceSlots(x, datacols = datacols, check = FALSE)
 })
 
 #' @importFrom dplyr pull summarize

@@ -1,5 +1,6 @@
 #' DuckDB-backed DataFrame
 #'
+#' @description
 #' Create a DuckDB-backed \linkS4class{DataFrame} object.
 #'
 #' @inheritParams DuckDBTable
@@ -192,7 +193,7 @@ setMethod("extractROWS", "DuckDBDataFrame", function(x, i) {
     conn <- head(x@conn, n)
     keycols <- x@keycols
     keycols[[1L]] <- .keycols.row_number(conn)
-    initialize2(x, conn = conn, keycols = keycols, check = FALSE)
+    replaceSlots(x, conn = conn, keycols = keycols, check = FALSE)
 }
 
 #' @export
@@ -342,7 +343,7 @@ setMethod("replaceCOLS", "DuckDBDataFrame", function(x, i, value) {
                 mc <- combineRows(mc, DataFrame(row.names = newnames))
                 mc <- mc[names(datacols), , drop = FALSE]
             }
-            return(initialize2(x, datacols = datacols, elementMetadata = mc, check = FALSE))
+            return(replaceSlots(x, datacols = datacols, elementMetadata = mc, check = FALSE))
         }
     }
     stop("not compatible DuckDBDataFrame objects")
@@ -364,7 +365,7 @@ setMethod("[[<-", "DuckDBDataFrame", function(x, i, j, ..., value) {
         if (!is.null(mc)) {
             mc <- mc[-i2, , drop = FALSE]
         }
-        return(initialize2(x, datacols = datacols, elementMetadata = mc, check = FALSE))
+        return(replaceSlots(x, datacols = datacols, elementMetadata = mc, check = FALSE))
     }
 
     if (length(i2) == 1L && !is.na(i2)) {
@@ -376,7 +377,7 @@ setMethod("[[<-", "DuckDBDataFrame", function(x, i, j, ..., value) {
                 if (!is.null(mc) && is.character(i) && !(i %in% colnames(x))) {
                     mc <- combineRows(mc, DataFrame(row.names = i))
                 }
-                return(initialize2(x, datacols = datacols, elementMetadata = mc, check = FALSE))
+                return(replaceSlots(x, datacols = datacols, elementMetadata = mc, check = FALSE))
             }
         }
     }
@@ -443,7 +444,7 @@ cbind.DuckDBDataFrame <- function(..., deparse.level = 1) {
     }
     all_metadata <- do.call(c, all_metadata)
 
-    initialize2(bound, elementMetadata = all_mcols, metadata = all_metadata, check = FALSE)
+    replaceSlots(bound, elementMetadata = all_mcols, metadata = all_metadata, check = FALSE)
 }
 
 #' @export

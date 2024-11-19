@@ -65,19 +65,19 @@ setMethod("tblconn", "DuckDBArray", function(x) callGeneric(x@seed))
 #' @export
 setMethod("[", "DuckDBArray", function(x, i, j, ..., drop = TRUE) {
     Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
-    initialize2(x, seed = .subset_DuckDBArraySeed(x@seed, Nindex = Nindex, drop = drop), check = FALSE)
+    replaceSlots(x, seed = .subset_DuckDBArraySeed(x@seed, Nindex = Nindex, drop = drop), check = FALSE)
 })
 
 #' @export
 #' @importFrom BiocGenerics aperm
 setMethod("aperm", "DuckDBArray", function(a, perm, ...) {
-    initialize2(a, seed = aperm(a@seed, perm = perm, ...), check = FALSE)
+    replaceSlots(a, seed = aperm(a@seed, perm = perm, ...), check = FALSE)
 })
 
 #' @export
 #' @importFrom BiocGenerics t
 setMethod("t", "DuckDBArray", function(x) {
-    initialize2(x, seed = t(x@seed), check = FALSE)
+    replaceSlots(x, seed = t(x@seed), check = FALSE)
 })
 
 #' @export
@@ -89,13 +89,13 @@ setMethod("type", "DuckDBArray", function(x) {
 #' @export
 #' @importFrom BiocGenerics type<-
 setReplaceMethod("type", "DuckDBArray", function(x, value) {
-    initialize2(x, seed = callGeneric(x@seed, value = value), check = FALSE)
+    replaceSlots(x, seed = callGeneric(x@seed, value = value), check = FALSE)
 })
 
 #' @export
 #' @importFrom SparseArray is_nonzero
 setMethod("is_nonzero", "DuckDBArray", function(x) {
-    initialize2(x, seed = callGeneric(x@seed), check = FALSE)
+    replaceSlots(x, seed = callGeneric(x@seed), check = FALSE)
 })
 
 #' @export
@@ -106,37 +106,37 @@ setMethod("nzcount", "DuckDBArray", function(x) {
 
 #' @export
 setMethod("Ops", c(e1 = "DuckDBArray", e2 = "DuckDBArray"), function(e1, e2) {
-    initialize2(e1, seed = callGeneric(e1@seed, e2@seed), check = FALSE)
+    replaceSlots(e1, seed = callGeneric(e1@seed, e2@seed), check = FALSE)
 })
 
 #' @export
 setMethod("Ops", c(e1 = "DuckDBArray", e2 = "atomic"), function(e1, e2) {
-    initialize2(e1, seed = callGeneric(e1@seed, e2), check = FALSE)
+    replaceSlots(e1, seed = callGeneric(e1@seed, e2), check = FALSE)
 })
 
 #' @export
 setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBArray"), function(e1, e2) {
-    initialize2(e2, seed = callGeneric(e1, e2@seed), check = FALSE)
+    replaceSlots(e2, seed = callGeneric(e1, e2@seed), check = FALSE)
 })
 
 #' @export
 setMethod("Math", "DuckDBArray", function(x) {
-    initialize2(x, seed = callGeneric(x@seed), check = FALSE)
+    replaceSlots(x, seed = callGeneric(x@seed), check = FALSE)
 })
 
 #' @export
 setMethod("is.finite", "DuckDBArray", function(x) {
-    initialize2(x, seed = is.finite(x@seed), check = FALSE)
+    replaceSlots(x, seed = is.finite(x@seed), check = FALSE)
 })
 
 #' @export
 setMethod("is.infinite", "DuckDBArray", function(x) {
-    initialize2(x, seed = is.infinite(x@seed), check = FALSE)
+    replaceSlots(x, seed = is.infinite(x@seed), check = FALSE)
 })
 
 #' @export
 setMethod("is.nan", "DuckDBArray", function(x) {
-    initialize2(x, seed = is.nan(x@seed), check = FALSE)
+    replaceSlots(x, seed = is.nan(x@seed), check = FALSE)
 })
 
 #' @export

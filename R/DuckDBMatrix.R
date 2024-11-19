@@ -80,7 +80,7 @@ setMethod("[", "DuckDBMatrix", function(x, i, j, ..., drop = TRUE) {
     if (length(dim(seed)) == 1L) {
         DuckDBArray(seed)
     } else {
-        initialize2(x, seed = seed, check = FALSE)
+        replaceSlots(x, seed = seed, check = FALSE)
     }
 })
 

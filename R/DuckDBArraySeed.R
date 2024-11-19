@@ -150,13 +150,13 @@ setMethod("type", "DuckDBArraySeed", function(x) {
 setReplaceMethod("type", "DuckDBArraySeed", function(x, value) {
     table <- x@table
     coltypes(table) <- value
-    initialize2(x, table = table, check = FALSE)
+    replaceSlots(x, table = table, check = FALSE)
 })
 
 #' @export
 #' @importFrom SparseArray is_nonzero
 setMethod("is_nonzero", "DuckDBArraySeed", function(x) {
-    initialize2(x, table = callGeneric(x@table), check = FALSE)
+    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export
@@ -207,7 +207,7 @@ setMethod("t", "DuckDBArraySeed", function(x) {
         }
     }
 
-    initialize2(x, table = table[Nindex, ], drop = drop, check = FALSE)
+    replaceSlots(x, table = table[Nindex, ], drop = drop, check = FALSE)
 }
 
 #' @export
@@ -222,37 +222,37 @@ setMethod("Ops", c(e1 = "DuckDBArraySeed", e2 = "DuckDBArraySeed"), function(e1,
     if (!isTRUE(all.equal(e1@table, e2@table)) || !identical(e1@drop, e2@drop)) {
         stop("can only perform arithmetic operations with compatible objects")
     }
-    initialize2(e1, table = callGeneric(e1@table, e2@table), check = FALSE)
+    replaceSlots(e1, table = callGeneric(e1@table, e2@table), check = FALSE)
 })
 
 #' @export
 setMethod("Ops", c(e1 = "DuckDBArraySeed", e2 = "atomic"), function(e1, e2) {
-    initialize2(e1, table = callGeneric(e1@table, e2), check = FALSE)
+    replaceSlots(e1, table = callGeneric(e1@table, e2), check = FALSE)
 })
 
 #' @export
 setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBArraySeed"), function(e1, e2) {
-    initialize2(e2, table = callGeneric(e1, e2@table), check = FALSE)
+    replaceSlots(e2, table = callGeneric(e1, e2@table), check = FALSE)
 })
 
 #' @export
 setMethod("Math", "DuckDBArraySeed", function(x) {
-    initialize2(x, table = callGeneric(x@table), check = FALSE)
+    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export
 setMethod("is.finite", "DuckDBArraySeed", function(x) {
-    initialize2(x, table = is.finite(x@table), check = FALSE)
+    replaceSlots(x, table = is.finite(x@table), check = FALSE)
 })
 
 #' @export
 setMethod("is.infinite", "DuckDBArraySeed", function(x) {
-    initialize2(x, table = is.infinite(x@table), check = FALSE)
+    replaceSlots(x, table = is.infinite(x@table), check = FALSE)
 })
 
 #' @export
 setMethod("is.nan", "DuckDBArraySeed", function(x) {
-    initialize2(x, table = is.nan(x@table), check = FALSE)
+    replaceSlots(x, table = is.nan(x@table), check = FALSE)
 })
 
 .extract_array_index <- function(x, index) {
