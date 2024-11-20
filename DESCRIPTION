@@ -26,6 +26,9 @@ Imports:
     BiocGenerics (>= 0.51.2),
     S4Vectors,
     S4Arrays (>= 1.1.1),
+    IRanges,
+    GenomeInfoDb,
+    GenomicRanges,
     DBI,
     dplyr,
     arrow
@@ -49,6 +52,7 @@ Collate:
     'DuckDBArray.R'
     'DuckDBColumn.R'
     'DuckDBDataFrame.R'
+    'DuckDBGRanges.R'
     'DuckDBMatrix.R'
     'listParquetDirs.R'
     'writeArray.R'

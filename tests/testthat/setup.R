@@ -90,6 +90,17 @@ special_path <- tempfile(fileext = ".parquet")
 arrow::write_parquet(special_df, special_path)
 
 
+# GRanges dataset
+granges_df <- data.frame(id = head(letters, 10L),
+                         seqnames = rep.int(c("chr2", "chr2", "chr1", "chr3"), c(1L, 3L, 2L, 4L)),
+                         start = 1:10, end = 10L, width = 10:1,
+                         strand = strand(rep.int(c("-", "+", "*", "+", "-"), c(1L, 2L, 2L, 3L, 2L))),
+                         score = 1:10,
+                         GC = seq(1, 0, length = 10))
+granges_tf <- tempfile(fileext = ".parquet")
+arrow::write_parquet(granges_df, granges_tf)
+
+
 # Helper functions
 checkDuckDBTable <- function(object, expected) {
     expect_s4_class(object, "DuckDBTable")
@@ -161,5 +172,27 @@ checkDuckDBColumn <- function(object, expected) {
     } else {
         expect_identical(names(object), names(expected))
         expect_equal(as.vector(object), expected)
+    }
+}
+
+
+checkDuckDBGRanges <- function(object, expected) {
+    expect_s4_class(object, "DuckDBGRanges")
+    expect_identical(length(object), length(expected))
+    if (nkey(object@frame) > 0L) {
+        expect_setequal(names(object), names(expected))
+        object <- object[names(expected)]
+        expect_identical(unname(as.vector(seqnames(object))), as.character(seqnames(expected)))
+        expect_identical(unname(as.vector(start(object))), start(expected))
+        expect_identical(unname(as.vector(end(object))), end(expected))
+        expect_identical(unname(as.vector(width(object))), width(expected))
+        expect_identical(unname(as.vector(strand(object))), as.character(strand(expected)))
+        df <- as.data.frame(expected)
+        for (j in names(df)) {
+            if (is.factor(df[[j]])) {
+                df[[j]] <- as.character(df[[j]])
+            }
+        }
+        expect_identical(as.data.frame(object)[names(expected), , drop=FALSE], df)
     }
 }
