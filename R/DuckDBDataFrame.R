@@ -121,7 +121,7 @@ setValidity2("DuckDBDataFrame", function(x) {
         rownames(m) <- S4Vectors:::make_rownames_for_RectangularData_display(x_rownames, x_nrow, nhead, ntail)
     }
 
-    m
+    rbind(sprintf("<%s>", coltypes(x)), m)
 }
 
 #' @export
@@ -142,7 +142,6 @@ setMethod("show", "DuckDBDataFrame", function(object) {
 
     if (x_nrow != 0L && x_ncol != 0L) {
         m <- .makePrettyCharacterMatrixForDisplay(object)
-        m <- rbind(sprintf("<%s>", coltypes(object)), m)
         print(m, quote = FALSE, right = TRUE)
     }
 
