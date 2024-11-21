@@ -53,8 +53,10 @@ list.files(tf3, full.names = TRUE, recursive = TRUE)
 
 # Write a random array to multiple Parquet files
 tf4 <- tempfile()
-X <- randomSparseMatrix(50000, 2^17, density = 0.0001)
-writeArray(X, tf4, partition_size = c(nrow(X), 100000))
+X <- poissonSparseMatrix(50000, 2^17, density = 0.0005,
+                         dimnames = list(sprintf("FEAT\%011d", seq_len(50000)),
+                                         sprintf("SAMP\%011d", seq_len(2^17))))
+writeArray(X, tf4, partition_size = c(nrow(X), 2^16))
 files <- list.files(tf4, full.names = TRUE, recursive = TRUE)
 files <- setNames(sprintf("\%.1f MB", file.size(files) / 2^20), files)
 files
