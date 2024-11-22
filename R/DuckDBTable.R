@@ -72,6 +72,8 @@
 #' sd,DuckDBTable-method
 #' mad,DuckDBTable-method
 #' IQR,DuckDBTable-method
+#' rowSums,DuckDBTable-method
+#' colSums,DuckDBTable-method
 #'
 #' @include DuckDBConnection.R
 #' @include keynames.R
@@ -656,6 +658,51 @@ function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, h
 #' @importFrom BiocGenerics IQR
 setMethod("IQR", "DuckDBTable", function(x, na.rm = FALSE, type = 7) {
     diff(quantile(x, c(0.25, 0.75), na.rm = na.rm, names = FALSE, type = type))
+})
+
+#' @export
+#' @importFrom dplyr group_by summarize
+#' @importFrom DelayedArray rowSums
+#' @importFrom S4Vectors isSingleNumber new2
+setMethod("rowSums", "DuckDBTable", function(x, na.rm = FALSE, dims = 1, ...) {
+    if (nkey(x) < 2L) {
+        stop("'x' must be an array of at least two dimensions")
+    }
+    if (!isSingleNumber(dims) || dims < 1L || dims >= nkey(x)) {
+        stop("invalid 'dims'")
+    }
+    if (length(x@datacols) != 1L) {
+        stop("requires a single datacols")
+    }
+    datacols <- x@datacols
+    keycols <- head(x@keycols, dims)
+    groups <- lapply(names(keycols), as.name)
+    aggr <- sapply(datacols, function(y) call("sum", y, na.rm = TRUE), simplify = FALSE)
+    conn <- summarize(group_by(x@conn, !!!groups), !!!aggr)
+    new2("DuckDBTable", conn = conn, datacols = datacols, keycols = keycols, check = FALSE)
+})
+
+#' @export
+#' @importFrom dplyr group_by summarize
+#' @importFrom DelayedArray colSums
+#' @importFrom S4Vectors isSingleNumber new2
+setMethod("colSums", "DuckDBTable", function(x, na.rm = FALSE, dims = 1, ...) {
+    nk <- nkey(x)
+    if (nk < 2L) {
+        stop("'x' must be an array of at least two dimensions")
+    }
+    if (!isSingleNumber(dims) || dims < 1L || dims >= nk) {
+        stop("invalid 'dims'")
+    }
+    if (length(x@datacols) != 1L) {
+        stop("requires a single datacols")
+    }
+    datacols <- x@datacols
+    keycols <- tail(x@keycols, nk - dims)
+    groups <- lapply(names(keycols), as.name)
+    aggr <- sapply(datacols, function(y) call("sum", y, na.rm = TRUE), simplify = FALSE)
+    conn <- summarize(group_by(x@conn, !!!groups), !!!aggr)
+    new2("DuckDBTable", conn = conn, datacols = datacols, keycols = keycols, check = FALSE)
 })
 
 #' @export

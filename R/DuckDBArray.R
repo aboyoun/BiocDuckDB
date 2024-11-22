@@ -41,6 +41,8 @@
 #' Ops,DuckDBArray,atomic-method
 #' Ops,atomic,DuckDBArray-method
 #' Math,DuckDBArray-method
+#' rowSums,DuckDBArray-method
+#' colSums,DuckDBArray-method
 #'
 #' @seealso
 #' \code{\link{DuckDBArraySeed}},
@@ -126,17 +128,29 @@ setMethod("Math", "DuckDBArray", function(x) {
 
 #' @export
 setMethod("is.finite", "DuckDBArray", function(x) {
-    replaceSlots(x, seed = is.finite(x@seed), check = FALSE)
+    replaceSlots(x, seed = callGeneric(x@seed), check = FALSE)
 })
 
 #' @export
 setMethod("is.infinite", "DuckDBArray", function(x) {
-    replaceSlots(x, seed = is.infinite(x@seed), check = FALSE)
+    replaceSlots(x, seed = callGeneric(x@seed), check = FALSE)
 })
 
 #' @export
 setMethod("is.nan", "DuckDBArray", function(x) {
-    replaceSlots(x, seed = is.nan(x@seed), check = FALSE)
+    replaceSlots(x, seed = callGeneric(x@seed), check = FALSE)
+})
+
+#' @export
+#' @importFrom DelayedArray rowSums
+setMethod("rowSums", "DuckDBArray", function(x, na.rm = FALSE, dims = 1, ...) {
+    as.array(replaceSlots(x, seed = callGeneric(x@seed, na.rm = na.rm, dims = dims, ...), check = FALSE), drop = TRUE)
+})
+
+#' @export
+#' @importFrom DelayedArray colSums
+setMethod("colSums", "DuckDBArray", function(x, na.rm = FALSE, dims = 1, ...) {
+    as.array(replaceSlots(x, seed = callGeneric(x@seed, na.rm = na.rm, dims = dims, ...), check = FALSE), drop = TRUE)
 })
 
 #' @export

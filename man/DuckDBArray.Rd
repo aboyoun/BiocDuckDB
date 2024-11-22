@@ -19,6 +19,8 @@
 \alias{Ops,DuckDBArray,atomic-method}
 \alias{Ops,atomic,DuckDBArray-method}
 \alias{Math,DuckDBArray-method}
+\alias{rowSums,DuckDBArray-method}
+\alias{colSums,DuckDBArray-method}
 \title{DuckDB tables as DelayedArray objects}
 \usage{
 DuckDBArray(conn, datacols, keycols, type = NULL)

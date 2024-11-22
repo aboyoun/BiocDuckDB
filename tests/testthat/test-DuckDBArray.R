@@ -228,3 +228,21 @@ test_that("Special numeric functions work as expected for a DuckDBArray", {
     checkDuckDBArray(is.infinite(pqarray), is.infinite(as.array(pqarray)))
     checkDuckDBArray(is.nan(pqarray), is.nan(as.array(pqarray)))
 })
+
+test_that("row/colSums methods work as expected for a DuckDBArray", {
+    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array))
+
+    object <- rowSums(pqarray)
+    expect_identical(setNames(as.vector(object), names(object)), rowSums(as.array(pqarray)))
+    object <- rowSums(pqarray, dims = 2L)
+    expect_identical(setNames(object, names(object)), rowSums(as.array(pqarray), dims = 2L))
+    object <- rowSums(pqarray, dims = 3L)
+    expect_identical(setNames(object, names(object)), rowSums(as.array(pqarray), dims = 3L))
+
+    object <- colSums(pqarray)
+    expect_identical(setNames(object, names(object)), colSums(as.array(pqarray)))
+    object <- colSums(pqarray, dims = 2L)
+    expect_identical(setNames(object, names(object)), colSums(as.array(pqarray), dims = 2L))
+    object <- colSums(pqarray, dims = 3L)
+    expect_identical(setNames(as.vector(object), names(object)), colSums(as.array(pqarray), dims = 3L))
+})

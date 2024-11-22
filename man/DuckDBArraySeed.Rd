@@ -26,6 +26,8 @@
 \alias{Ops,DuckDBArraySeed,atomic-method}
 \alias{Ops,atomic,DuckDBArraySeed-method}
 \alias{Math,DuckDBArraySeed-method}
+\alias{rowSums,DuckDBArraySeed-method}
+\alias{colSums,DuckDBArraySeed-method}
 \title{DuckDBArraySeed objects}
 \usage{
 DuckDBArraySeed(conn, datacols, keycols, type = NULL)

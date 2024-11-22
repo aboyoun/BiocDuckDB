@@ -38,6 +38,8 @@
 \alias{sd,DuckDBTable-method}
 \alias{mad,DuckDBTable-method}
 \alias{IQR,DuckDBTable-method}
+\alias{rowSums,DuckDBTable-method}
+\alias{colSums,DuckDBTable-method}
 \title{DuckDBTable objects}
 \usage{
 DuckDBTable(conn, datacols = colnames(conn), keycols = NULL, type = NULL)

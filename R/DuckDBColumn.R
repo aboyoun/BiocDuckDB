@@ -231,17 +231,17 @@ setMethod("Math", "DuckDBColumn", function(x) {
 
 #' @export
 setMethod("is.finite", "DuckDBColumn", function(x) {
-    replaceSlots(x, table = is.finite(x@table), check = FALSE)
+    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export
 setMethod("is.infinite", "DuckDBColumn", function(x) {
-    replaceSlots(x, table = is.infinite(x@table), check = FALSE)
+    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export
 setMethod("is.nan", "DuckDBColumn", function(x) {
-    replaceSlots(x, table = is.nan(x@table), check = FALSE)
+    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
 })
 
 #' @export
