@@ -222,7 +222,7 @@ setMethod("[", "DuckDBArraySeed", function(x, i, j, ..., drop = TRUE) {
 #' @export
 setMethod("Ops", c(e1 = "DuckDBArraySeed", e2 = "DuckDBArraySeed"), function(e1, e2) {
     if (!isTRUE(all.equal(e1@table, e2@table)) || !identical(e1@drop, e2@drop)) {
-        stop("can only perform arithmetic operations with compatible objects")
+        stop("can only perform binary operations with compatible objects")
     }
     replaceSlots(e1, table = callGeneric(e1@table, e2@table), check = FALSE)
 })

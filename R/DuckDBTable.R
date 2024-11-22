@@ -481,7 +481,7 @@ all.equal.DuckDBTable <- function(target, current, check.datacols = FALSE, ...) 
 #' @export
 setMethod("Ops", c(e1 = "DuckDBTable", e2 = "DuckDBTable"), function(e1, e2) {
     if (!isTRUE(all.equal(e1, e2)) || ((ncol(e1) > 1L) && (ncol(e2) > 1L) && (ncol(e1) != ncol(e2)))) {
-        stop("can only perform arithmetic operations with compatible objects")
+        stop("can only perform binary operations with compatible objects")
     }
     comb <- cbind(e1, e2)
     fin1 <- head(comb@datacols, ncol(e1))
