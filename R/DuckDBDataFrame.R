@@ -479,9 +479,7 @@ function(x, row.names = NULL, optional = FALSE, ...) {
 })
 
 #' @export
-#' @importFrom dplyr everything select
-#' @importFrom S4Vectors isSingleString new2
-#' @importFrom stats setNames
+#' @importFrom S4Vectors new2
 #' @rdname DuckDBDataFrame
 DuckDBDataFrame <- function(conn, datacols = colnames(conn), keycols = NULL, type = NULL) {
     if (missing(datacols)) {
