@@ -347,13 +347,13 @@ setMethod("is_nonzero", "DuckDBTable", function(x) {
     ctypes <- coltypes(x)
     for (j in names(ctypes)) {
         datacols[[j]] <- switch(ctypes[j],
-                            logical = datacols[[j]],
-                            integer =,
-                            integer64 =,
-                            double =,
-                            character =,
-                            raw = call("!=", datacols[[j]], .zeros[[ctypes[j]]]),
-                            TRUE)
+                                logical = datacols[[j]],
+                                integer =,
+                                integer64 =,
+                                double =,
+                                character =,
+                                raw = call("!=", datacols[[j]], .zeros[[ctypes[j]]]),
+                                TRUE)
     }
     replaceSlots(x, datacols = datacols, check = FALSE)
 })
