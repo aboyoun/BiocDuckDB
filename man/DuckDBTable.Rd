@@ -39,6 +39,7 @@
 \alias{sd,DuckDBTable-method}
 \alias{mad,DuckDBTable-method}
 \alias{IQR,DuckDBTable-method}
+\alias{table,DuckDBTable-method}
 \alias{rowSums,DuckDBTable-method}
 \alias{colSums,DuckDBTable-method}
 \title{DuckDBTable objects}

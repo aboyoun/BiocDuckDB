@@ -123,4 +123,8 @@ test_that("Other aggregate methods work as expected for a DuckDBColumn", {
 
     expect_equal(IQR(mpg), IQR(as.vector(mpg)))
     expect_equal(IQR(mpg, type = 1), IQR(as.vector(mpg), type = 1))
+
+    gear <- df[["gear"]]
+    carb <- df[["carb"]]
+    expect_equal(table(gear, carb), table(gear = as.vector(gear), carb = as.vector(carb)))
 })

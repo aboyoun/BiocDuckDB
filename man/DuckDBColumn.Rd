@@ -34,6 +34,7 @@
 \alias{sd,DuckDBColumn-method}
 \alias{mad,DuckDBColumn-method}
 \alias{IQR,DuckDBColumn-method}
+\alias{table,DuckDBColumn-method}
 \title{DuckDBColumn objects}
 \description{
 DuckDBColumn objects

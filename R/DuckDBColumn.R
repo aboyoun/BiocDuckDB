@@ -35,6 +35,7 @@
 #' sd,DuckDBColumn-method
 #' mad,DuckDBColumn-method
 #' IQR,DuckDBColumn-method
+#' table,DuckDBColumn-method
 #'
 #' @include DuckDBTable.R
 #'
@@ -301,6 +302,12 @@ function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, h
 #' @importFrom BiocGenerics IQR
 setMethod("IQR", "DuckDBColumn", function(x, na.rm = FALSE, type = 7) {
     callGeneric(x@table, type = type)
+})
+
+#' @export
+#' @importFrom BiocGenerics table
+setMethod("table", "DuckDBColumn", function(...) {
+    callGeneric(cbind.DuckDBDataFrame(...))
 })
 
 #' @export

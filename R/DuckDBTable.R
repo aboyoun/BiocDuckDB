@@ -73,6 +73,7 @@
 #' sd,DuckDBTable-method
 #' mad,DuckDBTable-method
 #' IQR,DuckDBTable-method
+#' table,DuckDBTable-method
 #' rowSums,DuckDBTable-method
 #' colSums,DuckDBTable-method
 #'
@@ -91,20 +92,6 @@ replaceSlots <- BiocGenerics:::replaceSlots
 #' @importFrom dplyr n pull summarize
 .keycols.row_number <- function(conn) {
     c(NA_integer64_, - pull(summarize(conn, n = n())))
-}
-
-#' @importFrom dplyr filter group_by n summarize
-.row_count <- function(conn, keycols = NULL) {
-    if (is.null(keycols)) {
-        as.data.frame(summarize(conn, count = n()))
-    } else {
-        for (i in names(keycols)) {
-            set <- keycols[[i]]
-            conn <- filter(conn, !!as.name(i) %in% set)
-        }
-        groups <- lapply(names(keycols), as.name)
-        as.data.frame(summarize(group_by(conn, !!!groups), count = n()))
-    }
 }
 
 #' @export
@@ -681,6 +668,26 @@ function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, h
 #' @importFrom BiocGenerics IQR
 setMethod("IQR", "DuckDBTable", function(x, na.rm = FALSE, type = 7) {
     diff(quantile(x, c(0.25, 0.75), na.rm = na.rm, names = FALSE, type = type))
+})
+
+#' @export
+#' @importFrom BiocGenerics table
+#' @importFrom dplyr group_by n summarize
+#' @importFrom stats setNames
+setMethod("table", "DuckDBTable", function(...) {
+    args <- list(...)
+    if (length(args) != 1L) {
+        stop("\"table\" method for DuckDB data can only take one input object")
+    }
+    x <- args[[1L]]
+    conn <- x@conn
+    groups <- as.list(x@datacols)
+    counts <- as.data.frame(summarize(group_by(conn, !!!groups), count = n(), .groups = "drop"))
+    dnames <- lapply(counts[seq_along(groups)], function(j) as.character(sort(unique(j))))
+    ans <- array(0L, dim = lengths(dnames, use.names = FALSE), dimnames = dnames)
+    ans[do.call(cbind, lapply(counts[seq_along(groups)], as.character))] <- as.integer(counts[["count"]])
+    class(ans) <- "table"
+    ans
 })
 
 #' @export

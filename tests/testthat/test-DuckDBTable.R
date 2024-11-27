@@ -260,4 +260,7 @@ test_that("Other aggregate methods work as expected for a DuckDBTable", {
 
     expect_equal(IQR(tbl), IQR(as.data.frame(tbl)[["fate"]]))
     expect_equal(IQR(tbl, type = 1), IQR(as.data.frame(tbl)[["fate"]], type = 1))
+
+    tbl <- DuckDBTable(mtcars_parquet, datacols = c("cyl", "vs", "am", "gear", "carb"), keycols = "model")
+    expect_equal(table(tbl), table(as.data.frame(tbl)[-1L]))
 })
