@@ -171,6 +171,10 @@ setMethod("ranges", "DuckDBGRanges", function (x, use.names = TRUE, use.mcols = 
 #' @export
 #' @importFrom S4Vectors extractROWS
 setMethod("extractROWS", "DuckDBGRanges", function(x, i) {
+    if (missing(i)) {
+        return(x)
+    }
+
     frame <- x@frame
     frame <- callGeneric(frame, i = i)
 

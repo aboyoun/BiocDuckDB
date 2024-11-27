@@ -4,6 +4,7 @@
 \alias{DuckDBArray}
 \alias{DuckDBArray-class}
 \alias{[,DuckDBArray,ANY,ANY,ANY-method}
+\alias{\%in\%,DuckDBArray,ANY-method}
 \alias{aperm,DuckDBArray-method}
 \alias{dbconn,DuckDBArray-method}
 \alias{is_nonzero,DuckDBArray-method}

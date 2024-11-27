@@ -3,6 +3,7 @@
 \name{DuckDBColumn}
 \alias{DuckDBColumn}
 \alias{DuckDBColumn-class}
+\alias{\%in\%,DuckDBColumn,ANY-method}
 \alias{as.vector,DuckDBColumn-method}
 \alias{dbconn,DuckDBColumn-method}
 \alias{extractROWS,DuckDBColumn,ANY-method}

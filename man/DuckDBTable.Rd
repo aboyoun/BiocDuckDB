@@ -5,6 +5,7 @@
 \alias{DuckDBTable-class}
 \alias{show,DuckDBTable-method}
 \alias{[,DuckDBTable,ANY,ANY,ANY-method}
+\alias{\%in\%,DuckDBTable,ANY-method}
 \alias{all.equal.DuckDBTable}
 \alias{as.data.frame,DuckDBTable-method}
 \alias{bindCOLS,DuckDBTable-method}

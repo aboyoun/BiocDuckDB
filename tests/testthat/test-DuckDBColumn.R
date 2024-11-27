@@ -77,6 +77,13 @@ test_that("Math methods work as expected for a DuckDBColumn", {
     expect_error(log1p(mpg))
 })
 
+test_that("%in% works as expected for a DuckDBColumn", {
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = "model")
+    carb <- df[["carb"]]
+
+    checkDuckDBColumn(carb %in% c(2, 4, 8), setNames(as.vector(carb) %in% c(2, 4, 8), names(carb)))
+})
+
 test_that("Special numeric functions work as expected for a DuckDBColumn", {
     df <- DuckDBDataFrame(special_path, datacols = "x", keycols = list(id = letters[1:4]))
     x <- df[["x"]]

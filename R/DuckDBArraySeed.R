@@ -42,6 +42,7 @@
 #' DuckDBArraySeed-class
 #' show,DuckDBArraySeed-method
 #' [,DuckDBArraySeed,ANY,ANY,ANY-method
+#' %in%,DuckDBArraySeed,ANY-method
 #' aperm,DuckDBArraySeed-method
 #' dbconn,DuckDBArraySeed-method
 #' DelayedArray,DuckDBArraySeed-method
@@ -240,6 +241,12 @@ setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBArraySeed"), function(e1, e2) {
 #' @export
 setMethod("Math", "DuckDBArraySeed", function(x) {
     replaceSlots(x, table = callGeneric(x@table), check = FALSE)
+})
+
+#' @export
+#' @importFrom BiocGenerics %in%
+setMethod("%in%", c(x = "DuckDBArraySeed", table = "ANY"), function(x, table) {
+    replaceSlots(x, table = callGeneric(x@table, table), check = FALSE)
 })
 
 #' @export

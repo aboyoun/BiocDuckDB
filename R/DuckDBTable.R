@@ -39,6 +39,7 @@
 #' DuckDBTable-class
 #' show,DuckDBTable-method
 #' [,DuckDBTable,ANY,ANY,ANY-method
+#' %in%,DuckDBTable,ANY-method
 #' all.equal.DuckDBTable
 #' as.data.frame,DuckDBTable-method
 #' bindCOLS,DuckDBTable-method
@@ -90,6 +91,20 @@ replaceSlots <- BiocGenerics:::replaceSlots
 #' @importFrom dplyr n pull summarize
 .keycols.row_number <- function(conn) {
     c(NA_integer64_, - pull(summarize(conn, n = n())))
+}
+
+#' @importFrom dplyr filter group_by n summarize
+.row_count <- function(conn, keycols = NULL) {
+    if (is.null(keycols)) {
+        as.data.frame(summarize(conn, count = n()))
+    } else {
+        for (i in names(keycols)) {
+            set <- keycols[[i]]
+            conn <- filter(conn, !!as.name(i) %in% set)
+        }
+        groups <- lapply(names(keycols), as.name)
+        as.data.frame(summarize(group_by(conn, !!!groups), count = n()))
+    }
 }
 
 #' @export
@@ -546,6 +561,14 @@ setMethod("Math", "DuckDBTable", function(x) {
 })
 
 #' @export
+#' @importFrom BiocGenerics %in%
+#' @importFrom S4Vectors endoapply
+setMethod("%in%", c(x = "DuckDBTable", table = "ANY"), function(x, table) {
+    datacols <- endoapply(x@datacols, function(j) call("%in%", j, table))
+    replaceSlots(x, datacols = datacols, check = FALSE)
+})
+
+#' @export
 #' @importFrom S4Vectors endoapply
 setMethod("is.finite", "DuckDBTable", function(x) {
     datacols <- endoapply(x@datacols, function(j) call("isfinite", j))
@@ -803,7 +826,7 @@ function(conn, datacols = colnames(conn), keycols = NULL, type = NULL) {
     }
 
     # Ensure 'keycols' is a named list of vectors
-    if (is.null(keycols)) {
+    if (length(keycols) == 0L) {
         keycols <- tail(make.unique(c(colnames(conn), "row_number"), sep = "_"), 1L)
         keycols <- setNames(list(call("row_number")), keycols)
         conn <- mutate(conn, !!!keycols)

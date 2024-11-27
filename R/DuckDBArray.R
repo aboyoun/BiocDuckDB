@@ -26,6 +26,7 @@
 #' @aliases
 #' DuckDBArray-class
 #' [,DuckDBArray,ANY,ANY,ANY-method
+#' %in%,DuckDBArray,ANY-method
 #' aperm,DuckDBArray-method
 #' dbconn,DuckDBArray-method
 #' is_nonzero,DuckDBArray-method
@@ -124,6 +125,12 @@ setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBArray"), function(e1, e2) {
 #' @export
 setMethod("Math", "DuckDBArray", function(x) {
     replaceSlots(x, seed = callGeneric(x@seed), check = FALSE)
+})
+
+#' @export
+#' @importFrom BiocGenerics %in%
+setMethod("%in%", c(x = "DuckDBArray", table = "ANY"), function(x, table) {
+    replaceSlots(x, seed = callGeneric(x@seed, table), check = FALSE)
 })
 
 #' @export

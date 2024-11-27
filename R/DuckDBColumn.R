@@ -4,6 +4,7 @@
 #'
 #' @aliases
 #' DuckDBColumn-class
+#' %in%,DuckDBColumn,ANY-method
 #' as.vector,DuckDBColumn-method
 #' dbconn,DuckDBColumn-method
 #' extractROWS,DuckDBColumn,ANY-method
@@ -160,6 +161,9 @@ setMethod("nzcount", "DuckDBColumn", function(x) {
 
 #' @export
 setMethod("extractROWS", "DuckDBColumn", function(x, i) {
+    if (missing(i)) {
+        return(x)
+    }
     if (is(i, "DuckDBColumn")) {
         i <- i@table
     }
@@ -227,6 +231,12 @@ setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBColumn"), function(e1, e2) {
 #' @export
 setMethod("Math", "DuckDBColumn", function(x) {
     replaceSlots(x, table = callGeneric(x@table), check = FALSE)
+})
+
+#' @export
+#' @importFrom BiocGenerics %in%
+setMethod("%in%", c(x = "DuckDBColumn", table = "ANY"), function(x, table) {
+    replaceSlots(x, table = callGeneric(x@table, table), check = FALSE)
 })
 
 #' @export
