@@ -63,10 +63,11 @@ setClass("DuckDBMatrix", contains = c("DuckDBArray", "DelayedMatrix"))
 
 #' @importFrom S4Vectors setValidity2
 setValidity2("DuckDBMatrix", function(x) {
+    msg <- NULL
     if (nkey(x@seed@table) != 2L) {
-        return("'keycols' seed slot must be a two element named list of character vectors")
+        msg <- c(msg, "'keycols' seed slot must be a two element named list of character vectors")
     }
-    TRUE
+    msg %||% TRUE
 })
 
 #' @export

@@ -85,16 +85,17 @@ setClass("DuckDBArraySeed", contains = "Array",
 
 #' @importFrom S4Vectors isTRUEorFALSE setValidity2 isSingleString
 setValidity2("DuckDBArraySeed", function(x) {
+    msg <- NULL
     table <- x@table
     if (length(table@conn) > 0L) {
         if (ncol(table) != 1L) {
-            return("'table' slot must be a single-column DuckDBTable")
+            msg <- c(msg, "'table' slot must be a single-column DuckDBTable")
         }
     }
     if (!isTRUEorFALSE(x@drop)) {
-        return("'drop' slot must be TRUE or FALSE")
+        msg <- c(msg, "'drop' slot must be TRUE or FALSE")
     }
-    TRUE
+    msg %||% TRUE
 })
 
 #' @export
