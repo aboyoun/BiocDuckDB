@@ -59,6 +59,8 @@
 #' as.data.frame,DuckDBGRanges-method
 #' coerce,DuckDBGRanges,DuckDBDataFrame-method
 #' dbconn,DuckDBGRanges-method
+#' elementMetadata,DuckDBGRanges-method
+#' elementMetadata<-,DuckDBGRanges-method
 #' end,DuckDBGRanges-method
 #' extractROWS,DuckDBGRanges,ANY-method
 #' head,DuckDBGRanges-method
@@ -89,15 +91,16 @@ setClass("DuckDBGRanges", contains = "GenomicRanges",
 
 #' @importFrom S4Vectors mcols
 setValidity2("DuckDBGRanges", function(x) {
+    msg <- NULL
     frame <- x@frame
     if (!setequal(colnames(frame), names(.datacols_granges))) {
-        return("missing definition for one or more of 'seqnames', 'start', 'end', 'width', and 'strand'")
+        msg <- c(msg, "missing definition for one or more of 'seqnames', 'start', 'end', 'width', and 'strand'")
     }
     mcols <- x@elementMetadata
     if (!is.null(mcols) && !is(mcols, "DuckDBDataFrame") && !isTRUE(all.equal(mcols, frame))) {
-        return("'mcols' must be compatible with its associated ranges")
+        msg <- c(msg, "'mcols' must be compatible with its associated ranges")
     }
-    TRUE
+    msg %||% TRUE
 })
 
 #' @export
@@ -125,6 +128,8 @@ setMethod("dbconn", "DuckDBGRanges", function(x) callGeneric(x@frame))
 
 #' @export
 setMethod("tblconn", "DuckDBGRanges", function(x) callGeneric(x@frame))
+
+setMethod(".keycols", "DuckDBGRanges", function(x) callGeneric(x@frame))
 
 setMethod(".has_row_number", "DuckDBGRanges", function(x) callGeneric(x@frame))
 
@@ -166,6 +171,19 @@ setMethod("ranges", "DuckDBGRanges", function (x, use.names = TRUE, use.mcols = 
         df <- cbind.DuckDBDataFrame(df, x@elementMetadata)
     }
     df
+})
+
+#' @export
+#' @importFrom S4Vectors elementMetadata
+setMethod("elementMetadata", "DuckDBGRanges", function(x) x@elementMetadata)
+
+#' @export
+#' @importFrom S4Vectors elementMetadata<-
+setReplaceMethod("elementMetadata", "DuckDBGRanges", function(x, ..., value) {
+    if (!is(value, "DuckDBDataFrame") || !isTRUE(all.equal(x@frame, value))) {
+        stop("'elementMetadata' must be a compatible DuckDBDataFrame object")
+    }
+    replaceSlots(x, elementMetadata = value, check = FALSE)
 })
 
 #' @export

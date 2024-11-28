@@ -8,6 +8,8 @@
 \alias{as.data.frame,DuckDBGRanges-method}
 \alias{coerce,DuckDBGRanges,DuckDBDataFrame-method}
 \alias{dbconn,DuckDBGRanges-method}
+\alias{elementMetadata,DuckDBGRanges-method}
+\alias{elementMetadata<-,DuckDBGRanges-method}
 \alias{end,DuckDBGRanges-method}
 \alias{extractROWS,DuckDBGRanges,ANY-method}
 \alias{head,DuckDBGRanges-method}

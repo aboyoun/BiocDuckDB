@@ -250,6 +250,45 @@ sparse_ddb <- DuckDBArray(sparse_tf, datacol = "value", keycols = list("dim1" = 
 sparse_ddb
 ```
 
+# Creating DuckDB-backed SummarizedExperiment objects
+
+```{r}
+library(SummarizedExperiment)
+data(airway, package = "airway")
+
+airway_rowranges_td <- tempfile(pattern = "rowranges_")
+arrow::write_dataset(as.data.frame(rowRanges(airway)), airway_rowranges_td, format = "parquet")
+
+airway_rowdata_td <- tempfile(pattern = "rowdata_")
+arrow::write_dataset(as.data.frame(rowData(airway)), airway_rowdata_td, format = "parquet")
+
+airway_coldata_td <- tempfile(pattern = "coldata_")
+arrow::write_dataset(as.data.frame(colData(airway)), airway_coldata_td, format = "parquet")
+
+airway_counts_td <- tempfile(pattern = "counts_")
+writeArray(assays(airway)[["counts"]], airway_counts_td, dim_names = c("gene_id", "run"))
+
+rranges <- DuckDBGRanges(airway_rowranges_td, seqnames = "seqnames", start = "start", end = "end",
+                         strand = "strand", mcols = c("exon_id", "exon_name", "group_name"),
+                         seqinfo = seqinfo(airway))
+
+rdata <- DuckDBDataFrame(airway_rowdata_td, keycols = "gene_id")
+rdata <- rdata[sort(rownames(rdata)), ]
+
+rranges <- split(rranges, rranges$group_name)
+mcols(rranges) <- rdata
+
+cdata <- DuckDBDataFrame(airway_coldata_td, keycols = "Run")
+cdata <- cdata[sort(rownames(cdata)), ]
+
+counts <- DuckDBMatrix(airway_counts_td, row = "gene_id", col = "run", datacol = "value")
+counts <- counts[rownames(rdata), sort(rownames(cdata))]
+
+airway_ddb <- SummarizedExperiment(assays = SimpleList(counts = counts),
+                                   rowRanges = rranges, colData = cdata,
+                                   metadata = metadata(airway))
+```
+
 # Retrieving the DuckDB table connection
 
 At any point, users can retrieve the query to the underlying DuckDB table via the

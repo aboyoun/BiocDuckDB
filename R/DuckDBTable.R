@@ -127,11 +127,7 @@ setValidity2("DuckDBTable", function(x) {
     if (length(intersect(names(x@keycols), names(x@datacols)))) {
         msg <- c(msg, "names in 'keycols' and 'datacols' slots must be unique")
     }
-    if (is.null(msg)) {
-        TRUE
-    } else {
-        msg
-    }
+    msg %||% TRUE
 })
 
 #' @export
@@ -161,6 +157,10 @@ setMethod("dbconn", "DuckDBTable", function(x) x@conn$src$con)
 
 #' @export
 setMethod("tblconn", "DuckDBTable", function(x) x@conn)
+
+setGeneric(".keycols", function(x) standardGeneric(".keycols"))
+
+setMethod(".keycols", "DuckDBTable", function(x) x@keycols)
 
 setGeneric(".has_row_number", function(x) standardGeneric(".has_row_number"))
 

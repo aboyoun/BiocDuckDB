@@ -36,6 +36,8 @@ Suggests:
     knitr,
     rmarkdown,
     BiocStyle,
+    SummarizedExperiment,
+    airway,
     testthat
 biocViews: DataRepresentation, Infrastructure, Software
 VignetteBuilder: knitr
@@ -52,7 +54,10 @@ Collate:
     'DuckDBArray.R'
     'DuckDBColumn.R'
     'DuckDBDataFrame.R'
+    'DuckDBList.R'
+    'DuckDBDataFrameList.R'
     'DuckDBGRanges.R'
+    'DuckDBGRangesList.R'
     'DuckDBMatrix.R'
     'listParquetDirs.R'
     'writeArray.R'

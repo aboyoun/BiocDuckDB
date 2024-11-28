@@ -48,16 +48,17 @@ setClass("DuckDBColumn", contains = "Vector", slots = c(table = "DuckDBTable"))
 
 #' @importFrom S4Vectors isTRUEorFALSE setValidity2
 setValidity2("DuckDBColumn", function(x) {
+    msg <- NULL
     table <- x@table
     if (length(table@conn) > 0L) {
         if (ncol(table) != 1L) {
-            return("'table' slot must be a single-column DuckDBTable")
+            msg <- c(msg, "'table' slot must be a single-column DuckDBTable")
         }
         if (nkey(table) != 1L) {
-            return("'table' slot must have a 'keycols' with a named list containing a single named character vector")
+            msg <- c(msg, "'table' slot must have a 'keycols' with a named list containing a single named character vector")
         }
     }
-    TRUE
+    msg %||% TRUE
 })
 
 #' @export
@@ -111,6 +112,8 @@ setMethod("dbconn", "DuckDBColumn", function(x) callGeneric(x@table))
 
 #' @export
 setMethod("tblconn", "DuckDBColumn", function(x) callGeneric(x@table))
+
+setMethod(".keycols", "DuckDBColumn", function(x) callGeneric(x@table))
 
 setMethod(".has_row_number", "DuckDBColumn", function(x) callGeneric(x@table))
 
