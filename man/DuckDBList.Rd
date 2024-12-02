@@ -3,12 +3,12 @@
 \name{DuckDBList}
 \alias{DuckDBList}
 \alias{DuckDBList-class}
+\alias{length,DuckDBList-method}
+\alias{names,DuckDBList-method}
 \alias{elementNROWS,DuckDBList-method}
 \alias{extractROWS,DuckDBList,ANY-method}
 \alias{getListElement,DuckDBList-method}
 \alias{head,DuckDBList-method}
-\alias{length,DuckDBList-method}
-\alias{names,DuckDBList-method}
 \alias{tail,DuckDBList-method}
 \title{DuckDB-backed List}
 \description{

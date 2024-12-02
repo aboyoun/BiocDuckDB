@@ -7,12 +7,14 @@
 #'
 #' @aliases
 #' DuckDBList-class
+#'
+#' length,DuckDBList-method
+#' names,DuckDBList-method
 #' elementNROWS,DuckDBList-method
+#'
 #' extractROWS,DuckDBList,ANY-method
 #' getListElement,DuckDBList-method
 #' head,DuckDBList-method
-#' length,DuckDBList-method
-#' names,DuckDBList-method
 #' tail,DuckDBList-method
 #'
 #' @include DuckDBTable.R
@@ -27,6 +29,25 @@ setClass("DuckDBList", contains = c("List", "VIRTUAL"),
          slots = c(unlistData = "ANY", partitioning = "expression",
                    names = "character", elementNROWS = "integer"),
          prototype = prototype(elementNROWS = setNames(integer(), character())))
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Accessors
+###
+
+#' @export
+setMethod("length", "DuckDBList", function(x) length(x@names))
+
+#' @export
+setMethod("names", "DuckDBList", function(x) names(x@names) %||% x@names)
+
+#' @export
+#' @importFrom S4Vectors elementNROWS
+#' @importFrom stats setNames
+setMethod("elementNROWS", "DuckDBList", function(x) setNames(x@elementNROWS, names(x)))
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Validity
+###
 
 #' @importFrom S4Vectors setValidity2
 setValidity2("DuckDBList", function(x) {
@@ -48,16 +69,9 @@ setValidity2("DuckDBList", function(x) {
     msg %||% TRUE
 })
 
-#' @export
-setMethod("length", "DuckDBList", function(x) length(x@names))
-
-#' @export
-setMethod("names", "DuckDBList", function(x) names(x@names) %||% x@names)
-
-#' @export
-#' @importFrom S4Vectors elementNROWS
-#' @importFrom stats setNames
-setMethod("elementNROWS", "DuckDBList", function(x) setNames(x@elementNROWS, names(x)))
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Subsetting
+###
 
 #' @export
 #' @importFrom S4Vectors extractROWS normalizeSingleBracketSubscript
