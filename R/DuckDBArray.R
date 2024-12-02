@@ -25,25 +25,18 @@
 #'
 #' @aliases
 #' DuckDBArray-class
-#' [,DuckDBArray,ANY,ANY,ANY-method
-#' %in%,DuckDBArray,ANY-method
-#' aperm,DuckDBArray-method
+#'
 #' dbconn,DuckDBArray-method
-#' is_nonzero,DuckDBArray-method
-#' is.finite,DuckDBArray-method
-#' is.infinite,DuckDBArray-method
-#' is.nan,DuckDBArray-method
-#' nzcount,DuckDBArray-method
-#' t,DuckDBArray-method
 #' tblconn,DuckDBArray-method
 #' type,DuckDBArray-method
 #' type<-,DuckDBArray-method
-#' Ops,DuckDBArray,DuckDBArray-method
-#' Ops,DuckDBArray,atomic-method
-#' Ops,atomic,DuckDBArray-method
-#' Math,DuckDBArray-method
-#' rowSums,DuckDBArray-method
-#' colSums,DuckDBArray-method
+#'
+#' DuckDBArray
+#'
+#' [,DuckDBArray,ANY,ANY,ANY-method
+#'
+#' aperm,DuckDBArray-method
+#' t,DuckDBArray-method
 #'
 #' @seealso
 #' \code{\link{DuckDBArraySeed}},
@@ -58,30 +51,16 @@ NULL
 #' @importClassesFrom DelayedArray DelayedArray
 setClass("DuckDBArray", contains = "DelayedArray", slots = c(seed = "DuckDBArraySeed"))
 
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Accessors
+###
+
 #' @export
 #' @importFrom BiocGenerics dbconn
 setMethod("dbconn", "DuckDBArray", function(x) callGeneric(x@seed))
 
 #' @export
 setMethod("tblconn", "DuckDBArray", function(x) callGeneric(x@seed))
-
-#' @export
-setMethod("[", "DuckDBArray", function(x, i, j, ..., drop = TRUE) {
-    Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
-    replaceSlots(x, seed = .subset_DuckDBArraySeed(x@seed, Nindex = Nindex, drop = drop), check = FALSE)
-})
-
-#' @export
-#' @importFrom BiocGenerics aperm
-setMethod("aperm", "DuckDBArray", function(a, perm, ...) {
-    replaceSlots(a, seed = aperm(a@seed, perm = perm, ...), check = FALSE)
-})
-
-#' @export
-#' @importFrom BiocGenerics t
-setMethod("t", "DuckDBArray", function(x) {
-    replaceSlots(x, seed = t(x@seed), check = FALSE)
-})
 
 #' @export
 #' @importFrom BiocGenerics type
@@ -95,70 +74,9 @@ setReplaceMethod("type", "DuckDBArray", function(x, value) {
     replaceSlots(x, seed = callGeneric(x@seed, value = value), check = FALSE)
 })
 
-#' @export
-#' @importFrom SparseArray is_nonzero
-setMethod("is_nonzero", "DuckDBArray", function(x) {
-    replaceSlots(x, seed = callGeneric(x@seed), check = FALSE)
-})
-
-#' @export
-#' @importFrom SparseArray nzcount
-setMethod("nzcount", "DuckDBArray", function(x) {
-    callGeneric(x@seed)
-})
-
-#' @export
-setMethod("Ops", c(e1 = "DuckDBArray", e2 = "DuckDBArray"), function(e1, e2) {
-    replaceSlots(e1, seed = callGeneric(e1@seed, e2@seed), check = FALSE)
-})
-
-#' @export
-setMethod("Ops", c(e1 = "DuckDBArray", e2 = "atomic"), function(e1, e2) {
-    replaceSlots(e1, seed = callGeneric(e1@seed, e2), check = FALSE)
-})
-
-#' @export
-setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBArray"), function(e1, e2) {
-    replaceSlots(e2, seed = callGeneric(e1, e2@seed), check = FALSE)
-})
-
-#' @export
-setMethod("Math", "DuckDBArray", function(x) {
-    replaceSlots(x, seed = callGeneric(x@seed), check = FALSE)
-})
-
-#' @export
-#' @importFrom BiocGenerics %in%
-setMethod("%in%", c(x = "DuckDBArray", table = "ANY"), function(x, table) {
-    replaceSlots(x, seed = callGeneric(x@seed, table), check = FALSE)
-})
-
-#' @export
-setMethod("is.finite", "DuckDBArray", function(x) {
-    replaceSlots(x, seed = callGeneric(x@seed), check = FALSE)
-})
-
-#' @export
-setMethod("is.infinite", "DuckDBArray", function(x) {
-    replaceSlots(x, seed = callGeneric(x@seed), check = FALSE)
-})
-
-#' @export
-setMethod("is.nan", "DuckDBArray", function(x) {
-    replaceSlots(x, seed = callGeneric(x@seed), check = FALSE)
-})
-
-#' @export
-#' @importFrom DelayedArray rowSums
-setMethod("rowSums", "DuckDBArray", function(x, na.rm = FALSE, dims = 1, ...) {
-    as.array(replaceSlots(x, seed = callGeneric(x@seed, na.rm = na.rm, dims = dims, ...), check = FALSE), drop = TRUE)
-})
-
-#' @export
-#' @importFrom DelayedArray colSums
-setMethod("colSums", "DuckDBArray", function(x, na.rm = FALSE, dims = 1, ...) {
-    as.array(replaceSlots(x, seed = callGeneric(x@seed, na.rm = na.rm, dims = dims, ...), check = FALSE), drop = TRUE)
-})
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Constructor
+###
 
 #' @export
 #' @importFrom S4Vectors new2
@@ -169,3 +87,29 @@ DuckDBArray <- function(conn, datacols, keycols, type = NULL) {
     }
     new2("DuckDBArray", seed = conn, check = FALSE)
 }
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Subsetting
+###
+
+#' @export
+setMethod("[", "DuckDBArray", function(x, i, j, ..., drop = TRUE) {
+    Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
+    replaceSlots(x, seed = .subset_DuckDBArraySeed(x@seed, Nindex = Nindex, drop = drop), check = FALSE)
+})
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Transposition
+###
+
+#' @export
+#' @importFrom BiocGenerics aperm
+setMethod("aperm", "DuckDBArray", function(a, perm, ...) {
+    replaceSlots(a, seed = aperm(a@seed, perm = perm, ...), check = FALSE)
+})
+
+#' @export
+#' @importFrom BiocGenerics t
+setMethod("t", "DuckDBArray", function(x) {
+    replaceSlots(x, seed = t(x@seed), check = FALSE)
+})

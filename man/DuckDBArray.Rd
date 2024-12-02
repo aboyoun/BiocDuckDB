@@ -3,25 +3,13 @@
 \name{DuckDBArray}
 \alias{DuckDBArray}
 \alias{DuckDBArray-class}
-\alias{[,DuckDBArray,ANY,ANY,ANY-method}
-\alias{\%in\%,DuckDBArray,ANY-method}
-\alias{aperm,DuckDBArray-method}
 \alias{dbconn,DuckDBArray-method}
-\alias{is_nonzero,DuckDBArray-method}
-\alias{is.finite,DuckDBArray-method}
-\alias{is.infinite,DuckDBArray-method}
-\alias{is.nan,DuckDBArray-method}
-\alias{nzcount,DuckDBArray-method}
-\alias{t,DuckDBArray-method}
 \alias{tblconn,DuckDBArray-method}
 \alias{type,DuckDBArray-method}
 \alias{type<-,DuckDBArray-method}
-\alias{Ops,DuckDBArray,DuckDBArray-method}
-\alias{Ops,DuckDBArray,atomic-method}
-\alias{Ops,atomic,DuckDBArray-method}
-\alias{Math,DuckDBArray-method}
-\alias{rowSums,DuckDBArray-method}
-\alias{colSums,DuckDBArray-method}
+\alias{[,DuckDBArray,ANY,ANY,ANY-method}
+\alias{aperm,DuckDBArray-method}
+\alias{t,DuckDBArray-method}
 \title{DuckDB tables as DelayedArray objects}
 \usage{
 DuckDBArray(conn, datacols, keycols, type = NULL)
