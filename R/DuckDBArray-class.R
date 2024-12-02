@@ -7,7 +7,7 @@
 #' All the operations available for \link[DelayedArray]{DelayedArray}
 #' objects work on DuckDBArray objects.
 #'
-#' @inheritParams DuckDBArraySeed
+#' @inheritParams DuckDBArraySeed-class
 #'
 #' @author Patrick Aboyoun
 #'
@@ -42,10 +42,10 @@
 #' \code{\link{DuckDBArraySeed}},
 #' \code{\link[DelayedArray]{DelayedArray}}
 #'
-#' @include DuckDBArraySeed.R
+#' @include DuckDBArraySeed-class.R
 #' @include DuckDBArraySeed-utils.R
 #'
-#' @name DuckDBArray
+#' @name DuckDBArray-class
 NULL
 
 #' @export
@@ -81,7 +81,7 @@ setReplaceMethod("type", "DuckDBArray", function(x, value) {
 
 #' @export
 #' @importFrom S4Vectors new2
-#' @rdname DuckDBArray
+#' @rdname DuckDBArray-class
 DuckDBArray <- function(conn, datacols, keycols, type = NULL) {
     if (!is(conn, "DuckDBArraySeed")) {
         conn <- DuckDBArraySeed(conn, datacols = datacols, keycols = keycols, type = type)

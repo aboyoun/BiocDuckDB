@@ -81,9 +81,9 @@
 #'
 #' show,DuckDBGRanges-method
 #'
-#' @include DuckDBDataFrame.R
+#' @include DuckDBDataFrame-class.R
 #'
-#' @name DuckDBGRanges
+#' @name DuckDBGRanges-class
 NULL
 
 .datacols_granges <- expression(seqnames = NULL, start = NULL, end = NULL, width = NULL, strand = NULL)
@@ -190,7 +190,7 @@ setValidity2("DuckDBGRanges", function(x) {
 #' @importFrom GenomeInfoDb Seqinfo
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
-#' @rdname DuckDBGRanges
+#' @rdname DuckDBGRanges-class
 DuckDBGRanges <-
 function(conn, seqnames, start = NULL, end = NULL, width = NULL, strand = NULL,
          keycols = NULL, mcols = NULL, seqinfo = NULL, seqlengths = NULL)

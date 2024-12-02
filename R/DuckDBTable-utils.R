@@ -30,7 +30,7 @@
 #' nzcount,DuckDBTable-method
 #' is_sparse,DuckDBTable-method
 #'
-#' @include DuckDBTable.R
+#' @include DuckDBTable-class.R
 #'
 #' @name DuckDBTable-utils
 NULL

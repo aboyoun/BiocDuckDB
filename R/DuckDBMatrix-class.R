@@ -55,9 +55,9 @@
 #'
 #' [,DuckDBMatrix,ANY,ANY,ANY-method
 #'
-#' @include DuckDBArray.R
+#' @include DuckDBArray-class.R
 #'
-#' @name DuckDBMatrix
+#' @name DuckDBMatrix-class
 NULL
 
 #' @export
@@ -88,7 +88,7 @@ setValidity2("DuckDBMatrix", function(x) {
 #' @export
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
-#' @rdname DuckDBMatrix
+#' @rdname DuckDBMatrix-class
 DuckDBMatrix <- function(conn, datacols, row, col, keycols = c(row, col), type = NULL) {
     if (!missing(row) && isSingleString(row)) {
         row <- setNames(list(NULL), row)

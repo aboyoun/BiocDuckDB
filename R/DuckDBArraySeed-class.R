@@ -65,9 +65,9 @@
 #' \code{\link{DuckDBArray}},
 #' \code{\link[S4Arrays]{Array}}
 #'
-#' @include DuckDBTable.R
+#' @include DuckDBTable-class.R
 #'
-#' @name DuckDBArraySeed
+#' @name DuckDBArraySeed-class
 NULL
 
 #' @export
@@ -241,7 +241,7 @@ setMethod("DelayedArray", "DuckDBArraySeed", function(seed) DuckDBArray(seed))
 #' @export
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
-#' @rdname DuckDBArraySeed
+#' @rdname DuckDBArraySeed-class
 DuckDBArraySeed <- function(conn, datacols, keycols, type = NULL) {
     if (!is.null(type)) {
         type <- setNames(type, names(datacols) %||% datacols)

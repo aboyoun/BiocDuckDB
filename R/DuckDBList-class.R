@@ -17,9 +17,9 @@
 #' head,DuckDBList-method
 #' tail,DuckDBList-method
 #'
-#' @include DuckDBTable.R
+#' @include DuckDBTable-class.R
 #'
-#' @name DuckDBList
+#' @name DuckDBList-class
 NULL
 
 #' @export

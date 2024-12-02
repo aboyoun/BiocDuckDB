@@ -66,7 +66,7 @@
 #' @include keynames.R
 #' @include tblconn.R
 #'
-#' @name DuckDBTable
+#' @name DuckDBTable-class
 NULL
 
 setOldClass("tbl_duckdb_connection")
@@ -319,7 +319,7 @@ setValidity2("DuckDBTable", function(x) {
 #' @importFrom dplyr distinct mutate pull select tbl
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
-#' @rdname DuckDBTable
+#' @rdname DuckDBTable-class
 DuckDBTable <-
 function(conn, datacols = colnames(conn), keycols = NULL, type = NULL) {
     # Acquire the connection if it is a string

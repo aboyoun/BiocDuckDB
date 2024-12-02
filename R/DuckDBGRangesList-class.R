@@ -18,10 +18,10 @@
 #' tail,DuckDBGRangesList-method
 #' split,DuckDBGRanges,DuckDBColumn-method
 #'
-#' @include DuckDBGRanges.R
-#' @include DuckDBList.R
+#' @include DuckDBGRanges-class.R
+#' @include DuckDBList-class.R
 #'
-#' @name DuckDBGRangesList
+#' @name DuckDBGRangesList-class
 NULL
 
 #' @export

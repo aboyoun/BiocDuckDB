@@ -9,10 +9,10 @@
 #' DuckDBDataFrameList-class
 #' split,DuckDBDataFrame,DuckDBColumn-method
 #'
-#' @include DuckDBDataFrame.R
-#' @include DuckDBList.R
+#' @include DuckDBDataFrame-class.R
+#' @include DuckDBList-class.R
 #'
-#' @name DuckDBDataFrameList
+#' @name DuckDBDataFrameList-class
 NULL
 
 #' @export

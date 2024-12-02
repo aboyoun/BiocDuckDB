@@ -20,7 +20,7 @@
 #' nzcount,DuckDBArraySeed-method
 #' is_sparse,DuckDBArraySeed-method
 #'
-#' @include DuckDBArraySeed.R
+#' @include DuckDBArraySeed-class.R
 #' @include DuckDBTable-utils.R
 #'
 #' @name DuckDBArraySeed-utils

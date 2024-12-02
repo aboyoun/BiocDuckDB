@@ -27,7 +27,7 @@
 #' is_nonzero,DuckDBColumn-method
 #' nzcount,DuckDBColumn-method
 #'
-#' @include DuckDBColumn.R
+#' @include DuckDBColumn-class.R
 #' @include DuckDBTable-utils.R
 #'
 #' @name DuckDBColumn-utils

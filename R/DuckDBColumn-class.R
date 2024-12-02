@@ -21,9 +21,9 @@
 #' show,DuckDBColumn-method
 #' showAsCell,DuckDBColumn-method
 #'
-#' @include DuckDBTable.R
+#' @include DuckDBTable-class.R
 #'
-#' @name DuckDBColumn
+#' @name DuckDBColumn-class
 NULL
 
 #' @export

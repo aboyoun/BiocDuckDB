@@ -19,7 +19,7 @@
 #' is_nonzero,DuckDBArray-method
 #' nzcount,DuckDBArray-method
 #'
-#' @include DuckDBArray.R
+#' @include DuckDBArray-class.R
 #' @include DuckDBTable-utils.R
 #'
 #' @name DuckDBArray-utils

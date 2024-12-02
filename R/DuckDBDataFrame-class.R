@@ -3,7 +3,7 @@
 #' @description
 #' Create a DuckDB-backed \linkS4class{DataFrame} object.
 #'
-#' @inheritParams DuckDBTable
+#' @inheritParams DuckDBTable-class
 #'
 #' @return A DuckDBDataFrame where each column is a \linkS4class{DuckDBColumn}.
 #'
@@ -70,10 +70,10 @@
 #' makeNakedCharacterMatrixForDisplay,DuckDBDataFrame-method
 #' show,DuckDBDataFrame-method
 #'
-#' @include DuckDBColumn.R
-#' @include DuckDBTable.R
+#' @include DuckDBColumn-class.R
+#' @include DuckDBTable-class.R
 #'
-#' @name DuckDBDataFrame
+#' @name DuckDBDataFrame-class
 NULL
 
 #' @export
@@ -143,7 +143,7 @@ setValidity2("DuckDBDataFrame", function(x) {
 
 #' @export
 #' @importFrom S4Vectors new2
-#' @rdname DuckDBDataFrame
+#' @rdname DuckDBDataFrame-class
 DuckDBDataFrame <- function(conn, datacols = colnames(conn), keycols = NULL, type = NULL) {
     if (missing(datacols)) {
         tbl <- DuckDBTable(conn, keycols = keycols, type = NULL)
