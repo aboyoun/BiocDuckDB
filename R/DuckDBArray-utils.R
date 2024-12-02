@@ -14,8 +14,6 @@
 #' rowSums,DuckDBArray-method
 #' colSums,DuckDBArray-method
 #'
-#' %in%,DuckDBArray,ANY-method
-#'
 #' is_nonzero,DuckDBArray-method
 #' nzcount,DuckDBArray-method
 #'
@@ -78,16 +76,6 @@ setMethod("rowSums", "DuckDBArray", function(x, na.rm = FALSE, dims = 1, ...) {
 #' @importFrom DelayedArray colSums
 setMethod("colSums", "DuckDBArray", function(x, na.rm = FALSE, dims = 1, ...) {
     as.array(replaceSlots(x, seed = callGeneric(x@seed, na.rm = na.rm, dims = dims, ...), check = FALSE), drop = TRUE)
-})
-
-### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-### Set methods
-###
-
-#' @export
-#' @importFrom BiocGenerics %in%
-setMethod("%in%", c(x = "DuckDBArray", table = "ANY"), function(x, table) {
-    replaceSlots(x, seed = callGeneric(x@seed, table), check = FALSE)
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

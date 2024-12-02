@@ -11,7 +11,6 @@
 \alias{is.nan,DuckDBArraySeed-method}
 \alias{rowSums,DuckDBArraySeed-method}
 \alias{colSums,DuckDBArraySeed-method}
-\alias{\%in\%,DuckDBArraySeed,ANY-method}
 \alias{is_nonzero,DuckDBArraySeed-method}
 \alias{nzcount,DuckDBArraySeed-method}
 \alias{is_sparse,DuckDBArraySeed-method}

@@ -11,7 +11,6 @@
 \alias{is.nan,DuckDBArray-method}
 \alias{rowSums,DuckDBArray-method}
 \alias{colSums,DuckDBArray-method}
-\alias{\%in\%,DuckDBArray,ANY-method}
 \alias{is_nonzero,DuckDBArray-method}
 \alias{nzcount,DuckDBArray-method}
 \title{DuckDBArray Utilities}
