@@ -12,6 +12,8 @@
 #' names,DuckDBList-method
 #' elementNROWS,DuckDBList-method
 #'
+#' unlist,DuckDBList-method
+#'
 #' extractROWS,DuckDBList,ANY-method
 #' getListElement,DuckDBList-method
 #' head,DuckDBList-method
@@ -67,6 +69,14 @@ setValidity2("DuckDBList", function(x) {
         msg <- c(msg, "'elementNROWS' must be a named integer64 vector")
     }
     msg %||% TRUE
+})
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Unlisting
+###
+
+setMethod("unlist", "DuckDBList", function(x, recursive = TRUE, use.names = TRUE) {
+    x@unlistData
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -5,6 +5,7 @@
 \alias{length,DuckDBList-method}
 \alias{names,DuckDBList-method}
 \alias{elementNROWS,DuckDBList-method}
+\alias{unlist,DuckDBList-method}
 \alias{extractROWS,DuckDBList,ANY-method}
 \alias{getListElement,DuckDBList-method}
 \alias{head,DuckDBList-method}
