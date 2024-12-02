@@ -75,6 +75,7 @@ setValidity2("DuckDBList", function(x) {
 ### Unlisting
 ###
 
+#' @export
 setMethod("unlist", "DuckDBList", function(x, recursive = TRUE, use.names = TRUE) {
     x@unlistData
 })
