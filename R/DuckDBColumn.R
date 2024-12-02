@@ -4,38 +4,22 @@
 #'
 #' @aliases
 #' DuckDBColumn-class
-#' %in%,DuckDBColumn,ANY-method
-#' as.vector,DuckDBColumn-method
+#'
 #' dbconn,DuckDBColumn-method
-#' extractROWS,DuckDBColumn,ANY-method
-#' head,DuckDBColumn-method
-#' is_nonzero,DuckDBColumn-method
-#' is.finite,DuckDBColumn-method
-#' is.infinite,DuckDBColumn-method
-#' is.nan,DuckDBColumn-method
+#' tblconn,DuckDBColumn-method
 #' length,DuckDBColumn-method
 #' names,DuckDBColumn-method
-#' nzcount,DuckDBColumn-method
-#' show,DuckDBColumn-method
-#' showAsCell,DuckDBColumn-method
-#' tail,DuckDBColumn-method
-#' tblconn,DuckDBColumn-method
 #' type,DuckDBColumn-method
 #' type<-,DuckDBColumn-method
-#' unique,DuckDBColumn-method
-#' Ops,DuckDBColumn,DuckDBColumn-method
-#' Ops,DuckDBColumn,atomic-method
-#' Ops,atomic,DuckDBColumn-method
-#' Math,DuckDBColumn-method
-#' Summary,DuckDBColumn-method
-#' mean,DuckDBColumn-method
-#' median.DuckDBColumn
-#' quantile.DuckDBColumn
-#' var,DuckDBColumn,ANY-method
-#' sd,DuckDBColumn-method
-#' mad,DuckDBColumn-method
-#' IQR,DuckDBColumn-method
-#' table,DuckDBColumn-method
+#'
+#' extractROWS,DuckDBColumn,ANY-method
+#' head,DuckDBColumn-method
+#' tail,DuckDBColumn-method
+#'
+#' as.vector,DuckDBColumn-method
+#'
+#' show,DuckDBColumn-method
+#' showAsCell,DuckDBColumn-method
 #'
 #' @include DuckDBTable.R
 #'
@@ -46,65 +30,9 @@ NULL
 #' @importClassesFrom S4Vectors Vector
 setClass("DuckDBColumn", contains = "Vector", slots = c(table = "DuckDBTable"))
 
-#' @importFrom S4Vectors isTRUEorFALSE setValidity2
-setValidity2("DuckDBColumn", function(x) {
-    msg <- NULL
-    table <- x@table
-    if (length(table@conn) > 0L) {
-        if (ncol(table) != 1L) {
-            msg <- c(msg, "'table' slot must be a single-column DuckDBTable")
-        }
-        if (nkey(table) != 1L) {
-            msg <- c(msg, "'table' slot must have a 'keycols' with a named list containing a single named character vector")
-        }
-    }
-    msg %||% TRUE
-})
-
-#' @export
-#' @importFrom S4Vectors classNameForDisplay
-setMethod("show", "DuckDBColumn", function(object) {
-    len <- length(object)
-    cat(sprintf("%s of length %s\n", classNameForDisplay(object), len))
-    if (length(object@table@conn) == 0L) {
-        return(invisible(NULL))
-    }
-    if (.has_row_number(object)) {
-        n1 <- 5L
-        n2 <- 0L
-    } else {
-        n1 <- 3L
-        n2 <- 2L
-    }
-    if (len <= n1 + n2 + 1L) {
-        vec <- as.vector(object)
-    } else {
-        if (n2 == 0L) {
-            vec <- as.vector(head(object, n1))
-            if (is.character(vec)) {
-                vec <- setNames(sprintf("\"%s\"", vec), names(vec))
-            }
-            vec <- format(vec, justify = "right")
-            vec <- c(vec, "..." = "...")
-        } else {
-            i <- c(seq_len(n1), (len + 1L) - rev(seq_len(n2)))
-            vec <- as.vector(object[i])
-            if (is.character(vec)) {
-                vec <- setNames(sprintf("\"%s\"", vec), names(vec))
-            }
-            vec <- format(vec, justify = "right")
-            vec <- c(head(vec, n1), "..." = "...", tail(vec, n2))
-        }
-    }
-    print(vec, quote = FALSE)
-    invisible(NULL)
-})
-
-#' @export
-#' @importFrom S4Vectors showAsCell
-setMethod("showAsCell", "DuckDBColumn", function(object) {
-    callGeneric(as.vector(object@table))
-})
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Accessors
+###
 
 #' @export
 #' @importFrom BiocGenerics dbconn
@@ -144,24 +72,28 @@ setReplaceMethod("type", "DuckDBColumn", function(x, value) {
     replaceSlots(x, table = table, check = FALSE)
 })
 
-#' @export
-#' @importFrom BiocGenerics unique
-setMethod("unique", "DuckDBColumn",
-function (x, incomparables = FALSE, fromLast = FALSE, ...)  {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Validity
+###
+
+#' @importFrom S4Vectors isTRUEorFALSE setValidity2
+setValidity2("DuckDBColumn", function(x) {
+    msg <- NULL
+    table <- x@table
+    if (length(table@conn) > 0L) {
+        if (ncol(table) != 1L) {
+            msg <- c(msg, "'table' slot must be a single-column DuckDBTable")
+        }
+        if (nkey(table) != 1L) {
+            msg <- c(msg, "'table' slot must have a 'keycols' with a named list containing a single named character vector")
+        }
+    }
+    msg %||% TRUE
 })
 
-#' @export
-#' @importFrom SparseArray is_nonzero
-setMethod("is_nonzero", "DuckDBColumn", function(x) {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
-})
-
-#' @export
-#' @importFrom SparseArray nzcount
-setMethod("nzcount", "DuckDBColumn", function(x) {
-    callGeneric(x@table)
-})
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Subsetting
+###
 
 #' @export
 setMethod("extractROWS", "DuckDBColumn", function(x, i) {
@@ -217,101 +149,9 @@ setMethod("tail", "DuckDBColumn", function(x, n = 6L, ...) {
     }
 })
 
-#' @export
-setMethod("Ops", c(e1 = "DuckDBColumn", e2 = "DuckDBColumn"), function(e1, e2) {
-    replaceSlots(e1, table = callGeneric(e1@table, e2@table), check = FALSE)
-})
-
-#' @export
-setMethod("Ops", c(e1 = "DuckDBColumn", e2 = "atomic"), function(e1, e2) {
-    replaceSlots(e1, table = callGeneric(e1@table, e2), check = FALSE)
-})
-
-#' @export
-setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBColumn"), function(e1, e2) {
-    replaceSlots(e2, table = callGeneric(e1, e2@table), check = FALSE)
-})
-
-#' @export
-setMethod("Math", "DuckDBColumn", function(x) {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
-})
-
-#' @export
-#' @importFrom BiocGenerics %in%
-setMethod("%in%", c(x = "DuckDBColumn", table = "ANY"), function(x, table) {
-    replaceSlots(x, table = callGeneric(x@table, table), check = FALSE)
-})
-
-#' @export
-setMethod("is.finite", "DuckDBColumn", function(x) {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
-})
-
-#' @export
-setMethod("is.infinite", "DuckDBColumn", function(x) {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
-})
-
-#' @export
-setMethod("is.nan", "DuckDBColumn", function(x) {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
-})
-
-#' @export
-setMethod("Summary", "DuckDBColumn", function(x, ..., na.rm = FALSE) {
-    callGeneric(x@table)
-})
-
-#' @export
-#' @importFrom BiocGenerics mean
-setMethod("mean", "DuckDBColumn", function(x, ...) {
-    callGeneric(x@table)
-})
-
-#' @exportS3Method stats::median
-#' @importFrom stats median
-median.DuckDBColumn <- function(x, na.rm = FALSE, ...) {
-    median(x@table, na.rm = na.rm, ...)
-}
-
-#' @exportS3Method stats::quantile
-#' @importFrom stats quantile
-quantile.DuckDBColumn <-
-function(x, probs = seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7, digits = 7, ...) {
-    quantile(x@table, probs = probs, na.rm = na.rm, names = names, type = type, digits = digits, ...)
-}
-
-#' @export
-#' @importFrom BiocGenerics var
-setMethod("var", "DuckDBColumn", function(x, y = NULL, na.rm = FALSE, use)  {
-    callGeneric(x@table)
-})
-
-#' @export
-#' @importFrom BiocGenerics sd
-setMethod("sd", "DuckDBColumn", function(x, na.rm = FALSE) {
-    callGeneric(x@table)
-})
-
-#' @export
-#' @importFrom BiocGenerics mad
-setMethod("mad", "DuckDBColumn",
-function(x, center = median(x), constant = 1.4826, na.rm = FALSE, low = FALSE, high = FALSE) {
-    callGeneric(x@table, constant = constant)
-})
-
-#' @export
-#' @importFrom BiocGenerics IQR
-setMethod("IQR", "DuckDBColumn", function(x, na.rm = FALSE, type = 7) {
-    callGeneric(x@table, type = type)
-})
-
-#' @export
-#' @importFrom BiocGenerics table
-setMethod("table", "DuckDBColumn", function(...) {
-    callGeneric(cbind.DuckDBDataFrame(...))
-})
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Coercion
+###
 
 #' @export
 #' @importFrom BiocGenerics as.vector
@@ -324,4 +164,53 @@ setMethod("as.vector", "DuckDBColumn", function(x, mode = "any") {
         storage.mode(vec) <- mode
     }
     vec
+})
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Display
+###
+
+#' @export
+#' @importFrom S4Vectors classNameForDisplay
+setMethod("show", "DuckDBColumn", function(object) {
+    len <- length(object)
+    cat(sprintf("%s of length %s\n", classNameForDisplay(object), len))
+    if (length(object@table@conn) == 0L) {
+        return(invisible(NULL))
+    }
+    if (.has_row_number(object)) {
+        n1 <- 5L
+        n2 <- 0L
+    } else {
+        n1 <- 3L
+        n2 <- 2L
+    }
+    if (len <= n1 + n2 + 1L) {
+        vec <- as.vector(object)
+    } else {
+        if (n2 == 0L) {
+            vec <- as.vector(head(object, n1))
+            if (is.character(vec)) {
+                vec <- setNames(sprintf("\"%s\"", vec), names(vec))
+            }
+            vec <- format(vec, justify = "right")
+            vec <- c(vec, "..." = "...")
+        } else {
+            i <- c(seq_len(n1), (len + 1L) - rev(seq_len(n2)))
+            vec <- as.vector(object[i])
+            if (is.character(vec)) {
+                vec <- setNames(sprintf("\"%s\"", vec), names(vec))
+            }
+            vec <- format(vec, justify = "right")
+            vec <- c(head(vec, n1), "..." = "...", tail(vec, n2))
+        }
+    }
+    print(vec, quote = FALSE)
+    invisible(NULL)
+})
+
+#' @export
+#' @importFrom S4Vectors showAsCell
+setMethod("showAsCell", "DuckDBColumn", function(object) {
+    callGeneric(as.vector(object@table))
 })

@@ -53,6 +53,7 @@ Collate:
     'DuckDBArraySeed.R'
     'DuckDBArray.R'
     'DuckDBColumn.R'
+    'DuckDBColumn-utils.R'
     'DuckDBDataFrame.R'
     'DuckDBList.R'
     'DuckDBDataFrameList.R'
