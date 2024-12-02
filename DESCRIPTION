@@ -51,6 +51,7 @@ Collate:
     'DuckDBConnection.R'
     'DuckDBTable.R'
     'DuckDBArraySeed.R'
+    'DuckDBArraySeed-utils.R'
     'DuckDBArray.R'
     'DuckDBArray-utils.R'
     'DuckDBColumn.R'

@@ -43,6 +43,7 @@
 #' \code{\link[DelayedArray]{DelayedArray}}
 #'
 #' @include DuckDBArraySeed.R
+#' @include DuckDBArraySeed-utils.R
 #'
 #' @name DuckDBArray
 NULL

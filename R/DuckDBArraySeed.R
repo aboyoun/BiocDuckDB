@@ -40,32 +40,26 @@
 #'
 #' @aliases
 #' DuckDBArraySeed-class
-#' show,DuckDBArraySeed-method
-#' [,DuckDBArraySeed,ANY,ANY,ANY-method
-#' %in%,DuckDBArraySeed,ANY-method
-#' aperm,DuckDBArraySeed-method
+#'
 #' dbconn,DuckDBArraySeed-method
-#' DelayedArray,DuckDBArraySeed-method
+#' tblconn,DuckDBArraySeed-method
+#' type,DuckDBArraySeed-method
+#' type<-,DuckDBArraySeed-method
+#'
 #' dim,DuckDBArraySeed-method
 #' dimnames,DuckDBArraySeed-method
 #' extract_array,DuckDBArraySeed-method
 #' extract_sparse_array,DuckDBArraySeed-method
-#' is_nonzero,DuckDBArraySeed-method
-#' is_sparse,DuckDBArraySeed-method
-#' is.finite,DuckDBArraySeed-method
-#' is.infinite,DuckDBArraySeed-method
-#' is.nan,DuckDBArraySeed-method
-#' nzcount,DuckDBArraySeed-method
+#' DelayedArray,DuckDBArraySeed-method
+#'
+#' DuckDBArraySeed
+#'
+#' [,DuckDBArraySeed,ANY,ANY,ANY-method
+#'
+#' aperm,DuckDBArraySeed-method
 #' t,DuckDBArraySeed-method
-#' tblconn,DuckDBArraySeed-method
-#' type,DuckDBArraySeed-method
-#' type<-,DuckDBArraySeed-method
-#' Ops,DuckDBArraySeed,DuckDBArraySeed-method
-#' Ops,DuckDBArraySeed,atomic-method
-#' Ops,atomic,DuckDBArraySeed-method
-#' Math,DuckDBArraySeed-method
-#' rowSums,DuckDBArraySeed-method
-#' colSums,DuckDBArraySeed-method
+#'
+#' show,DuckDBArraySeed-method
 #'
 #' @seealso
 #' \code{\link{DuckDBArray}},
@@ -83,6 +77,35 @@ setClass("DuckDBArraySeed", contains = "Array",
          slots = c(table = "DuckDBTable", drop = "logical"),
          prototype = prototype(drop = FALSE))
 
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Accessors
+###
+
+#' @export
+#' @importFrom BiocGenerics dbconn
+setMethod("dbconn", "DuckDBArraySeed", function(x) callGeneric(x@table))
+
+#' @export
+setMethod("tblconn", "DuckDBArraySeed", function(x) callGeneric(x@table))
+
+#' @export
+#' @importFrom BiocGenerics type
+setMethod("type", "DuckDBArraySeed", function(x) {
+    unname(coltypes(x@table))
+})
+
+#' @export
+#' @importFrom BiocGenerics type<-
+setReplaceMethod("type", "DuckDBArraySeed", function(x, value) {
+    table <- x@table
+    coltypes(table) <- value
+    replaceSlots(x, table = table, check = FALSE)
+})
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Validity
+###
+
 #' @importFrom S4Vectors isTRUEorFALSE setValidity2 isSingleString
 setValidity2("DuckDBArraySeed", function(x) {
     msg <- NULL
@@ -98,22 +121,9 @@ setValidity2("DuckDBArraySeed", function(x) {
     msg %||% TRUE
 })
 
-#' @export
-#' @importFrom S4Vectors classNameForDisplay
-setMethod("show", "DuckDBArraySeed", function(object) {
-    cat(sprintf("<%s>%s %s object of type \"%s\"\n",
-                paste(dim(object), collapse = " x "),
-                if (is_sparse(object)) " sparse" else "",
-                classNameForDisplay(object), type(object)))
-    invisible(NULL)
-})
-
-#' @export
-#' @importFrom BiocGenerics dbconn
-setMethod("dbconn", "DuckDBArraySeed", function(x) callGeneric(x@table))
-
-#' @export
-setMethod("tblconn", "DuckDBArraySeed", function(x) callGeneric(x@table))
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Seed contract
+###
 
 #' @export
 setMethod("dim", "DuckDBArraySeed", function(x) {
@@ -141,140 +151,6 @@ setMethod("dimnames", "DuckDBArraySeed", function(x) {
         }
     }
     ans
-})
-
-#' @export
-#' @importFrom BiocGenerics type
-setMethod("type", "DuckDBArraySeed", function(x) {
-    unname(coltypes(x@table))
-})
-
-#' @export
-#' @importFrom BiocGenerics type<-
-setReplaceMethod("type", "DuckDBArraySeed", function(x, value) {
-    table <- x@table
-    coltypes(table) <- value
-    replaceSlots(x, table = table, check = FALSE)
-})
-
-#' @export
-#' @importFrom SparseArray is_nonzero
-setMethod("is_nonzero", "DuckDBArraySeed", function(x) {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
-})
-
-#' @export
-#' @importFrom SparseArray nzcount
-setMethod("nzcount", "DuckDBArraySeed", function(x) {
-    callGeneric(x@table)
-})
-#' @export
-#' @importFrom S4Arrays is_sparse
-setMethod("is_sparse", "DuckDBArraySeed", function(x) {
-    callGeneric(x@table)
-})
-
-#' @export
-#' @importFrom BiocGenerics aperm
-setMethod("aperm", "DuckDBArraySeed", function(a, perm, ...) {
-    k <- nkey(a@table)
-    if ((length(perm) != k) || !setequal(perm, seq_len(k))) {
-        stop("'perm' must be a permutation of 1:", k)
-    }
-    a@table@keycols <- a@table@keycols[perm]
-    a
-})
-
-#' @export
-#' @importFrom BiocGenerics t
-setMethod("t", "DuckDBArraySeed", function(x) {
-    if (nkey(x@table) != 2L) {
-        stop("'t()' is only defined for 2-dimensional DuckDBArray objects")
-    }
-    aperm(x, perm = 2:1)
-})
-
-.subset_DuckDBArraySeed <- function(x, Nindex, drop) {
-    table <- x@table
-    ndim <- nkey(table)
-    nsubscript <- length(Nindex)
-    if (nsubscript == 0L)
-        return(x)  # no-op
-    if (nsubscript != ndim) {
-        stop("incorrect number of subscripts")
-    }
-
-    names(Nindex) <- keynames(table)
-    for (i in names(Nindex)) {
-        if (is.null(Nindex[[i]])) {
-            Nindex[[i]] <- keydimnames(table)[[i]]
-        }
-    }
-
-    replaceSlots(x, table = table[Nindex, ], drop = drop, check = FALSE)
-}
-
-#' @export
-#' @importFrom S4Vectors isTRUEorFALSE
-setMethod("[", "DuckDBArraySeed", function(x, i, j, ..., drop = TRUE) {
-    Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
-    .subset_DuckDBArraySeed(x, Nindex = Nindex, drop = drop)
-})
-
-#' @export
-setMethod("Ops", c(e1 = "DuckDBArraySeed", e2 = "DuckDBArraySeed"), function(e1, e2) {
-    if (!isTRUE(all.equal(e1@table, e2@table)) || !identical(e1@drop, e2@drop)) {
-        stop("can only perform binary operations with compatible objects")
-    }
-    replaceSlots(e1, table = callGeneric(e1@table, e2@table), check = FALSE)
-})
-
-#' @export
-setMethod("Ops", c(e1 = "DuckDBArraySeed", e2 = "atomic"), function(e1, e2) {
-    replaceSlots(e1, table = callGeneric(e1@table, e2), check = FALSE)
-})
-
-#' @export
-setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBArraySeed"), function(e1, e2) {
-    replaceSlots(e2, table = callGeneric(e1, e2@table), check = FALSE)
-})
-
-#' @export
-setMethod("Math", "DuckDBArraySeed", function(x) {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
-})
-
-#' @export
-#' @importFrom BiocGenerics %in%
-setMethod("%in%", c(x = "DuckDBArraySeed", table = "ANY"), function(x, table) {
-    replaceSlots(x, table = callGeneric(x@table, table), check = FALSE)
-})
-
-#' @export
-setMethod("is.finite", "DuckDBArraySeed", function(x) {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
-})
-
-#' @export
-setMethod("is.infinite", "DuckDBArraySeed", function(x) {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
-})
-
-#' @export
-setMethod("is.nan", "DuckDBArraySeed", function(x) {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
-})
-
-#' @export
-#' @importFrom DelayedArray rowSums
-setMethod("rowSums", "DuckDBArraySeed", function(x, na.rm = FALSE, dims = 1, ...) {
-    replaceSlots(x, table = callGeneric(x@table, na.rm = na.rm, dims = dims, ...), check = FALSE)
-})
-
-#' @export
-#' @importFrom DelayedArray colSums
-setMethod("colSums", "DuckDBArraySeed", function(x, na.rm = FALSE, dims = 1, ...) {
-    replaceSlots(x, table = callGeneric(x@table, na.rm = na.rm, dims = dims, ...), check = FALSE)
 })
 
 .extract_array_index <- function(x, index) {
@@ -358,6 +234,10 @@ setMethod("extract_sparse_array", "DuckDBArraySeed", function(x, index) {
 #' @importFrom DelayedArray DelayedArray
 setMethod("DelayedArray", "DuckDBArraySeed", function(seed) DuckDBArray(seed))
 
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Constructor
+###
+
 #' @export
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
@@ -369,3 +249,72 @@ DuckDBArraySeed <- function(conn, datacols, keycols, type = NULL) {
     table <- DuckDBTable(conn, datacols = datacols, keycols = keycols, type = type)
     new2("DuckDBArraySeed", table = table, drop = FALSE, check = FALSE)
 }
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Subsetting
+###
+
+.subset_DuckDBArraySeed <- function(x, Nindex, drop) {
+    table <- x@table
+    ndim <- nkey(table)
+    nsubscript <- length(Nindex)
+    if (nsubscript == 0L)
+        return(x)  # no-op
+    if (nsubscript != ndim) {
+        stop("incorrect number of subscripts")
+    }
+
+    names(Nindex) <- keynames(table)
+    for (i in names(Nindex)) {
+        if (is.null(Nindex[[i]])) {
+            Nindex[[i]] <- keydimnames(table)[[i]]
+        }
+    }
+
+    replaceSlots(x, table = table[Nindex, ], drop = drop, check = FALSE)
+}
+
+#' @export
+#' @importFrom S4Vectors isTRUEorFALSE
+setMethod("[", "DuckDBArraySeed", function(x, i, j, ..., drop = TRUE) {
+    Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
+    .subset_DuckDBArraySeed(x, Nindex = Nindex, drop = drop)
+})
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Transposition
+###
+
+#' @export
+#' @importFrom BiocGenerics aperm
+setMethod("aperm", "DuckDBArraySeed", function(a, perm, ...) {
+    k <- nkey(a@table)
+    if ((length(perm) != k) || !setequal(perm, seq_len(k))) {
+        stop("'perm' must be a permutation of 1:", k)
+    }
+    a@table@keycols <- a@table@keycols[perm]
+    a
+})
+
+#' @export
+#' @importFrom BiocGenerics t
+setMethod("t", "DuckDBArraySeed", function(x) {
+    if (nkey(x@table) != 2L) {
+        stop("'t()' is only defined for 2-dimensional DuckDBArray objects")
+    }
+    aperm(x, perm = 2:1)
+})
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Display
+###
+
+#' @export
+#' @importFrom S4Vectors classNameForDisplay
+setMethod("show", "DuckDBArraySeed", function(object) {
+    cat(sprintf("<%s>%s %s object of type \"%s\"\n",
+                paste(dim(object), collapse = " x "),
+                if (is_sparse(object)) " sparse" else "",
+                classNameForDisplay(object), type(object)))
+    invisible(NULL)
+})
