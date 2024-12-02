@@ -54,26 +54,32 @@
 #'
 #' @aliases
 #' DuckDBGRanges-class
-#' show,DuckDBGRanges-method
-#' [,DuckDBGRanges,ANY,ANY,ANY-method
-#' as.data.frame,DuckDBGRanges-method
-#' coerce,DuckDBGRanges,DuckDBDataFrame-method
+#'
 #' dbconn,DuckDBGRanges-method
-#' elementMetadata,DuckDBGRanges-method
-#' elementMetadata<-,DuckDBGRanges-method
-#' end,DuckDBGRanges-method
-#' extractROWS,DuckDBGRanges,ANY-method
-#' head,DuckDBGRanges-method
+#' tblconn,DuckDBGRanges-method
 #' length,DuckDBGRanges-method
 #' names,DuckDBGRanges-method
-#' ranges,DuckDBGRanges-method
 #' seqinfo,DuckDBGRanges-method
 #' seqnames,DuckDBGRanges-method
 #' start,DuckDBGRanges-method
-#' strand,DuckDBGRanges-method
-#' tail,DuckDBGRanges-method
-#' tblconn,DuckDBGRanges-method
+#' end,DuckDBGRanges-method
 #' width,DuckDBGRanges-method
+#' strand,DuckDBGRanges-method
+#' ranges,DuckDBGRanges-method
+#' elementMetadata,DuckDBGRanges-method
+#' elementMetadata<-,DuckDBGRanges-method
+#'
+#' DuckDBGRanges
+#'
+#' extractROWS,DuckDBGRanges,ANY-method
+#' [,DuckDBGRanges,ANY,ANY,ANY-method
+#' head,DuckDBGRanges-method
+#' tail,DuckDBGRanges-method
+#'
+#' coerce,DuckDBGRanges,DuckDBDataFrame-method
+#' as.data.frame,DuckDBGRanges-method
+#'
+#' show,DuckDBGRanges-method
 #'
 #' @include DuckDBDataFrame.R
 #'
@@ -89,38 +95,9 @@ setClass("DuckDBGRanges", contains = "GenomicRanges",
          slots = c(frame = "DuckDBDataFrame", seqinfo = "Seqinfo"),
          prototype = prototype(frame = new2("DuckDBDataFrame", datacols = .datacols_granges, check = FALSE)))
 
-#' @importFrom S4Vectors mcols
-setValidity2("DuckDBGRanges", function(x) {
-    msg <- NULL
-    frame <- x@frame
-    if (!setequal(colnames(frame), names(.datacols_granges))) {
-        msg <- c(msg, "missing definition for one or more of 'seqnames', 'start', 'end', 'width', and 'strand'")
-    }
-    mcols <- x@elementMetadata
-    if (!is.null(mcols) && !is(mcols, "DuckDBDataFrame") && !isTRUE(all.equal(mcols, frame))) {
-        msg <- c(msg, "'mcols' must be compatible with its associated ranges")
-    }
-    msg %||% TRUE
-})
-
-#' @export
-setMethod("show", "DuckDBGRanges", function(object) {
-    cat(summary(object), ":\n", sep = "")
-    if (length(object) > 0L) {
-        m <- .makePrettyCharacterMatrixForDisplay(as(object, "DuckDBDataFrame"))
-        k <- NCOL(object@elementMetadata)
-        if (k > 0L) {
-            nc <- ncol(m)
-            h <- nc - k
-            m <- cbind(m[, 1:h, drop = FALSE],
-                       `|` = ifelse(rownames(m) == "...", ".", "|"),
-                       m[, (h + 1L):nc, drop = FALSE])
-        }
-        print(m, quote = FALSE, right = TRUE)
-    }
-    cat("-------\n")
-    cat("seqinfo: ", summary(object@seqinfo), "\n", sep = "")
-})
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Accessors
+###
 
 #' @export
 #' @importFrom BiocGenerics dbconn
@@ -186,88 +163,27 @@ setReplaceMethod("elementMetadata", "DuckDBGRanges", function(x, ..., value) {
     replaceSlots(x, elementMetadata = value, check = FALSE)
 })
 
-#' @export
-#' @importFrom S4Vectors extractROWS
-setMethod("extractROWS", "DuckDBGRanges", function(x, i) {
-    if (missing(i)) {
-        return(x)
-    }
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Validity
+###
 
+#' @importFrom S4Vectors mcols
+setValidity2("DuckDBGRanges", function(x) {
+    msg <- NULL
     frame <- x@frame
-    frame <- callGeneric(frame, i = i)
-
+    if (!setequal(colnames(frame), names(.datacols_granges))) {
+        msg <- c(msg, "missing definition for one or more of 'seqnames', 'start', 'end', 'width', and 'strand'")
+    }
     mcols <- x@elementMetadata
-    if (!is.null(mcols)) {
-        mcols <- callGeneric(mcols, i = i)
+    if (!is.null(mcols) && !is(mcols, "DuckDBDataFrame") && !isTRUE(all.equal(mcols, frame))) {
+        msg <- c(msg, "'mcols' must be compatible with its associated ranges")
     }
-
-    replaceSlots(x, frame = frame, elementMetadata = mcols, check = FALSE)
+    msg %||% TRUE
 })
 
-#' @export
-#' @importFrom S4Vectors head
-setMethod("head", "DuckDBGRanges", function(x, n = 6L, ...) {
-    frame <- x@frame
-    frame <- callGeneric(frame, n = n, ...)
-
-    mcols <- x@elementMetadata
-    if (!is.null(mcols)) {
-        mcols <- callGeneric(mcols, n = n, ...)
-    }
-
-    replaceSlots(x, frame = frame, elementMetadata = mcols, check = FALSE)
-})
-
-#' @export
-#' @importFrom S4Vectors tail
-setMethod("tail", "DuckDBGRanges", function(x, n = 6L, ...) {
-    frame <- x@frame
-    frame <- callGeneric(frame, n = n, ...)
-
-    mcols <- x@elementMetadata
-    if (!is.null(mcols)) {
-        mcols <- callGeneric(mcols, n = n, ...)
-    }
-
-    replaceSlots(x, frame = frame, elementMetadata = mcols, check = FALSE)
-})
-
-#' @export
-setMethod("[", "DuckDBGRanges", function(x, i, j, ..., drop = TRUE) {
-    frame <- x@frame
-    if (!missing(i)) {
-        frame <- extractROWS(frame, i)
-    }
-
-    mcols <- x@elementMetadata
-    if (!is.null(mcols)) {
-        if (!missing(i)) {
-            mcols <- extractROWS(mcols, i)
-        }
-        if (!missing(j)) {
-            mcols <- extractCOLS(mcols, j)
-        }
-    }
-
-    replaceSlots(x, frame = frame, elementMetadata = mcols, check = FALSE)
-})
-
-#' @export
-setAs("DuckDBGRanges", "DuckDBDataFrame", function(from) {
-    df <- from@frame
-    if (!is.null(from@elementMetadata)) {
-        df <- cbind.DuckDBDataFrame(df, from@elementMetadata)
-    }
-    df
-})
-
-#' @export
-#' @importFrom BiocGenerics as.data.frame
-setMethod("as.data.frame", "DuckDBGRanges",
-function(x, row.names = NULL, optional = FALSE, ...) {
-    df <- as(x, "DuckDBDataFrame")
-    callGeneric(df, row.names = row.names, optional = optional, ...)
-})
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Constructor
+###
 
 #' @export
 #' @importFrom dplyr distinct pull select
@@ -334,3 +250,117 @@ function(conn, seqnames, start = NULL, end = NULL, width = NULL, strand = NULL,
 
     new2("DuckDBGRanges", frame = frame, seqinfo = seqinfo, elementMetadata = mcols, check = FALSE)
 }
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Subsetting
+###
+
+#' @export
+#' @importFrom S4Vectors extractROWS
+setMethod("extractROWS", "DuckDBGRanges", function(x, i) {
+    if (missing(i)) {
+        return(x)
+    }
+
+    frame <- x@frame
+    frame <- callGeneric(frame, i = i)
+
+    mcols <- x@elementMetadata
+    if (!is.null(mcols)) {
+        mcols <- callGeneric(mcols, i = i)
+    }
+
+    replaceSlots(x, frame = frame, elementMetadata = mcols, check = FALSE)
+})
+
+#' @export
+setMethod("[", "DuckDBGRanges", function(x, i, j, ..., drop = TRUE) {
+    frame <- x@frame
+    if (!missing(i)) {
+        frame <- extractROWS(frame, i)
+    }
+
+    mcols <- x@elementMetadata
+    if (!is.null(mcols)) {
+        if (!missing(i)) {
+            mcols <- extractROWS(mcols, i)
+        }
+        if (!missing(j)) {
+            mcols <- extractCOLS(mcols, j)
+        }
+    }
+
+    replaceSlots(x, frame = frame, elementMetadata = mcols, check = FALSE)
+})
+
+#' @export
+#' @importFrom S4Vectors head
+setMethod("head", "DuckDBGRanges", function(x, n = 6L, ...) {
+    frame <- x@frame
+    frame <- callGeneric(frame, n = n, ...)
+
+    mcols <- x@elementMetadata
+    if (!is.null(mcols)) {
+        mcols <- callGeneric(mcols, n = n, ...)
+    }
+
+    replaceSlots(x, frame = frame, elementMetadata = mcols, check = FALSE)
+})
+
+#' @export
+#' @importFrom S4Vectors tail
+setMethod("tail", "DuckDBGRanges", function(x, n = 6L, ...) {
+    frame <- x@frame
+    frame <- callGeneric(frame, n = n, ...)
+
+    mcols <- x@elementMetadata
+    if (!is.null(mcols)) {
+        mcols <- callGeneric(mcols, n = n, ...)
+    }
+
+    replaceSlots(x, frame = frame, elementMetadata = mcols, check = FALSE)
+})
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Coercion
+###
+
+#' @export
+setAs("DuckDBGRanges", "DuckDBDataFrame", function(from) {
+    df <- from@frame
+    if (!is.null(from@elementMetadata)) {
+        df <- cbind.DuckDBDataFrame(df, from@elementMetadata)
+    }
+    df
+})
+
+#' @export
+#' @importFrom BiocGenerics as.data.frame
+setMethod("as.data.frame", "DuckDBGRanges",
+function(x, row.names = NULL, optional = FALSE, ...) {
+    df <- as(x, "DuckDBDataFrame")
+    callGeneric(df, row.names = row.names, optional = optional, ...)
+})
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Display
+###
+
+#' @export
+setMethod("show", "DuckDBGRanges", function(object) {
+    cat(summary(object), ":\n", sep = "")
+    if (length(object) > 0L) {
+        m <- .makePrettyCharacterMatrixForDisplay(as(object, "DuckDBDataFrame"))
+        k <- NCOL(object@elementMetadata)
+        if (k > 0L) {
+            nc <- ncol(m)
+            h <- nc - k
+            m <- cbind(m[, 1:h, drop = FALSE],
+                       `|` = ifelse(rownames(m) == "...", ".", "|"),
+                       m[, (h + 1L):nc, drop = FALSE])
+        }
+        print(m, quote = FALSE, right = TRUE)
+    }
+    cat("-------\n")
+    cat("seqinfo: ", summary(object@seqinfo), "\n", sep = "")
+})
