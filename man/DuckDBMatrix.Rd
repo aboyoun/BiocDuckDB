@@ -3,8 +3,8 @@
 \name{DuckDBMatrix}
 \alias{DuckDBMatrix}
 \alias{DuckDBMatrix-class}
-\alias{[,DuckDBMatrix,ANY,ANY,ANY-method}
 \alias{matrixClass,DuckDBArray-method}
+\alias{[,DuckDBMatrix,ANY,ANY,ANY-method}
 \title{DuckDB tables as DelayedMatrix objects}
 \usage{
 DuckDBMatrix(conn, datacols, row, col, keycols = c(row, col), type = NULL)

@@ -49,8 +49,11 @@
 #'
 #' @aliases
 #' DuckDBMatrix-class
-#' [,DuckDBMatrix,ANY,ANY,ANY-method
 #' matrixClass,DuckDBArray-method
+#'
+#' DuckDBMatrix
+#'
+#' [,DuckDBMatrix,ANY,ANY,ANY-method
 #'
 #' @include DuckDBArray.R
 #'
@@ -61,6 +64,14 @@ NULL
 #' @importClassesFrom DelayedArray DelayedMatrix
 setClass("DuckDBMatrix", contains = c("DuckDBArray", "DelayedMatrix"))
 
+#' @export
+#' @importFrom DelayedArray matrixClass
+setMethod("matrixClass", "DuckDBArray", function(x) "DuckDBMatrix")
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Validity
+###
+
 #' @importFrom S4Vectors setValidity2
 setValidity2("DuckDBMatrix", function(x) {
     msg <- NULL
@@ -70,20 +81,9 @@ setValidity2("DuckDBMatrix", function(x) {
     msg %||% TRUE
 })
 
-#' @export
-#' @importFrom DelayedArray matrixClass
-setMethod("matrixClass", "DuckDBArray", function(x) "DuckDBMatrix")
-
-#' @export
-setMethod("[", "DuckDBMatrix", function(x, i, j, ..., drop = TRUE) {
-    Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
-    seed <- .subset_DuckDBArraySeed(x@seed, Nindex = Nindex, drop = drop)
-    if (length(dim(seed)) == 1L) {
-        DuckDBArray(seed)
-    } else {
-        replaceSlots(x, seed = seed, check = FALSE)
-    }
-})
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Constructor
+###
 
 #' @export
 #' @importFrom S4Vectors isSingleString new2
@@ -104,3 +104,18 @@ DuckDBMatrix <- function(conn, datacols, row, col, keycols = c(row, col), type =
     }
     new2("DuckDBMatrix", seed = conn, check = FALSE)
 }
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Subsetting
+###
+
+#' @export
+setMethod("[", "DuckDBMatrix", function(x, i, j, ..., drop = TRUE) {
+    Nindex <- S4Arrays:::extract_Nindex_from_syscall(sys.call(), parent.frame())
+    seed <- .subset_DuckDBArraySeed(x@seed, Nindex = Nindex, drop = drop)
+    if (length(dim(seed)) == 1L) {
+        DuckDBArray(seed)
+    } else {
+        replaceSlots(x, seed = seed, check = FALSE)
+    }
+})
