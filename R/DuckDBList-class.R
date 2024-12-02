@@ -76,6 +76,7 @@ setValidity2("DuckDBList", function(x) {
 ###
 
 #' @export
+#' @importFrom BiocGenerics unlist
 setMethod("unlist", "DuckDBList", function(x, recursive = TRUE, use.names = TRUE) {
     x@unlistData
 })
