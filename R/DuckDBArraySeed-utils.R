@@ -21,6 +21,7 @@
 #' is_sparse,DuckDBArraySeed-method
 #'
 #' @include DuckDBArraySeed.R
+#' @include DuckDBTable-utils.R
 #'
 #' @name DuckDBArraySeed-utils
 NULL

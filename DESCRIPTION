@@ -50,6 +50,7 @@ Collate:
     'keynames.R'
     'DuckDBConnection.R'
     'DuckDBTable.R'
+    'DuckDBTable-utils.R'
     'DuckDBArraySeed.R'
     'DuckDBArraySeed-utils.R'
     'DuckDBArray.R'

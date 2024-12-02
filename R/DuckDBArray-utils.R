@@ -20,6 +20,7 @@
 #' nzcount,DuckDBArray-method
 #'
 #' @include DuckDBArray.R
+#' @include DuckDBTable-utils.R
 #'
 #' @name DuckDBArray-utils
 NULL

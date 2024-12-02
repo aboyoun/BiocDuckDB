@@ -28,6 +28,7 @@
 #' nzcount,DuckDBColumn-method
 #'
 #' @include DuckDBColumn.R
+#' @include DuckDBTable-utils.R
 #'
 #' @name DuckDBColumn-utils
 NULL
