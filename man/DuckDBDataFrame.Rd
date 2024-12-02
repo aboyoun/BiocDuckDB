@@ -3,28 +3,28 @@
 \name{DuckDBDataFrame}
 \alias{DuckDBDataFrame}
 \alias{DuckDBDataFrame-class}
-\alias{makeNakedCharacterMatrixForDisplay,DuckDBDataFrame-method}
-\alias{show,DuckDBDataFrame-method}
 \alias{length,DuckDBDataFrame-method}
 \alias{names,DuckDBDataFrame-method}
 \alias{rownames<-,DuckDBDataFrame-method}
 \alias{names<-,DuckDBDataFrame-method}
+\alias{[[,DuckDBDataFrame-method}
 \alias{extractROWS,DuckDBDataFrame,ANY-method}
-\alias{head,DuckDBDataFrame-method}
-\alias{tail,DuckDBDataFrame-method}
 \alias{extractCOLS,DuckDBDataFrame-method}
 \alias{[,DuckDBDataFrame,ANY,ANY,ANY-method}
-\alias{subset,DuckDBDataFrame-method}
-\alias{[[,DuckDBDataFrame-method}
 \alias{replaceROWS,DuckDBDataFrame-method}
 \alias{replaceCOLS,DuckDBDataFrame-method}
-\alias{normalizeSingleBracketReplacementValue,DuckDBDataFrame-method}
 \alias{[[<-,DuckDBDataFrame-method}
+\alias{normalizeSingleBracketReplacementValue,DuckDBDataFrame-method}
+\alias{head,DuckDBDataFrame-method}
+\alias{tail,DuckDBDataFrame-method}
+\alias{subset,DuckDBDataFrame-method}
 \alias{bindROWS,DuckDBDataFrame-method}
 \alias{cbind,DuckDBDataFrame-method}
 \alias{cbind.DuckDBDataFrame}
 \alias{as.data.frame,DuckDBDataFrame-method}
 \alias{as.env,DuckDBDataFrame-method}
+\alias{makeNakedCharacterMatrixForDisplay,DuckDBDataFrame-method}
+\alias{show,DuckDBDataFrame-method}
 \title{DuckDB-backed DataFrame}
 \usage{
 DuckDBDataFrame(conn, datacols = colnames(conn), keycols = NULL, type = NULL)

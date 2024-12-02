@@ -40,27 +40,25 @@
 #'
 #' @aliases
 #' DuckDBDataFrame-class
-#' makeNakedCharacterMatrixForDisplay,DuckDBDataFrame-method
-#' show,DuckDBDataFrame-method
 #'
 #' length,DuckDBDataFrame-method
-#'
 #' names,DuckDBDataFrame-method
 #' rownames<-,DuckDBDataFrame-method
 #' names<-,DuckDBDataFrame-method
 #'
+#' DuckDBDataFrame
+#'
+#' [[,DuckDBDataFrame-method
 #' extractROWS,DuckDBDataFrame,ANY-method
-#' head,DuckDBDataFrame-method
-#' tail,DuckDBDataFrame-method
 #' extractCOLS,DuckDBDataFrame-method
 #' [,DuckDBDataFrame,ANY,ANY,ANY-method
-#' subset,DuckDBDataFrame-method
-#' [[,DuckDBDataFrame-method
-#'
 #' replaceROWS,DuckDBDataFrame-method
 #' replaceCOLS,DuckDBDataFrame-method
-#' normalizeSingleBracketReplacementValue,DuckDBDataFrame-method
 #' [[<-,DuckDBDataFrame-method
+#' normalizeSingleBracketReplacementValue,DuckDBDataFrame-method
+#' head,DuckDBDataFrame-method
+#' tail,DuckDBDataFrame-method
+#' subset,DuckDBDataFrame-method
 #'
 #' bindROWS,DuckDBDataFrame-method
 #' cbind,DuckDBDataFrame-method
@@ -68,6 +66,9 @@
 #'
 #' as.data.frame,DuckDBDataFrame-method
 #' as.env,DuckDBDataFrame-method
+#'
+#' makeNakedCharacterMatrixForDisplay,DuckDBDataFrame-method
+#' show,DuckDBDataFrame-method
 #'
 #' @include DuckDBColumn.R
 #' @include DuckDBTable.R
@@ -79,75 +80,12 @@ NULL
 #' @importClassesFrom S4Vectors DataFrame
 setClass("DuckDBDataFrame", contains = c("DuckDBTable", "DataFrame"))
 
-#' @importFrom S4Vectors setValidity2
-setValidity2("DuckDBDataFrame", function(x) {
-    msg <- NULL
-    if (length(x@conn) > 0L) {
-        if (nkey(x) > 1L) {
-            msg <- c(msg, "'keycols' slot has more than one element")
-        }
-    }
-    msg %||% TRUE
-})
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Accessors
+###
 
-.makePrettyCharacterMatrixForDisplay <- function(x) {
-    if (.has_row_number(x)) {
-        nhead <- get_showHeadLines() + get_showTailLines()
-        ntail <- 0L
-    } else {
-        nhead <- get_showHeadLines()
-        ntail <- get_showTailLines()
-    }
-
-    x_nrow <- NROW(x)
-    if (x_nrow <= nhead + ntail + 1L) {
-        m <- makeNakedCharacterMatrixForDisplay(x)
-        x_rownames <- rownames(x)
-        if (!is.null(x_rownames)) {
-            rownames(m) <- x_rownames
-        }
-    } else {
-        x_head <- head(x, nhead)
-        x_rownames <- rownames(x_head)
-        if (ntail == 0L) {
-            m <- rbind(makeNakedCharacterMatrixForDisplay(x_head), "...")
-        } else {
-            i <- c(seq_len(nhead), (x_nrow + 1L) - rev(seq_len(ntail)))
-            df <- DataFrame(as.data.frame(x[i, , drop = FALSE]))
-            m <- rbind(makeNakedCharacterMatrixForDisplay(head(df, nhead)),
-                       "...",
-                       makeNakedCharacterMatrixForDisplay(tail(df, ntail)))
-            x_rownames <- c(x_rownames, rownames(tail(x, ntail)))
-        }
-        rownames(m) <- S4Vectors:::make_rownames_for_RectangularData_display(x_rownames, x_nrow, nhead, ntail)
-    }
-
-    rbind(sprintf("<%s>", coltypes(x)), m)
-}
-
-#' @export
-#' @importFrom S4Vectors DataFrame makeNakedCharacterMatrixForDisplay
-setMethod("makeNakedCharacterMatrixForDisplay", "DuckDBDataFrame", function(x) {
-    callGeneric(DataFrame(as.data.frame(x)))
-})
-
-#' @export
-#' @importFrom S4Vectors classNameForDisplay DataFrame get_showHeadLines get_showTailLines makeNakedCharacterMatrixForDisplay
-setMethod("show", "DuckDBDataFrame", function(object) {
-    x_nrow <- nrow(object)
-    x_ncol <- ncol(object)
-
-    cat(classNameForDisplay(object), " with ",
-        x_nrow, " row", ifelse(x_nrow == 1L, "", "s"), " and ",
-        x_ncol, " column", ifelse(x_ncol == 1L, "", "s"), "\n", sep = "")
-
-    if (x_nrow != 0L && x_ncol != 0L) {
-        m <- .makePrettyCharacterMatrixForDisplay(object)
-        print(m, quote = FALSE, right = TRUE)
-    }
-
-    invisible(NULL)
-})
+# ncol method inherited from DuckDBTable
+# colnames method inherited from DuckDBTable
 
 #' @export
 setMethod("length", "DuckDBDataFrame", function(x) ncol(x))
@@ -155,6 +93,9 @@ setMethod("length", "DuckDBDataFrame", function(x) ncol(x))
 #' @export
 #' @importFrom BiocGenerics colnames
 setMethod("names", "DuckDBDataFrame", function(x) colnames(x))
+
+# nrow method inherited from DuckDBTable
+# rownames method inherited from DuckDBTable
 
 #' @export
 #' @importFrom BiocGenerics rownames<-
@@ -178,6 +119,96 @@ setReplaceMethod("names", "DuckDBDataFrame", function(x, value) {
     x
 })
 
+# colnames<- method inherited from DuckDBTable
+# dimnames<- method inherited from DataFrame
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Validity
+###
+
+#' @importFrom S4Vectors setValidity2
+setValidity2("DuckDBDataFrame", function(x) {
+    msg <- NULL
+    if (length(x@conn) > 0L) {
+        if (nkey(x) > 1L) {
+            msg <- c(msg, "'keycols' slot has more than one element")
+        }
+    }
+    msg %||% TRUE
+})
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Constructor
+###
+
+#' @export
+#' @importFrom S4Vectors new2
+#' @rdname DuckDBDataFrame
+DuckDBDataFrame <- function(conn, datacols = colnames(conn), keycols = NULL, type = NULL) {
+    if (missing(datacols)) {
+        tbl <- DuckDBTable(conn, keycols = keycols, type = NULL)
+    } else {
+        tbl <- DuckDBTable(conn, datacols = datacols, keycols = keycols, type = NULL)
+    }
+    new2("DuckDBDataFrame", tbl, check = FALSE)
+}
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Subsetting
+###
+
+#' @export
+#' @importFrom S4Vectors new2 normalizeDoubleBracketSubscript
+setMethod("[[", "DuckDBDataFrame", function(x, i, j, ...) {
+    if (!missing(j)) {
+        stop("list-style indexing of a DuckDBDataFrame with non-missing 'j' is not supported")
+    }
+
+    if (missing(i) || length(i) != 1L) {
+        stop("expected a length-1 'i' for list-style indexing of a DuckDBDataFrame")
+    }
+
+    i <- normalizeDoubleBracketSubscript(i, x)
+    column <- extractCOLS(x, i)
+    new2("DuckDBColumn", table = as(column, "DuckDBTable"), metadata = as.list(mcols(column)), check = FALSE)
+})
+
+#' @export
+#' @importFrom S4Vectors combineRows DataFrame normalizeDoubleBracketSubscript
+setReplaceMethod("[[", "DuckDBDataFrame", function(x, i, j, ..., value) {
+    if (is.character(i)) {
+        i2 <- i
+    } else {
+        i2 <- normalizeDoubleBracketSubscript(i, x, allow.nomatch = TRUE)
+    }
+
+    if (is.null(value)) {
+        datacols <- x@datacols
+        datacols[[i2]] <- NULL
+        mc <- mcols(x)
+        if (!is.null(mc)) {
+            mc <- mc[-i2, , drop = FALSE]
+        }
+        return(replaceSlots(x, datacols = datacols, elementMetadata = mc, check = FALSE))
+    }
+
+    if (length(i2) == 1L && !is.na(i2)) {
+        if (is(value, "DuckDBColumn")) {
+            if (isTRUE(all.equal(as(x, "DuckDBTable"), value@table))) {
+                datacols <- x@datacols
+                datacols[[i2]] <- value@table@datacols[[1L]]
+                mc <- mcols(x)
+                if (!is.null(mc) && is.character(i) && !(i %in% colnames(x))) {
+                    mc <- combineRows(mc, DataFrame(row.names = i))
+                }
+                return(replaceSlots(x, datacols = datacols, elementMetadata = mc, check = FALSE))
+            }
+        }
+    }
+
+    stop("not compatible DuckDBDataFrame and DuckDBColumn objects")
+})
+
 #' @export
 #' @importFrom S4Vectors extractROWS
 #' @importFrom stats setNames
@@ -187,6 +218,80 @@ setMethod("extractROWS", "DuckDBDataFrame", function(x, i) {
     }
     i <- setNames(list(i), names(x@keycols))
     .subset_DuckDBTable(x, i = i)
+})
+
+#' @export
+#' @importFrom stats setNames
+#' @importFrom S4Vectors extractCOLS mcols normalizeSingleBracketSubscript
+setMethod("extractCOLS", "DuckDBDataFrame", function(x, i) {
+    if (missing(i)) {
+        return(x)
+    }
+    xstub <- setNames(seq_along(x), names(x))
+    i <- normalizeSingleBracketSubscript(i, xstub)
+    if (anyDuplicated(i)) {
+        stop("cannot extract duplicate columns in a DuckDBDataFrame")
+    }
+    mc <- extractROWS(mcols(x), i)
+    .subset_DuckDBTable(x, j = i, elementMetadata = mc)
+})
+
+#' @export
+setMethod("[", "DuckDBDataFrame", function(x, i, j, ..., drop = TRUE) {
+    if (!missing(i)) {
+        x <- extractROWS(x, i)
+    }
+    if (!missing(j)) {
+        x <- extractCOLS(x, j)
+    }
+    if (missing(drop)) {
+        drop <- (ncol(x) == 1L)
+    }
+    if (drop && (ncol(x) == 1L)) {
+        x <- x[[1L]]
+    }
+    x
+})
+
+#' @export
+#' @importFrom S4Vectors replaceROWS
+setMethod("replaceROWS", "DuckDBDataFrame", function(x, i, value) {
+    stop("replacement of rows in a DuckDBDataFrame is not supported")
+})
+
+#' @export
+#' @importFrom stats setNames
+#' @importFrom S4Vectors replaceCOLS combineRows DataFrame normalizeSingleBracketSubscript
+setMethod("replaceCOLS", "DuckDBDataFrame", function(x, i, value) {
+    xstub <- setNames(seq_along(x), names(x))
+    i2 <- normalizeSingleBracketSubscript(i, xstub, allow.append = TRUE)
+    if (is(value, "DuckDBDataFrame")) {
+        if (isTRUE(all.equal(x, value))) {
+            datacols <- x@datacols
+            datacols[i2] <- unname(value@datacols)
+            if (is.character(i)) {
+                names(datacols)[i2] <- i
+            }
+            mc <- mcols(x)
+            if (!is.null(mc) && !setequal(names(datacols), rownames(mc))) {
+                newnames <- setdiff(names(datacols), rownames(mc))
+                mc <- combineRows(mc, DataFrame(row.names = newnames))
+                mc <- mc[names(datacols), , drop = FALSE]
+            }
+            return(replaceSlots(x, datacols = datacols, elementMetadata = mc, check = FALSE))
+        }
+    }
+    stop("not compatible DuckDBDataFrame objects")
+})
+
+#' @export
+#' @importFrom S4Vectors new2 normalizeSingleBracketReplacementValue
+setMethod("normalizeSingleBracketReplacementValue", "DuckDBDataFrame",
+function(value, x) {
+    if (is(value, "DuckDBColumn")) {
+        return(new2("DuckDBDataFrame", value@table, check = FALSE))
+    }
+    callNextMethod()
 })
 
 .head_conn <- function(x, n) {
@@ -239,39 +344,6 @@ setMethod("tail", "DuckDBDataFrame", function(x, n = 6L, ...) {
 })
 
 #' @export
-#' @importFrom stats setNames
-#' @importFrom S4Vectors extractCOLS mcols normalizeSingleBracketSubscript
-setMethod("extractCOLS", "DuckDBDataFrame", function(x, i) {
-    if (missing(i)) {
-        return(x)
-    }
-    xstub <- setNames(seq_along(x), names(x))
-    i <- normalizeSingleBracketSubscript(i, xstub)
-    if (anyDuplicated(i)) {
-        stop("cannot extract duplicate columns in a DuckDBDataFrame")
-    }
-    mc <- extractROWS(mcols(x), i)
-    .subset_DuckDBTable(x, j = i, elementMetadata = mc)
-})
-
-#' @export
-setMethod("[", "DuckDBDataFrame", function(x, i, j, ..., drop = TRUE) {
-    if (!missing(i)) {
-        x <- extractROWS(x, i)
-    }
-    if (!missing(j)) {
-        x <- extractCOLS(x, j)
-    }
-    if (missing(drop)) {
-        drop <- (ncol(x) == 1L)
-    }
-    if (drop && (ncol(x) == 1L)) {
-        x <- x[[1L]]
-    }
-    x
-})
-
-#' @export
 #' @importFrom BiocGenerics subset
 setMethod("subset", "DuckDBDataFrame",
 function(x, subset, select, drop = FALSE, ...) {
@@ -292,98 +364,9 @@ function(x, subset, select, drop = FALSE, ...) {
     x
 })
 
-#' @export
-#' @importFrom S4Vectors new2 normalizeDoubleBracketSubscript
-setMethod("[[", "DuckDBDataFrame", function(x, i, j, ...) {
-    if (!missing(j)) {
-        stop("list-style indexing of a DuckDBDataFrame with non-missing 'j' is not supported")
-    }
-
-    if (missing(i) || length(i) != 1L) {
-        stop("expected a length-1 'i' for list-style indexing of a DuckDBDataFrame")
-    }
-
-    i <- normalizeDoubleBracketSubscript(i, x)
-    column <- extractCOLS(x, i)
-    new2("DuckDBColumn", table = as(column, "DuckDBTable"), metadata = as.list(mcols(column)), check = FALSE)
-})
-
-#' @export
-#' @importFrom S4Vectors replaceROWS
-setMethod("replaceROWS", "DuckDBDataFrame", function(x, i, value) {
-    stop("replacement of rows in a DuckDBDataFrame is not supported")
-})
-
-#' @export
-#' @importFrom S4Vectors new2 normalizeSingleBracketReplacementValue
-setMethod("normalizeSingleBracketReplacementValue", "DuckDBDataFrame",
-function(value, x) {
-    if (is(value, "DuckDBColumn")) {
-        return(new2("DuckDBDataFrame", value@table, check = FALSE))
-    }
-    callNextMethod()
-})
-
-#' @export
-#' @importFrom stats setNames
-#' @importFrom S4Vectors replaceCOLS combineRows DataFrame normalizeSingleBracketSubscript
-setMethod("replaceCOLS", "DuckDBDataFrame", function(x, i, value) {
-    xstub <- setNames(seq_along(x), names(x))
-    i2 <- normalizeSingleBracketSubscript(i, xstub, allow.append = TRUE)
-    if (is(value, "DuckDBDataFrame")) {
-        if (isTRUE(all.equal(x, value))) {
-            datacols <- x@datacols
-            datacols[i2] <- unname(value@datacols)
-            if (is.character(i)) {
-                names(datacols)[i2] <- i
-            }
-            mc <- mcols(x)
-            if (!is.null(mc) && !setequal(names(datacols), rownames(mc))) {
-                newnames <- setdiff(names(datacols), rownames(mc))
-                mc <- combineRows(mc, DataFrame(row.names = newnames))
-                mc <- mc[names(datacols), , drop = FALSE]
-            }
-            return(replaceSlots(x, datacols = datacols, elementMetadata = mc, check = FALSE))
-        }
-    }
-    stop("not compatible DuckDBDataFrame objects")
-})
-
-#' @export
-#' @importFrom S4Vectors combineRows DataFrame normalizeDoubleBracketSubscript
-setMethod("[[<-", "DuckDBDataFrame", function(x, i, j, ..., value) {
-    if (is.character(i)) {
-        i2 <- i
-    } else {
-        i2 <- normalizeDoubleBracketSubscript(i, x, allow.nomatch = TRUE)
-    }
-
-    if (is.null(value)) {
-        datacols <- x@datacols
-        datacols[[i2]] <- NULL
-        mc <- mcols(x)
-        if (!is.null(mc)) {
-            mc <- mc[-i2, , drop = FALSE]
-        }
-        return(replaceSlots(x, datacols = datacols, elementMetadata = mc, check = FALSE))
-    }
-
-    if (length(i2) == 1L && !is.na(i2)) {
-        if (is(value, "DuckDBColumn")) {
-            if (isTRUE(all.equal(as(x, "DuckDBTable"), value@table))) {
-                datacols <- x@datacols
-                datacols[[i2]] <- value@table@datacols[[1L]]
-                mc <- mcols(x)
-                if (!is.null(mc) && is.character(i) && !(i %in% colnames(x))) {
-                    mc <- combineRows(mc, DataFrame(row.names = i))
-                }
-                return(replaceSlots(x, datacols = datacols, elementMetadata = mc, check = FALSE))
-            }
-        }
-    }
-
-    stop("not compatible DuckDBDataFrame and DuckDBColumn objects")
-})
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Binding
+###
 
 #' @export
 #' @importFrom S4Vectors bindROWS
@@ -450,6 +433,10 @@ cbind.DuckDBDataFrame <- function(..., deparse.level = 1) {
 #' @export
 setMethod("cbind", "DuckDBDataFrame", cbind.DuckDBDataFrame)
 
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Coercion
+###
+
 #' @export
 #' @importFrom S4Vectors as.env
 setMethod("as.env", "DuckDBDataFrame",
@@ -479,14 +466,65 @@ function(x, row.names = NULL, optional = FALSE, ...) {
     df[rownames(x), colnames(x), drop = FALSE]
 })
 
-#' @export
-#' @importFrom S4Vectors new2
-#' @rdname DuckDBDataFrame
-DuckDBDataFrame <- function(conn, datacols = colnames(conn), keycols = NULL, type = NULL) {
-    if (missing(datacols)) {
-        tbl <- DuckDBTable(conn, keycols = keycols, type = NULL)
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Display
+###
+
+.makePrettyCharacterMatrixForDisplay <- function(x) {
+    if (.has_row_number(x)) {
+        nhead <- get_showHeadLines() + get_showTailLines()
+        ntail <- 0L
     } else {
-        tbl <- DuckDBTable(conn, datacols = datacols, keycols = keycols, type = NULL)
+        nhead <- get_showHeadLines()
+        ntail <- get_showTailLines()
     }
-    new2("DuckDBDataFrame", tbl, check = FALSE)
+
+    x_nrow <- NROW(x)
+    if (x_nrow <= nhead + ntail + 1L) {
+        m <- makeNakedCharacterMatrixForDisplay(x)
+        x_rownames <- rownames(x)
+        if (!is.null(x_rownames)) {
+            rownames(m) <- x_rownames
+        }
+    } else {
+        x_head <- head(x, nhead)
+        x_rownames <- rownames(x_head)
+        if (ntail == 0L) {
+            m <- rbind(makeNakedCharacterMatrixForDisplay(x_head), "...")
+        } else {
+            i <- c(seq_len(nhead), (x_nrow + 1L) - rev(seq_len(ntail)))
+            df <- DataFrame(as.data.frame(x[i, , drop = FALSE]))
+            m <- rbind(makeNakedCharacterMatrixForDisplay(head(df, nhead)),
+                       "...",
+                       makeNakedCharacterMatrixForDisplay(tail(df, ntail)))
+            x_rownames <- c(x_rownames, rownames(tail(x, ntail)))
+        }
+        rownames(m) <- S4Vectors:::make_rownames_for_RectangularData_display(x_rownames, x_nrow, nhead, ntail)
+    }
+
+    rbind(sprintf("<%s>", coltypes(x)), m)
 }
+
+#' @export
+#' @importFrom S4Vectors DataFrame makeNakedCharacterMatrixForDisplay
+setMethod("makeNakedCharacterMatrixForDisplay", "DuckDBDataFrame", function(x) {
+    callGeneric(DataFrame(as.data.frame(x)))
+})
+
+#' @export
+#' @importFrom S4Vectors classNameForDisplay DataFrame get_showHeadLines get_showTailLines makeNakedCharacterMatrixForDisplay
+setMethod("show", "DuckDBDataFrame", function(object) {
+    x_nrow <- nrow(object)
+    x_ncol <- ncol(object)
+
+    cat(classNameForDisplay(object), " with ",
+        x_nrow, " row", ifelse(x_nrow == 1L, "", "s"), " and ",
+        x_ncol, " column", ifelse(x_ncol == 1L, "", "s"), "\n", sep = "")
+
+    if (x_nrow != 0L && x_ncol != 0L) {
+        m <- .makePrettyCharacterMatrixForDisplay(object)
+        print(m, quote = FALSE, right = TRUE)
+    }
+
+    invisible(NULL)
+})
