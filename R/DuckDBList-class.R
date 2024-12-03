@@ -89,8 +89,16 @@ setValidity2("DuckDBList", function(x) {
 
 #' @export
 #' @importFrom BiocGenerics unlist
+#' @importFrom S4Vectors new2
 setMethod("unlist", "DuckDBList", function(x, recursive = TRUE, use.names = TRUE) {
-    x@unlistData
+    unlistData <- x@unlistData
+    conn <- tblconn(unlistData)
+    datacols <- x@partitioning
+    keycols <- .keycols(unlistData)
+    table <- new2("DuckDBTable", conn = conn, datacols = datacols, keycols = keycols, check = FALSE)
+    group <- new2("DuckDBColumn", table = table, check = FALSE)
+    keep <- group %in% names(x)
+    extractROWS(unlistData, keep)
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
