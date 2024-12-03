@@ -2,6 +2,12 @@
 % Please edit documentation in R/DuckDBDataFrameList-class.R
 \name{DuckDBDataFrameList-class}
 \alias{DuckDBDataFrameList-class}
+\alias{ncols,DuckDBDataFrameList-method}
+\alias{rownames<-,DuckDBDataFrameList-method}
+\alias{colnames<-,DuckDBDataFrameList-method}
+\alias{commonColnames,DuckDBDataFrameList-method}
+\alias{columnMetadata,DuckDBDataFrameList-method}
+\alias{columnMetadata<-,DuckDBDataFrameList-method}
 \alias{split,DuckDBDataFrame,DuckDBColumn-method}
 \title{DuckDB-backed DataFrameList}
 \description{

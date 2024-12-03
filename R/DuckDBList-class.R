@@ -10,6 +10,7 @@
 #'
 #' length,DuckDBList-method
 #' names,DuckDBList-method
+#' names<-,DuckDBList-method
 #' elementNROWS,DuckDBList-method
 #'
 #' unlist,DuckDBList-method
@@ -41,6 +42,17 @@ setMethod("length", "DuckDBList", function(x) length(x@names))
 
 #' @export
 setMethod("names", "DuckDBList", function(x) names(x@names) %||% x@names)
+
+#' @export
+#' @importFrom S4Vectors mcols mcols<-
+setReplaceMethod("names", "DuckDBList", function(x, value) {
+    names(x@names) <- value
+    mc <- mcols(x)
+    if (!is.null(mc)) {
+        rownames(mcols(mc)) <- value
+    }
+    x
+})
 
 #' @export
 #' @importFrom S4Vectors elementNROWS
