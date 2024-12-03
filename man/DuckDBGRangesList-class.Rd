@@ -2,16 +2,18 @@
 % Please edit documentation in R/DuckDBGRangesList-class.R
 \name{DuckDBGRangesList-class}
 \alias{DuckDBGRangesList-class}
-\alias{show,DuckDBGRangesList-method}
 \alias{updateObject,DuckDBGRangesList-method}
+\alias{length,DuckDBGRangesList-method}
+\alias{names,DuckDBGRangesList-method}
+\alias{names<-,DuckDBGRangesList-method}
 \alias{elementNROWS,DuckDBGRangesList-method}
+\alias{split,DuckDBGRanges,DuckDBColumn-method}
+\alias{unlist,DuckDBGRangesList-method}
 \alias{extractROWS,DuckDBGRangesList,ANY-method}
 \alias{getListElement,DuckDBGRangesList-method}
 \alias{head,DuckDBGRangesList-method}
-\alias{length,DuckDBGRangesList-method}
-\alias{names,DuckDBGRangesList-method}
 \alias{tail,DuckDBGRangesList-method}
-\alias{split,DuckDBGRanges,DuckDBColumn-method}
+\alias{show,DuckDBGRangesList-method}
 \title{DuckDB-backed GenomicRangesList}
 \description{
 Create a DuckDB-backed \linkS4class{GenomicRangesList} object.
