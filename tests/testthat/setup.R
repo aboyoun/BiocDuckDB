@@ -149,14 +149,14 @@ checkDuckDBMatrix <- function(object, expected) {
 
 checkDuckDBDataFrame <- function(object, expected) {
     expect_s4_class(object, "DuckDBDataFrame")
-    expect_identical(ncol(object), ncol(expected))
     expect_identical(nrow(object), nrow(expected))
+    expect_identical(ncol(object), ncol(expected))
     expect_setequal(rownames(object), rownames(expected))
     expect_identical(colnames(object), colnames(expected))
     if (nkey(object) == 0L) {
         object <- as.data.frame(object)
-        expect_identical(ncol(object), ncol(expected))
         expect_identical(nrow(object), nrow(expected))
+        expect_identical(ncol(object), ncol(expected))
         expect_identical(colnames(object), colnames(expected))
     } else {
         expect_identical(as.data.frame(object)[rownames(expected), , drop=FALSE], expected)
@@ -195,4 +195,24 @@ checkDuckDBGRanges <- function(object, expected) {
         }
         expect_identical(as.data.frame(object)[names(expected), , drop=FALSE], df)
     }
+}
+
+checkDuckDBDataFrameList <- function(object, expected) {
+    expect_s4_class(object, "DuckDBDataFrameList")
+    expect_identical(length(object), length(expected))
+    expect_identical(names(object), names(expected))
+    expect_identical(NROW(object), NROW(expected))
+    expect_identical(ROWNAMES(object), ROWNAMES(expected))
+    expect_identical(elementNROWS(object), elementNROWS(expected))
+    expect_identical(nrows(object), nrows(expected))
+    expect_identical(ncols(object), ncols(expected))
+    expect_identical(dims(object), dims(expected))
+    for (i in seq_along(object)) {
+        expect_setequal(rownames(object)[[i]], rownames(expected)[[i]])
+    }
+    expect_identical(colnames(object), colnames(expected))
+    expect_identical(mcols(object), mcols(expected))
+    expect_identical(columnMetadata(object), columnMetadata(expected))
+    expect_identical(commonColnames(object), commonColnames(expected))
+    checkDuckDBDataFrame(unlist(object), as.data.frame(unlist(expected, use.names = FALSE)))
 }

@@ -36,7 +36,17 @@ setClass("DuckDBDataFrameList", contains = c("SplitDataFrameList", "DuckDBList")
 
 #' @export
 #' @importFrom BiocGenerics ncols
-setMethod("ncols", "DuckDBDataFrameList", getMethod("ncols", "SimpleSplitDataFrameList"))
+#' @importFrom S4Vectors isTRUEorFALSE
+setMethod("ncols", "DuckDBDataFrameList", function(x, use.names = TRUE) {
+    if (!isTRUEorFALSE(use.names)) {
+        stop("'use.names' must be TRUE or FALSE")
+    }
+    ans <- rep.int(ncol(x@unlistData), length(x))
+    if (use.names) {
+        names(ans) <- names(x)
+    }
+    ans
+})
 
 # dims method inherited from DataFrameList
 # rownames method inherited from DataFrameList
@@ -78,21 +88,18 @@ setReplaceMethod("colnames", "DuckDBDataFrameList", function(x, value) {
 
 #' @export
 #' @importFrom IRanges commonColnames
-setMethod("commonColnames", "DuckDBDataFrameList", getMethod("commonColnames", "SimpleSplitDataFrameList"))
+setMethod("commonColnames", "DuckDBDataFrameList", function(x) colnames(x@unlistData))
 
 # commonColnames<- method inherited from SplitDataFrameList
 
 #' @export
 #' @importFrom IRanges columnMetadata
-setMethod("columnMetadata", "DuckDBDataFrameList", getMethod("columnMetadata", "SimpleSplitDataFrameList"))
+setMethod("columnMetadata", "DuckDBDataFrameList", function(x) mcols(x@unlistData, use.names = FALSE))
 
 #' @export
 #' @importFrom IRanges columnMetadata<-
 setReplaceMethod("columnMetadata", "DuckDBDataFrameList", function(x, value) {
-    if (length(x) != length(value)) {
-        stop("replacement value must be the same length as x")
-    }
-    mcols(x@unlistData) <- value[[1L]]
+    mcols(x@unlistData) <- value
     x
 })
 

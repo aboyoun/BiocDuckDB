@@ -97,7 +97,7 @@ setMethod("unlist", "DuckDBList", function(x, recursive = TRUE, use.names = TRUE
     keycols <- .keycols(unlistData)
     table <- new2("DuckDBTable", conn = conn, datacols = datacols, keycols = keycols, check = FALSE)
     group <- new2("DuckDBColumn", table = table, check = FALSE)
-    keep <- group %in% names(x)
+    keep <- group %in% x@names
     extractROWS(unlistData, keep)
 })
 
