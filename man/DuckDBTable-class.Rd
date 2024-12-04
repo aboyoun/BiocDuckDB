@@ -21,34 +21,94 @@
 \alias{as.data.frame,DuckDBTable-method}
 \alias{show,DuckDBTable-method}
 \title{DuckDBTable objects}
-\usage{
-DuckDBTable(conn, datacols = colnames(conn), keycols = NULL, type = NULL)
-}
-\arguments{
-\item{conn}{Either a character vector containing the paths to parquet, csv,
-or gzipped csv data files; a string that defines a duckdb \code{read_*} data
-source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
-object.}
-
-\item{datacols}{Either a character vector of column names from \code{conn}
-or a named \code{expression} that will be evaluated in the context of `conn`
-that defines the data.}
-
-\item{keycols}{An optional character vector of column names from \code{conn}
-that will define the primary key, or a named list of character vectors where
-the names of the list define the key and the character vectors set the
-distinct values for the key. If missing, a \code{row_number} column is
-created as an identifier.}
-
-\item{type}{An optional named character vector where the names specify the
-column names and the values specify the column type; one of
-\code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
-\code{"character"}.}
-}
 \description{
 The \code{DuckDBTable} class extends the \link{RectangularData} virtual
 class for DuckDB tables by wrapping a \code{tbl_duckdb_connection} object.
 }
+\details{
+The \code{DuckDBTable} class provides a way to define a DuckDB table as a
+\linkS4class{RectangularData} object. It supports \emph{standard 2D API}
+such as \code{dim()}, \code{nrow()}, \code{ncol()}, \code{dimnames()},
+\code{x[i, j]} and \code{cbind()}, but does not support \code{rbind()}.
+}
+\section{Constructor}{
+
+\describe{
+  \item{\code{DuckDBTable(conn, datacols = colnames(conn), keycols = NULL, type = NULL)}:}{
+    Creates a \code{DuckDBTable} object.
+    \describe{
+      \item{\code{conn}}{
+        Either a character vector containing the paths to parquet, csv, or
+        gzipped csv data files; a string that defines a duckdb \code{read_*}
+        data source; a \code{DuckDBDataFrame} object; or a
+        \code{tbl_duckdb_connection} object.
+      }
+      \item{\code{datacols}}{
+        Either a character vector of column names from \code{conn} or a
+        named \code{expression} that will be evaluated in the context of
+        \code{conn} that defines the data.
+      }
+      \item{\code{keycols}}{
+        An optional character vector of column names from \code{conn} that
+        will define the primary key, or a named list of character vectors
+        where the names of the list define the key and the character vectors
+        set the distinct values for the key. If missing, a \code{row_number}
+        column is created as an identifier.
+      }
+      \item{\code{type}}{
+        An optional named character vector where the names specify the
+        column names and the values specify the column type; one of
+        \code{"logical"}, \code{"integer"}, \code{"integer64"},
+        \code{"double"}, or \code{"character"}.
+      }
+    }
+  }
+}
+}
+
+\section{Accessors}{
+
+In the following code snippets, \code{x} is a \code{DuckDBTable}.
+\describe{
+  \item{\code{dim(x)}:}{
+    Length two integer vector defined as \code{c(nrow(x), ncol(x))}.
+  }
+  \item{\code{nrow(x)}, \code{ncol(x)}:}{
+    Get the number of rows and columns, respectively.
+  }
+  \item{\code{NROW(x)}, \code{NCOL(x)}:}{
+    Same as \code{nrow(x)} and \code{ncol(x)}, respectively.
+  }
+  \item{\code{dimnames(x)}:}{
+    Length two list of character vectors defined as
+    \code{list(rownames(x), colnames(x))}.
+  }
+  \item{\code{rownames(x)}, \code{colnames(x)}:}{
+    Get the names of the rows and columns, respectively.
+  }
+}
+}
+
+\section{Coercion}{
+
+\describe{
+  \item{\code{as.data.frame(x)}:}{
+    Coerces \code{x} to a \code{data.frame}.
+  }
+}
+}
+
+\section{Subsetting}{
+
+In the code snippets below, \code{x} is a \code{DuckDBTable}.
+\describe{
+  \item{\code{x[i, j]}:}{
+    Return a new \code{DuckDBTable} of the same class as \code{x}
+    made of the selected rows and columns.
+  }
+}
+}
+
 \examples{
 # Create a data.frame from the Titanic data
 df <- do.call(expand.grid, c(dimnames(Titanic), stringsAsFactors = FALSE))
@@ -65,3 +125,5 @@ tbl <- DuckDBTable(tf, datacols = "fate", keycols = c("Class", "Sex", "Age", "Su
 \author{
 Patrick Aboyoun
 }
+\keyword{classes}
+\keyword{methods}

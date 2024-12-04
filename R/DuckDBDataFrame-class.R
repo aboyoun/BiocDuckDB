@@ -3,7 +3,22 @@
 #' @description
 #' Create a DuckDB-backed \linkS4class{DataFrame} object.
 #'
-#' @inheritParams DuckDBTable-class
+#' @param conn Either a character vector containing the paths to parquet, csv,
+#' or gzipped csv data files; a string that defines a duckdb \code{read_*} data
+#' source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
+#' object.
+#' @param datacols Either a character vector of column names from \code{conn}
+#' or a named \code{expression} that will be evaluated in the context of `conn`
+#' that defines the data.
+#' @param keycols An optional character vector of column names from \code{conn}
+#' that will define the primary key, or a named list of character vectors where
+#' the names of the list define the key and the character vectors set the
+#' distinct values for the key. If missing, a \code{row_number} column is
+#' created as an identifier.
+#' @param type An optional named character vector where the names specify the
+#' column names and the values specify the column type; one of
+#' \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
+#' \code{"character"}.
 #'
 #' @return A DuckDBDataFrame where each column is a \linkS4class{DuckDBColumn}.
 #'
