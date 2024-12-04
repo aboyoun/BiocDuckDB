@@ -68,7 +68,7 @@ such as \code{dim()}, \code{nrow()}, \code{ncol()}, \code{dimnames()},
 
 \section{Accessors}{
 
-In the following code snippets, \code{x} is a \code{DuckDBTable}.
+In the code snippets below, \code{x} is a \code{DuckDBTable} object:
 \describe{
   \item{\code{dim(x)}:}{
     Length two integer vector defined as \code{c(nrow(x), ncol(x))}.
@@ -100,7 +100,7 @@ In the following code snippets, \code{x} is a \code{DuckDBTable}.
 
 \section{Subsetting}{
 
-In the code snippets below, \code{x} is a \code{DuckDBTable}.
+In the code snippets below, \code{x} is a \code{DuckDBTable} object:
 \describe{
   \item{\code{x[i, j]}:}{
     Return a new \code{DuckDBTable} of the same class as \code{x}
