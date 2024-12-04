@@ -61,7 +61,6 @@
 #' tail,DuckDBDataFrame-method
 #' subset,DuckDBDataFrame-method
 #'
-#' bindROWS,DuckDBDataFrame-method
 #' cbind,DuckDBDataFrame-method
 #' cbind.DuckDBDataFrame
 #'
@@ -375,13 +374,6 @@ function(x, subset, select, drop = FALSE, ...) {
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Binding
 ###
-
-#' @export
-#' @importFrom S4Vectors bindROWS
-setMethod("bindROWS", "DuckDBDataFrame",
-function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TRUE) {
-    stop("binding rows to a DuckDBDataFrame is not supported")
-})
 
 #' @export
 #' @importFrom dplyr rename

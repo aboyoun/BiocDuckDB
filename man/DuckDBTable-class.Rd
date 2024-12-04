@@ -16,6 +16,7 @@
 \alias{DuckDBTable}
 \alias{all.equal.DuckDBTable}
 \alias{[,DuckDBTable,ANY,ANY,ANY-method}
+\alias{bindROWS,DuckDBTable-method}
 \alias{bindCOLS,DuckDBTable-method}
 \alias{as.data.frame,DuckDBTable-method}
 \alias{show,DuckDBTable-method}
@@ -45,8 +46,8 @@ column names and the values specify the column type; one of
 \code{"character"}.}
 }
 \description{
-DuckDBTable is a low-level helper class for representing a
-pointer to a \code{tbl_duckdb_connection} object.
+The \code{DuckDBTable} class extends the \link{RectangularData} virtual
+class for DuckDB tables by wrapping a \code{tbl_duckdb_connection} object.
 }
 \examples{
 # Create a data.frame from the Titanic data

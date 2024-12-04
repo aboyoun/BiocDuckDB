@@ -19,7 +19,6 @@
 \alias{head,DuckDBDataFrame-method}
 \alias{tail,DuckDBDataFrame-method}
 \alias{subset,DuckDBDataFrame-method}
-\alias{bindROWS,DuckDBDataFrame-method}
 \alias{cbind,DuckDBDataFrame-method}
 \alias{cbind.DuckDBDataFrame}
 \alias{as.data.frame,DuckDBDataFrame-method}

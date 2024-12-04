@@ -1,8 +1,8 @@
 #' DuckDBTable objects
 #'
 #' @description
-#' DuckDBTable is a low-level helper class for representing a
-#' pointer to a \code{tbl_duckdb_connection} object.
+#' The \code{DuckDBTable} class extends the \link{RectangularData} virtual
+#' class for DuckDB tables by wrapping a \code{tbl_duckdb_connection} object.
 #'
 #' @param conn Either a character vector containing the paths to parquet, csv,
 #' or gzipped csv data files; a string that defines a duckdb \code{read_*} data
@@ -56,6 +56,7 @@
 #'
 #' [,DuckDBTable,ANY,ANY,ANY-method
 #'
+#' bindROWS,DuckDBTable-method
 #' bindCOLS,DuckDBTable-method
 #'
 #' as.data.frame,DuckDBTable-method
@@ -451,6 +452,13 @@ setMethod("[", "DuckDBTable", .subset_DuckDBTable)
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Binding
 ###
+
+#' @export
+#' @importFrom S4Vectors classNameForDisplay bindROWS
+setMethod("bindROWS", "DuckDBTable",
+function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TRUE) {
+    stop(sprintf("binding rows to a %s is not supported", classNameForDisplay(x)))
+})
 
 #' @export
 #' @importFrom S4Vectors bindCOLS
