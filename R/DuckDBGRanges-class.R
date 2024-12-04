@@ -267,7 +267,7 @@ setMethod("extractROWS", "DuckDBGRanges", function(x, i) {
 
     mcols <- x@elementMetadata
     if (!is.null(mcols)) {
-        mcols <- callGeneric(mcols, i = i)
+        mcols <- replaceSlots(frame, datacols = mcols@datacols, check = FALSE)
     }
 
     replaceSlots(x, frame = frame, elementMetadata = mcols, check = FALSE)
@@ -282,12 +282,7 @@ setMethod("[", "DuckDBGRanges", function(x, i, j, ..., drop = TRUE) {
 
     mcols <- x@elementMetadata
     if (!is.null(mcols)) {
-        if (!missing(i)) {
-            mcols <- extractROWS(mcols, i)
-        }
-        if (!missing(j)) {
-            mcols <- extractCOLS(mcols, j)
-        }
+        mcols <- replaceSlots(frame, datacols = mcols@datacols, check = FALSE)
     }
 
     replaceSlots(x, frame = frame, elementMetadata = mcols, check = FALSE)
@@ -301,7 +296,7 @@ setMethod("head", "DuckDBGRanges", function(x, n = 6L, ...) {
 
     mcols <- x@elementMetadata
     if (!is.null(mcols)) {
-        mcols <- callGeneric(mcols, n = n, ...)
+        mcols <- replaceSlots(frame, datacols = mcols@datacols, check = FALSE)
     }
 
     replaceSlots(x, frame = frame, elementMetadata = mcols, check = FALSE)
@@ -315,7 +310,7 @@ setMethod("tail", "DuckDBGRanges", function(x, n = 6L, ...) {
 
     mcols <- x@elementMetadata
     if (!is.null(mcols)) {
-        mcols <- callGeneric(mcols, n = n, ...)
+        mcols <- replaceSlots(frame, datacols = mcols@datacols, check = FALSE)
     }
 
     replaceSlots(x, frame = frame, elementMetadata = mcols, check = FALSE)

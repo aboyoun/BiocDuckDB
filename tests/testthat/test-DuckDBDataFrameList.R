@@ -18,7 +18,7 @@ test_that("element metadata work as expected for a DuckDBDataFrameList", {
 
     expected <- DataFrame(mtcars)
     expected <- split(expected, expected[["carb"]])
-    mcols(expected) <- as.list(head(letters, length(dflist)))
+    mcols(expected) <- as.list(head(letters, length(expected)))
 
     checkDuckDBDataFrameList(dflist, expected)
 })

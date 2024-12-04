@@ -69,7 +69,7 @@ setMethod("elementNROWS", "DuckDBGRangesList", getMethod("elementNROWS", "DuckDB
 ###
 
 #' @export
-#' @importFrom S4Vectors split
+#' @importFrom S4Vectors make_zero_col_DFrame split
 #' @importFrom stats setNames
 setMethod("split", c("DuckDBGRanges", "DuckDBColumn"), function(x, f, drop = FALSE, ...) {
     if (!isTRUE(all.equal(as(x@frame, "DuckDBTable"), f@table))) {
@@ -78,7 +78,9 @@ setMethod("split", c("DuckDBGRanges", "DuckDBColumn"), function(x, f, drop = FAL
     elementNROWS <- table(f)
     elementNROWS <- setNames(as.vector(elementNROWS), names(elementNROWS))
     new2("DuckDBGRangesList", unlistData = x, partitioning = f@table@datacols,
-         names = names(elementNROWS), elementNROWS = elementNROWS, check = FALSE)
+         names = names(elementNROWS), elementNROWS = elementNROWS,
+         elementMetadata = make_zero_col_DFrame(length(elementNROWS)),
+         check = FALSE)
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

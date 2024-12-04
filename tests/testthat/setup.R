@@ -96,7 +96,8 @@ granges_df <- data.frame(id = head(letters, 10L),
                          start = 1:10, end = 10L, width = 10:1,
                          strand = strand(rep.int(c("-", "+", "*", "+", "-"), c(1L, 2L, 2L, 3L, 2L))),
                          score = 1:10,
-                         GC = seq(1, 0, length = 10))
+                         GC = seq(1, 0, length = 10),
+                         group = rep(c("gr1", "gr2", "gr3", "gr4"), 1:4))
 granges_tf <- tempfile(fileext = ".parquet")
 arrow::write_parquet(granges_df, granges_tf)
 
@@ -215,4 +216,18 @@ checkDuckDBDataFrameList <- function(object, expected) {
     expect_identical(columnMetadata(object), columnMetadata(expected))
     expect_identical(commonColnames(object), commonColnames(expected))
     checkDuckDBDataFrame(unlist(object), as.data.frame(unlist(expected, use.names = FALSE)))
+}
+
+checkDuckDBGRangesList <- function(object, expected) {
+    expect_s4_class(object, "DuckDBGRangesList")
+    expect_identical(length(object), length(expected))
+    expect_identical(names(object), names(expected))
+    expect_identical(elementNROWS(object), elementNROWS(expected))
+    for (i in seq_along(object)) {
+        expect_setequal(names(object[[i]]), names(expected[[i]]))
+    }
+    if (length(object) > 0L) {
+        expect_identical(mcols(object), mcols(expected))
+        checkDuckDBGRanges(unlist(object), unlist(expected, use.names = FALSE))
+    }
 }
