@@ -1,12 +1,13 @@
 Package: BiocDuckDB
-Version: 0.2.0
-Date: 2024-11-06
-Title: Bioconductor-friendly Bindings for DuckDB
-Description: 
-    Implements bindings for DuckDB tables that are compatible with Bioconductor
-    S4 data structures, namely the DataFrame and DelayedArray. This allows 
-    DuckDB hosted data to be used inside other Bioconductor objects such as
-    SummarizedExperiments.
+Version: 0.5.0
+Date: 2024-12-04
+Title: Bioconductor DuckDB Bindings
+Description:
+    This package provides bindings for DuckDB tables that extend Bioconductor
+    S4 data structures, including DelayedArray, DataFrame, and GenomicRanges.
+    By leveraging these bindings, DuckDB-hosted data can seamlessly support
+    SummarizedExperiments and other relational objects, facilitating efficient
+    and scalable data analysis within the Bioconductor ecosystem.
 Authors@R:
     c(
         person("Patrick", "Aboyoun", role=c("aut", "cre"), email="aboyounp@gene.com"),

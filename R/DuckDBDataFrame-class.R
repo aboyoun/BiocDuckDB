@@ -44,6 +44,7 @@
 #' length,DuckDBDataFrame-method
 #' names,DuckDBDataFrame-method
 #' rownames<-,DuckDBDataFrame-method
+#' colnames<-,DuckDBDataFrame-method
 #' names<-,DuckDBDataFrame-method
 #'
 #' DuckDBDataFrame
@@ -109,17 +110,24 @@ setReplaceMethod("rownames", "DuckDBDataFrame", function(x, value) {
 
 #' @export
 #' @importFrom BiocGenerics colnames<-
-#' @importFrom S4Vectors mcols mcols<-
-setReplaceMethod("names", "DuckDBDataFrame", function(x, value) {
-    colnames(x) <- value
+#' @importFrom S4Vectors mcols
+setReplaceMethod("colnames", "DuckDBDataFrame", function(x, value) {
+    datacols <- x@datacols
+    names(datacols) <- value
     mc <- mcols(x)
     if (!is.null(mc)) {
-        rownames(mcols(x)) <- value
+        rownames(mc) <- value
     }
+    replaceSlots(x, datacols = datacols, elementMetadata = mc, check = FALSE)
+})
+
+#' @export
+#' @importFrom S4Vectors mcols
+setReplaceMethod("names", "DuckDBDataFrame", function(x, value) {
+    colnames(x) <- value
     x
 })
 
-# colnames<- method inherited from DuckDBTable
 # dimnames<- method inherited from DataFrame
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -158,7 +166,7 @@ DuckDBDataFrame <- function(conn, datacols = colnames(conn), keycols = NULL, typ
 ###
 
 #' @export
-#' @importFrom S4Vectors new2 normalizeDoubleBracketSubscript
+#' @importFrom S4Vectors new2 mcols normalizeDoubleBracketSubscript
 setMethod("[[", "DuckDBDataFrame", function(x, i, j, ...) {
     if (!missing(j)) {
         stop("list-style indexing of a DuckDBDataFrame with non-missing 'j' is not supported")
@@ -174,7 +182,7 @@ setMethod("[[", "DuckDBDataFrame", function(x, i, j, ...) {
 })
 
 #' @export
-#' @importFrom S4Vectors combineRows DataFrame normalizeDoubleBracketSubscript
+#' @importFrom S4Vectors combineRows DataFrame mcols normalizeDoubleBracketSubscript
 setReplaceMethod("[[", "DuckDBDataFrame", function(x, i, j, ..., value) {
     if (is.character(i)) {
         i2 <- i
@@ -261,7 +269,7 @@ setMethod("replaceROWS", "DuckDBDataFrame", function(x, i, value) {
 
 #' @export
 #' @importFrom stats setNames
-#' @importFrom S4Vectors replaceCOLS combineRows DataFrame normalizeSingleBracketSubscript
+#' @importFrom S4Vectors replaceCOLS combineRows DataFrame mcols normalizeSingleBracketSubscript
 setMethod("replaceCOLS", "DuckDBDataFrame", function(x, i, value) {
     xstub <- setNames(seq_along(x), names(x))
     i2 <- normalizeSingleBracketSubscript(i, xstub, allow.append = TRUE)

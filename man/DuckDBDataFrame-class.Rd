@@ -5,6 +5,7 @@
 \alias{length,DuckDBDataFrame-method}
 \alias{names,DuckDBDataFrame-method}
 \alias{rownames<-,DuckDBDataFrame-method}
+\alias{colnames<-,DuckDBDataFrame-method}
 \alias{names<-,DuckDBDataFrame-method}
 \alias{DuckDBDataFrame}
 \alias{[[,DuckDBDataFrame-method}

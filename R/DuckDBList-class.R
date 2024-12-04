@@ -44,14 +44,15 @@ setMethod("length", "DuckDBList", function(x) length(x@names))
 setMethod("names", "DuckDBList", function(x) names(x@names) %||% x@names)
 
 #' @export
-#' @importFrom S4Vectors mcols mcols<-
+#' @importFrom S4Vectors mcols
 setReplaceMethod("names", "DuckDBList", function(x, value) {
-    names(x@names) <- value
+    x_names <- x@names
+    names(x_names) <- value
     mc <- mcols(x)
     if (!is.null(mc)) {
-        rownames(mcols(x)) <- value
+        rownames(mc) <- value
     }
-    x
+    replaceSlots(x, names = x_names, elementMetadata = mc, check = FALSE)
 })
 
 #' @export

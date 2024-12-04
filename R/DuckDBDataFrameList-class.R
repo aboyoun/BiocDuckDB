@@ -94,10 +94,12 @@ setMethod("commonColnames", "DuckDBDataFrameList", function(x) colnames(x@unlist
 
 #' @export
 #' @importFrom IRanges columnMetadata
+#' @importFrom S4Vectors mcols
 setMethod("columnMetadata", "DuckDBDataFrameList", function(x) mcols(x@unlistData, use.names = FALSE))
 
 #' @export
 #' @importFrom IRanges columnMetadata<-
+#' @importFrom S4Vectors mcols<-
 setReplaceMethod("columnMetadata", "DuckDBDataFrameList", function(x, value) {
     mcols(x@unlistData) <- value
     x
