@@ -114,7 +114,7 @@ setReplaceMethod("names", "DuckDBDataFrame", function(x, value) {
     colnames(x) <- value
     mc <- mcols(x)
     if (!is.null(mc)) {
-        rownames(mcols(mc)) <- value
+        rownames(mcols(x)) <- value
     }
     x
 })

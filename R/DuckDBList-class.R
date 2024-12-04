@@ -49,7 +49,7 @@ setReplaceMethod("names", "DuckDBList", function(x, value) {
     names(x@names) <- value
     mc <- mcols(x)
     if (!is.null(mc)) {
-        rownames(mc) <- value
+        rownames(mcols(x)) <- value
     }
     x
 })
