@@ -9,10 +9,92 @@
 \alias{columnMetadata,DuckDBDataFrameList-method}
 \alias{columnMetadata<-,DuckDBDataFrameList-method}
 \alias{split,DuckDBDataFrame,DuckDBColumn-method}
-\title{DuckDB-backed DataFrameList}
+\title{DuckDBDataFrameList objects}
 \description{
-Create a DuckDB-backed \linkS4class{DataFrameList} object.
+The DuckDBDataFrame class extends both \linkS4class{SplitDataFrameList} and
+\linkS4class{DuckDBList} to represent a DuckDB table as a
+\linkS4class{SplitDataFrameList} object.
 }
+\section{Constructor}{
+
+\describe{
+  \item{\code{split(x, f)}:}{
+    Creates a DuckDBDataFrame object.
+    \describe{
+      \item{\code{x}}{
+        A DuckDBDataFrame object to split.
+      }
+      \item{\code{f}}{
+        A DuckDBColumn object to split \code{x} by.
+      }
+    }
+  }
+}
+}
+
+\section{Accessors}{
+
+In the code snippets below, \code{x} is a DuckDBDataFrameList object:
+\describe{
+  \item{\code{dims(x)}:}{
+    Get the two-column matrix indicating the number of rows and columns for
+    each of the list elements.
+  }
+  \item{\code{nrows(x)}, \code{ncols(x)}:}{
+    Get the number of rows and columns, respectively, for each of the list
+    elements.
+  }
+  \item{\code{dimnames(x)}:}{
+    Get the list of two \linkS4class{CharacterList}s, the first holding the
+    rownames and the second the column names.
+  }
+  \item{\code{rownames(x)}, \code{colnames(x)}:}{
+    Get the \linkS4class{CharacterList} of row and colum names, respectively.
+  }
+  \item{\code{commonColnames(x)}, \code{commonColnames(x) <- value}:}{
+    Get or set the character vector of column names present in the individual
+    DataFrames in \code{x}.
+  }
+  \item{\code{columnMetadata(x)}, \code{columnMetadata(x) <- value}:}{
+    Get the \linkS4class{DataFrame} of metadata along the columns, i.e.,
+    where each column in \code{x} is represented by a row in the metadata.
+    The metadata is common across all elements of \code{x}. Note that calling
+    \code{mcols(x)} returns the metadata on the \linkS4class{DataFrame}
+    elements of \code{x}.
+  }
+}
+}
+
+\section{Subsetting}{
+
+In the code snippets below, \code{x} is a DuckDBDataFrameList object:
+\describe{
+  \item{\code{x[i]}:}{
+    Returns a DuckDBDataFrameList object containing the selected elements.
+  }
+  \item{\code{x[[i]]}:}{
+    Return the selected DuckDBDataFrame by \code{i}, where \code{i} is an
+    numeric or character vector of length 1.
+  }
+  \item{\code{x$name}:}{
+    Similar to \code{x[[name]]}, but \code{name} is taken literally as an
+    element name.
+  }
+  \item{\code{head(x, n = 6L)}:}{
+    If \code{n} is non-negative, returns the first n elements of \code{x}.
+    If \code{n} is negative, returns all but the last \code{abs(n)} elements
+    of \code{x}.
+  }
+  \item{\code{tail(x, n = 6L)}:}{
+    If \code{n} is non-negative, returns the last n elements of \code{x}.
+    If \code{n} is negative, returns all but the first \code{abs(n)} elements
+    of \code{x}.
+  }
+}
+}
+
 \author{
 Patrick Aboyoun
 }
+\keyword{classes}
+\keyword{methods}
