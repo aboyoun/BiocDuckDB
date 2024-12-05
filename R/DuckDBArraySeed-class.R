@@ -9,20 +9,75 @@
 #' \link{DuckDBArray} object instead. See \code{?\link{DuckDBArray}} for
 #' more information.
 #'
-#' @param conn Either a character vector containing the paths to parquet, csv,
-#' or gzipped csv data files; a string that defines a duckdb \code{read_*} data
-#' source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
-#' object.
-#' @param datacols Either a string specifying the column from \code{conn} or a
-#' named \code{expression} that will be evaluated in the context of \code{conn}
-#' that defines the values in the array.
-#' @param keycols Either a character vector of column names from \code{conn}
-#' that will specify the dimension names, or a named list of character vectors
-#' where the names of the list specify the dimension names and the character
-#' vectors set the distinct values for the dimension names.
-#' @param type String specifying the type of the data values; one of
-#' \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
-#' \code{"character"}. If \code{NULL}, it is determined by inspecting the data.
+#' @section Constructor:
+#' \describe{
+#'   \item{\code{DuckDBArraySeed(conn, datacols, keycols, type = NULL)}:}{
+#'     Creates a DuckDBDataFrame object.
+#'     \describe{
+#'       \item{\code{conn}}{
+#'         Either a character vector containing the paths to parquet, csv, or
+#'         gzipped csv data files; a string that defines a duckdb \code{read_*}
+#'         data source; a DuckDBDataFrame object; or a tbl_duckdb_connection
+#'         object.
+#'       }
+#'       \item{\code{datacols}}{
+#'         Either a string specifying the column from \code{conn} or a named
+#'         \code{expression} that will be evaluated in the context of
+#'         \code{conn} that defines the values in the array.
+#'       }
+#'       \item{\code{keycols}}{
+#'         Either a character vector of column names from \code{conn} that will
+#'         specify the dimension names, or a named list of character vectors
+#'         where the names of the list specify the dimension names and the
+#'         character vectors set the distinct values for the dimension names.
+#'       }
+#'       \item{\code{type}}{
+#'         String specifying the type of the data values; one of
+#'         \code{"logical"}, \code{"integer"}, \code{"integer64"},
+#'         \code{"double"}, or \code{"character"}. If \code{NULL}, it is
+#'         determined by inspecting the data.
+#'       }
+#'     }
+#'   }
+#' }
+#'
+#' @section Accessors:
+#' In the code snippets below, \code{x} is a DuckDBArraySeed object:
+#' \describe{
+#'   \item{\code{dim(x)}:}{
+#'     An integer vector of the array dimensions.
+#'   }
+#'   \item{\code{dimnames(x)}:}{
+#'     List of array dimension names.
+#'   }
+#'   \item{\code{type(x)}, \code{type(x) <- value}:}{
+#'     Get or set the data type of the array elements; one of \code{"logical"},
+#'     \code{"integer"}, \code{"integer64"}, \code{"double"}, or
+#'     \code{"character"}.
+#'   }
+#' }
+#'
+#' @section Subsetting:
+#' In the code snippets below, \code{x} is a DuckDBArraySeed object:
+#' \describe{
+#'   \item{\code{x[i, j, ..., drop = TRUE]}:}{
+#'     Returns a new DuckDBArraySeed object. Empty dimensions are dropped if
+#'     \code{drop = TRUE}.
+#'   }
+#' }
+#'
+#' @section Transposition:
+#' In the code snippets below, \code{x} is a DuckDBArraySeed object:
+#' \describe{
+#'   \item{\code{aperm(a, perm)}:}{
+#'     Returns a new DuckDBArraySeed object with the dimensions permuted
+#'     according to the \code{perm} vector.
+#'   }
+#'   \item{\code{t(x)}:}{
+#'     For two-dimensional arrays, returns a new DuckDBArraySeed object with the
+#'     dimensions transposed.
+#'   }
+#' }
 #'
 #' @author Patrick Aboyoun
 #'
@@ -66,6 +121,8 @@
 #' \code{\link[S4Arrays]{Array}}
 #'
 #' @include DuckDBTable-class.R
+#'
+#' @keywords classes methods
 #'
 #' @name DuckDBArraySeed-class
 NULL
@@ -241,7 +298,6 @@ setMethod("DelayedArray", "DuckDBArraySeed", function(seed) DuckDBArray(seed))
 #' @export
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
-#' @rdname DuckDBArraySeed-class
 DuckDBArraySeed <- function(conn, datacols, keycols, type = NULL) {
     if (!is.null(type)) {
         type <- setNames(type, names(datacols) %||% datacols)
