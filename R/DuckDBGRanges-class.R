@@ -1,35 +1,139 @@
-#' DuckDB-backed Genomic Ranges
+#' DuckDBGRanges objects
 #'
 #' @description
-#' Create a DuckDB-backed \linkS4class{GenomicRanges} object.
+#' The DuckDBGRanges class extends the \linkS4class{GenomicRanges} virtual
+#' class for DuckDB tables.
 #'
-#' @param conn Either a character vector containing the paths to parquet, csv,
-#' or gzipped csv data files; a string that defines a duckdb \code{read_*} data
-#' source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
-#' object.
-#' @param seqnames Either \code{NULL} or a string specifying the column from
-#' \code{conn} that defines the sequence names.
-#' @param start Either \code{NULL} or a string specifying the column from
-#' \code{conn} that defines the start of the range.
-#' @param end Either \code{NULL} or a string specifying the column from
-#' \code{conn} that defines the end of the range.
-#' @param width Either \code{NULL} or a string specifying the column from
-#' \code{conn} that defines the width of the range.
-#' @param strand Either \code{NULL} or a string specifying the column from
-#' \code{conn} that defines the width of the range.
-#' @param keycols An optional character vector of column names from \code{conn}
-#' that will define the primary key, or a named list of character vectors where
-#' the names of the list define the key and the character vectors set the
-#' distinct values for the key. If missing, a \code{row_number} column is
-#' created as an identifier.
-#' @param mcols Optional character vector specifying the columns that define
-#' the metadata columns.
-#' @param seqinfo Either \code{NULL}, or a \code{\link{Seqinfo}} object, or a
-#' character vector of unique sequence names (a.k.a. seqlevels), or a named
-#' numeric vector of sequence lengths.
-#' @param seqlengths Either \code{NULL}, or an integer vector named with
-#' \code{levels(seqnames)} and containing the \code{lengths} (or \code{NA}) for
-#' each level in \code{levels(seqnames)}.
+#' @details
+#' DuckDBGRanges adds \linkS4class{GenomicRanges} semantics to a DuckDB table.
+#' This includes the ability to define the sequence names, start, end, width,
+#' and strand columns, as well as the metadata columns. The \code{seqinfo}
+#' slot is used to define the sequence information for the ranges.
+#'
+#' @section Constructor:
+#' \describe{
+#'   \item{\code{DuckDBGRanges(conn, seqnames, start = NULL, end = NULL, width = NULL,
+#'     strand = NULL, keycols = NULL, mcols = NULL, seqinfo = NULL, seqlengths = NULL)}:}{
+#'     Creates a DuckDBGRanges object.
+#'     \describe{
+#'       \item{\code{conn}}{
+#'         Either a character vector containing the paths to parquet, csv, or
+#'         gzipped csv data files; a string that defines a duckdb \code{read_*}
+#'         data source; a DuckDBDataFrame object; or a tbl_duckdb_connection
+#'         object.
+#'       }
+#'       \item{\code{seqnames}}{
+#'         Either \code{NULL} or a string specifying the column from
+#'         \code{conn} that defines the sequence names.
+#'       }
+#'       \item{\code{start}}{
+#'         Either \code{NULL} or a string specifying the column from
+#'         \code{conn} that defines the start of the range.
+#'       }
+#'       \item{\code{end}}{
+#'         Either \code{NULL} or a string specifying the column from
+#'         \code{conn} that defines the end of the range.
+#'       }
+#'       \item{\code{width}}{
+#'         Either \code{NULL} or a string specifying the column from
+#'         \code{conn} that defines the width of the range.
+#'       }
+#'       \item{\code{strand}}{
+#'         Either \code{NULL} or a string specifying the column from
+#'         \code{conn} that defines the width of the range.
+#'       }
+#'       \item{\code{keycols}}{
+#'         An optional character vector of column names from \code{conn} that
+#'         will define the primary key, or a named list of character vectors
+#'         where the names of the list define the key and the character vectors
+#'         set the distinct values for the key. If missing, a \code{row_number}
+#'         column is created as an identifier.
+#'       }
+#'       \item{\code{mcols}}{
+#'         Optional character vector specifying the columns that define the
+#'         metadata columns.
+#'       }
+#'       \item{\code{seqinfo}}{
+#'         Either \code{NULL}, or a \code{\link{Seqinfo}} object, or a character
+#'         vector of unique sequence names (a.k.a. seqlevels), or a named
+#'         numeric vector of sequence lengths.
+#'       }
+#'       \item{\code{seqlengths}}{
+#'         Either \code{NULL}, or an integer vector named with
+#'         \code{levels(seqnames)} and containing the \code{lengths}
+#'         (or \code{NA}) for each level in \code{levels(seqnames)}.
+#'       }
+#'     }
+#'   }
+#' }
+#'
+#' @section Accessors:
+#' In the code snippets below, \code{x} is a DuckDBGRanges object:
+#' \describe{
+#'   \item{\code{length(x)}:}{
+#'     Get the number of elements.
+#'   }
+#'   \item{\code{names(x)}:}{
+#'     Get the names of the elements.
+#'   }
+#'   \item{\code{seqnames(x)}:}{
+#'     Get the sequence names.
+#'   }
+#'   \item{\code{ranges(x)}:}{
+#'     Get the ranges as a \linkS4class{DuckDBDataFrame}.
+#'   }
+#'   \item{\code{start(x)}:}{
+#'     Get the start values as a \linkS4class{DuckDBColumn}.
+#'   }
+#'   \item{\code{end(x)}:}{
+#'     Get the end values as a \linkS4class{DuckDBColumn}.
+#'   }
+#'   \item{\code{width(x)}:}{
+#'     Get the width values as a \linkS4class{DuckDBColumn}.
+#'   }
+#'   \item{\code{strand(x)}:}{
+#'     Get the strand values as a \linkS4class{DuckDBColumn}.
+#'   }
+#'   \item{\code{mcols(x)}, \code{mcols(x) <- value}:}{
+#'      Get or set the metadata columns.
+#'   }
+#'   \item{\code{seqinfo(x)}:}{
+#'     Get the information about the underlying sequences.
+#'   }
+#' }
+#'
+#' @section Coercion:
+#' \describe{
+#'   \item{\code{as(from, "DuckDBDataFrame")}:}{
+#'     Creates a \linkS4class{DuckDBDataFrame} object.
+#'   }
+#'   \item{\code{as.data.frame(x)}:}{
+#'     Coerces \code{x} to a data.frame.
+#'   }
+#' }
+#'
+#' @section Subsetting:
+#' In the code snippets below, \code{x} is a DuckDBGRanges object:
+#' \describe{
+#'   \item{\code{x[i]}:}{
+#'     Returns a DuckDBGRanges object containing the selected elements.
+#'   }
+#'   \item{\code{head(x, n = 6L)}:}{
+#'     If \code{n} is non-negative, returns the first n elements of \code{x}.
+#'     If \code{n} is negative, returns all but the last \code{abs(n)} elements
+#'     of \code{x}.
+#'   }
+#'   \item{\code{tail(x, n = 6L)}:}{
+#'     If \code{n} is non-negative, returns the last n elements of \code{x}.
+#'     If \code{n} is negative, returns all but the first \code{abs(n)} elements
+#'     of \code{x}.
+#'   }
+#' }
+#'
+#' @section Displaying:
+#' The \code{show()} method for DuckDBGRanges objects obeys global options
+#' \code{showHeadLines} and \code{showTailLines} for controlling the number of
+#' head and tail rows to display.
 #'
 #' @author Patrick Aboyoun
 #'
@@ -82,6 +186,8 @@
 #' show,DuckDBGRanges-method
 #'
 #' @include DuckDBDataFrame-class.R
+#'
+#' @keywords classes methods
 #'
 #' @name DuckDBGRanges-class
 NULL
@@ -190,7 +296,6 @@ setValidity2("DuckDBGRanges", function(x) {
 #' @importFrom GenomeInfoDb Seqinfo
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
-#' @rdname DuckDBGRanges-class
 DuckDBGRanges <-
 function(conn, seqnames, start = NULL, end = NULL, width = NULL, strand = NULL,
          keycols = NULL, mcols = NULL, seqinfo = NULL, seqlengths = NULL)

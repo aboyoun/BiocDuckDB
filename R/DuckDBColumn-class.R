@@ -17,10 +17,11 @@
 #'     Get the data type of the elements of \code{x}.
 #'   }
 #' }
+#'
 #' @section Coercion:
 #' \describe{
 #'   \item{\code{as.vector(x)}:}{
-#'     Coerces \code{x} to a \code{vector}.
+#'     Coerces \code{x} to a vector.
 #'   }
 #' }
 #'
@@ -28,7 +29,7 @@
 #' In the code snippets below, \code{x} is a DuckDBColumn object:
 #' \describe{
 #'   \item{\code{x[i]}:}{
-#'     Returns either a DuckDBColumn object containing the selected elements.
+#'     Returns a DuckDBColumn object containing the selected elements.
 #'   }
 #'   \item{\code{head(x, n = 6L)}:}{
 #'     If \code{n} is non-negative, returns the first n elements of \code{x}.

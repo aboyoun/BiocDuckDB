@@ -98,7 +98,7 @@ In the code snippets below, \code{x} is a DuckDBDataFrame object:
 
 \describe{
   \item{\code{as.data.frame(x)}:}{
-    Coerces \code{x} to a \code{data.frame}.
+    Coerces \code{x} to a data.frame.
   }
   \item{\code{as(from, "data.frame")}:}{
     Calls \code{as.data.frame(from)}.

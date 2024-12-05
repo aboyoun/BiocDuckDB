@@ -67,7 +67,7 @@
 #' @section Coercion:
 #' \describe{
 #'   \item{\code{as.data.frame(x)}:}{
-#'     Coerces \code{x} to a \code{data.frame}.
+#'     Coerces \code{x} to a data.frame.
 #'   }
 #' }
 #'
