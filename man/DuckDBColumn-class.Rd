@@ -16,8 +16,57 @@
 \alias{showAsCell,DuckDBColumn-method}
 \title{DuckDBColumn objects}
 \description{
-DuckDBColumn objects
+The \code{DuckDBColumn} class extends \link{Vector} to represent a column
+extracted from a \code{DuckDBDataFrame} object.
 }
+\section{Accessors}{
+
+In the code snippets below, \code{x} is a \code{DuckDBColumn} object:
+\describe{
+  \item{\code{length(x)}:}{
+    Get the number of elements in \code{x}.
+  }
+  \item{\code{names(x)}:}{
+    Get the names of the elements of \code{x}.
+  }
+  \item{\code{type(x)}:}{
+    Get the data type of the elements of \code{x}.
+  }
+}
+}
+
+\section{Coercion}{
+
+\describe{
+  \item{\code{as.vector(x)}:}{
+    Coerces \code{x} to a \code{vector}.
+  }
+}
+}
+
+\section{Subsetting}{
+
+In the code snippets below, \code{x} is a \code{DuckDBColumn} object:
+\describe{
+  \item{\code{x[i]}:}{
+    Returns either a \code{DuckDBColumn} object containing the selected
+    elements.
+  }
+  \item{\code{head(x, n = 6L)}:}{
+    If \code{n} is non-negative, returns the first n elements of \code{x}.
+    If \code{n} is negative, returns all but the last \code{abs(n)} elements
+    of \code{x}.
+  }
+  \item{\code{tail(x, n = 6L)}:}{
+    If \code{n} is non-negative, returns the last n elements of \code{x}.
+    If \code{n} is negative, returns all but the first \code{abs(n)} elements
+    of \code{x}.
+  }
+}
+}
+
 \author{
 Patrick Aboyoun
 }
+\keyword{classes}
+\keyword{methods}
