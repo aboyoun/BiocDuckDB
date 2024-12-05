@@ -1,7 +1,84 @@
-#' DuckDB-backed GenomicRangesList
+#' DuckDBGRangesList objects
 #'
 #' @description
-#' Create a DuckDB-backed \linkS4class{GenomicRangesList} object.
+#' The DuckDBDataFrame class extends both \linkS4class{GRangesList} and
+#' \linkS4class{DuckDBList} to represent a DuckDB table as a
+#' \linkS4class{GRangesList} object.
+#'
+#' @details
+#' The DuckDBGRangesList class extends the \linkS4class{GRangesList} instead of
+#' \linkS4class{GenomicRangesList} class because the \code{rowRanges} slot
+#' accepts either a \linkS4class{GenomicRanges} object or a
+#' \linkS4class{GRangesList} object. As a result, it is necessary to override
+#' certain methods that were inherited from \linkS4class{GRangesList} that would
+#' have ideally been inherited from the \linkS4class{DuckDBList} class.
+#'
+#' @section Constructor:
+#' \describe{
+#'   \item{\code{split(x, f)}:}{
+#'     Creates a DuckDBGRangesList object.
+#'     \describe{
+#'       \item{\code{x}}{
+#'         A DuckDBGRanges object to split.
+#'       }
+#'       \item{\code{f}}{
+#'         A DuckDBColumn object to split \code{x} by.
+#'       }
+#'     }
+#'   }
+#' }
+#'
+#' @section Accessors:
+#' In the code snippets below, \code{x} is a DuckDBGRangesList object:
+#' \describe{
+#'   \item{\code{length(x)}:}{
+#'     Get the number of elements in \code{x}.
+#'   }
+#'   \item{\code{names(x)}, \code{names(x) <- value}:}{
+#'     Get or set the names of the elements of \code{x}.
+#'   }
+#'   \item{\code{mcols(x)}, \code{mcols(x) <- value}:}{
+#'      Get or set the metadata columns.
+#'   }
+#'   \item{\code{elementNROWS(x)}:}{
+#'     Get the length (or nb of row for a matrix-like object) of each of the
+#'     elements.
+#'   }
+#' }
+#'
+#' @section Coercion:
+#' In the code snippets below, \code{x} is a DuckDBGRangesList object:
+#' \describe{
+#'   \item{\code{unlist(x)}:}{
+#'     Returns the underlying DuckDBGRanges object.
+#'   }
+#' }
+#'
+#' @section Subsetting:
+#' In the code snippets below, \code{x} is a DuckDBGRangesList object:
+#' \describe{
+#'   \item{\code{x[i]}:}{
+#'     Returns a DuckDBGRangesList object containing the selected elements.
+#'   }
+#'   \item{\code{x[[i]]}:}{
+#'     Return the selected DuckDBGRanges by \code{i}, where \code{i} is an
+#'     numeric or character vector of length 1.
+#'   }
+#'   \item{\code{x$name}:}{
+#'     Similar to \code{x[[name]]}, but \code{name} is taken literally as an
+#'     element name.
+#'   }
+#'   \item{\code{head(x, n = 6L)}:}{
+#'     If \code{n} is non-negative, returns the first n elements of \code{x}.
+#'     If \code{n} is negative, returns all but the last \code{abs(n)} elements
+#'     of \code{x}.
+#'   }
+#'   \item{\code{tail(x, n = 6L)}:}{
+#'     If \code{n} is non-negative, returns the last n elements of \code{x}.
+#'     If \code{n} is negative, returns all but the first \code{abs(n)} elements
+#'     of \code{x}.
+#'   }
+#' }
 #'
 #' @author Patrick Aboyoun
 #'
@@ -28,6 +105,8 @@
 #'
 #' @include DuckDBGRanges-class.R
 #' @include DuckDBList-class.R
+#'
+#' @keywords classes methods
 #'
 #' @name DuckDBGRangesList-class
 NULL

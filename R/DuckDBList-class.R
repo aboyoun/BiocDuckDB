@@ -13,7 +13,7 @@
 #' expression rather than a \linkS4class{PartitioningByEnd} object.
 #'
 #' @section Accessors:
-#' In the code snippets below, \code{x} is a DuckDBColumn object:
+#' In the code snippets below, \code{x} is a DuckDBList object:
 #' \describe{
 #'   \item{\code{length(x)}:}{
 #'     Get the number of elements in \code{x}.

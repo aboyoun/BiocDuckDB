@@ -19,7 +19,7 @@ The DuckDBDataFrame class extends both \linkS4class{SplitDataFrameList} and
 
 \describe{
   \item{\code{split(x, f)}:}{
-    Creates a DuckDBDataFrame object.
+    Creates a DuckDBDataFrameList object.
     \describe{
       \item{\code{x}}{
         A DuckDBDataFrame object to split.
@@ -61,6 +61,16 @@ In the code snippets below, \code{x} is a DuckDBDataFrameList object:
     The metadata is common across all elements of \code{x}. Note that calling
     \code{mcols(x)} returns the metadata on the \linkS4class{DataFrame}
     elements of \code{x}.
+  }
+}
+}
+
+\section{Coercion}{
+
+In the code snippets below, \code{x} is a DuckDBDataFrameList object:
+\describe{
+  \item{\code{unlist(x)}:}{
+    Returns the underlying DuckDBDataFrame object.
   }
 }
 }
