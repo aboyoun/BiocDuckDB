@@ -10,29 +10,7 @@
 \alias{[,DuckDBArray,ANY,ANY,ANY-method}
 \alias{aperm,DuckDBArray-method}
 \alias{t,DuckDBArray-method}
-\title{DuckDB tables as DelayedArray objects}
-\usage{
-DuckDBArray(conn, datacols, keycols, type = NULL)
-}
-\arguments{
-\item{conn}{Either a character vector containing the paths to parquet, csv,
-or gzipped csv data files; a string that defines a duckdb \code{read_*} data
-source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
-object.}
-
-\item{datacols}{Either a string specifying the column from \code{conn} or a
-named \code{expression} that will be evaluated in the context of \code{conn}
-that defines the values in the array.}
-
-\item{keycols}{Either a character vector of column names from \code{conn}
-that will specify the dimension names, or a named list of character vectors
-where the names of the list specify the dimension names and the character
-vectors set the distinct values for the dimension names.}
-
-\item{type}{String specifying the type of the data values; one of
-\code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
-\code{"character"}. If \code{NULL}, it is determined by inspecting the data.}
-}
+\title{DuckDBArray objects}
 \description{
 The DuckDBArray class is a \link[DelayedArray]{DelayedArray} subclass
 for representing and operating on a DuckDB table.
@@ -40,6 +18,84 @@ for representing and operating on a DuckDB table.
 All the operations available for \link[DelayedArray]{DelayedArray}
 objects work on DuckDBArray objects.
 }
+\section{Constructor}{
+
+\describe{
+  \item{\code{DuckDBArray(conn, datacols, keycols, type = NULL)}:}{
+    Creates a DuckDBDataFrame object.
+    \describe{
+      \item{\code{conn}}{
+        Either a character vector containing the paths to parquet, csv, or
+        gzipped csv data files; a string that defines a duckdb \code{read_*}
+        data source; a DuckDBDataFrame object; or a tbl_duckdb_connection
+        object.
+      }
+      \item{\code{datacols}}{
+        Either a string specifying the column from \code{conn} or a named
+        \code{expression} that will be evaluated in the context of
+        \code{conn} that defines the values in the array.
+      }
+      \item{\code{keycols}}{
+        Either a character vector of column names from \code{conn} that will
+        specify the dimension names, or a named list of character vectors
+        where the names of the list specify the dimension names and the
+        character vectors set the distinct values for the dimension names.
+      }
+      \item{\code{type}}{
+        String specifying the type of the data values; one of
+        \code{"logical"}, \code{"integer"}, \code{"integer64"},
+        \code{"double"}, or \code{"character"}. If \code{NULL}, it is
+        determined by inspecting the data.
+      }
+    }
+  }
+}
+}
+
+\section{Accessors}{
+
+In the code snippets below, \code{x} is a DuckDBArray object:
+\describe{
+  \item{\code{dim(x)}:}{
+    An integer vector of the array dimensions.
+  }
+  \item{\code{dimnames(x)}:}{
+    List of array dimension names.
+  }
+  \item{\code{type(x)}, \code{type(x) <- value}:}{
+    Get or set the data type of the array elements; one of \code{"logical"},
+    \code{"integer"}, \code{"integer64"}, \code{"double"}, or
+    \code{"character"}.
+  }
+}
+}
+
+\section{Subsetting}{
+
+In the code snippets below, \code{x} is a DuckDBArray object:
+\describe{
+  \item{\code{x[i, j, ..., drop = TRUE]}:}{
+    Returns a new DuckDBArray object. Empty dimensions are dropped if
+    \code{drop = TRUE}.
+  }
+}
+}
+
+\section{Transposition}{
+
+In the code snippets below, \code{x} is a DuckDBArray object:
+\describe{
+  \item{\code{aperm(a, perm)}:}{
+    Returns a new DuckDBArray object with the dimensions permuted
+    according to the \code{perm} vector.
+  }
+  \item{\code{t(x)}:}{
+    For two-dimensional arrays, returns a new DuckDBArray object with the
+    dimensions transposed.
+  }
+}
+}
+
 \examples{
 # Create a data.frame from the Titanic data
 df <- do.call(expand.grid, c(dimnames(Titanic), stringsAsFactors = FALSE))
@@ -60,3 +116,5 @@ pqarray <- DuckDBArray(tf, datacols = "fate", keycols = c("Class", "Sex", "Age",
 \author{
 Patrick Aboyoun
 }
+\keyword{classes}
+\keyword{methods}
