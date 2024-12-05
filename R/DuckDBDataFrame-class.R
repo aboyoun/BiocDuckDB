@@ -1,26 +1,25 @@
 #' DuckDBDataFrame objects
 #'
 #' @description
-#' The \code{DuckDBTable} class extends both \link{DuckDBTable} and
-#' \link{DataFrame} to represent a DuckDB table as a \link{DataFrame}
-#' object.
+#' The DuckDBTable class extends both \linkS4class{DuckDBTable} and
+#' \linkS4class{DataFrame} to represent a DuckDB table as a
+#' \linkS4class{DataFrame} object.
 #'
 #' @details
-#' \code{DuckDBDataFrame} adds \code{DataFrame} semantics to a DuckDB table.
-#' It achieves a balance between the flexibility of a
-#' \code{tbl_duckdb_connection} object and the familiarity of a
-#' \code{DataFrame} object.
+#' DuckDBDataFrame adds \linkS4class{DataFrame} semantics to a DuckDB table.
+#' It achieves a balance between the flexibility of a tbl_duckdb_connection
+#' object and the familiarity of a \linkS4class{DataFrame} object.
 #'
 #' @section Constructor:
 #' \describe{
 #'   \item{\code{DuckDBDataFrame(conn, datacols = colnames(conn), keycols = NULL, type = NULL)}:}{
-#'     Creates a \code{DuckDBDataFrame} object.
+#'     Creates a DuckDBDataFrame object.
 #'     \describe{
 #'       \item{\code{conn}}{
 #'         Either a character vector containing the paths to parquet, csv, or
 #'         gzipped csv data files; a string that defines a duckdb \code{read_*}
-#'         data source; a \code{DuckDBDataFrame} object; or a
-#'         \code{tbl_duckdb_connection} object.
+#'         data source; a DuckDBDataFrame object; or a tbl_duckdb_connection
+#'         object.
 #'       }
 #'       \item{\code{datacols}}{
 #'         Either a character vector of column names from \code{conn} or a
@@ -45,7 +44,7 @@
 #' }
 #'
 #' @section Accessors:
-#' In the code snippets below, \code{x} is a \code{DuckDBDataFrame} object:
+#' In the code snippets below, \code{x} is a DuckDBDataFrame object:
 #' \describe{
 #'   \item{\code{dim(x)}:}{
 #'     Length two integer vector defined as \code{c(nrow(x), ncol(x))}.
@@ -76,14 +75,14 @@
 #' }
 #'
 #' @section Subsetting:
-#' In the code snippets below, \code{x} is a \code{DuckDBDataFrame} object:
+#' In the code snippets below, \code{x} is a DuckDBDataFrame object:
 #' \describe{
 #'   \item{\code{x[i, j, drop = TRUE]}:}{
-#'     Returns either a new \code{DuckDBDataFrame} object or a
-#'     \code{DuckDBColumn} if selecting a single column and \code{drop = TRUE}.
+#'     Returns either a new DuckDBDataFrame object or a DuckDBColumn if
+#'     selecting a single column and \code{drop = TRUE}.
 #'   }
 #'   \item{\code{x[[i]]}:}{
-#'     Extracts a \code{DuckDBColumn} object from \code{x}.
+#'     Extracts a DuckDBColumn object from \code{x}.
 #'   }
 #'   \item{\code{x[[i]] <- value}:}{
 #'    Replaces column \code{i} in \code{x} with \code{value}.
@@ -99,7 +98,7 @@
 #'     \code{x}.
 #'   }
 #'   \item{\code{subset(x, subset, select, drop = FALSE)}:}{
-#'     Return a new \code{DuckDBDataFrame} using:
+#'     Return a new DuckDBDataFrame using:
 #'     \describe{
 #'       \item{subset}{logical expression indicating rows to keep, where missing
 #'          values are taken as FALSE.}
@@ -112,20 +111,20 @@
 #' @section Combining:
 #' \describe{
 #'   \item{\code{cbind(...)}:}{
-#'     Creates a new \code{DuckDBDataFrame} object by concatenating the columns
-#'     of the input objects.
-#'     The returned \code{DuckDBDataFrame} object concatenates the metadata
-#'     across the input objects.
-#'     The metadata columns of the returned \code{DuckDBDataFrame} object are
-#'     obtained by combining the metadata columns of the input object with
+#'     Creates a new DuckDBDataFrame object by concatenating the columns of the
+#'     input objects.
+#'     The returned DuckDBDataFrame object concatenates the metadata across the
+#'     input objects.
+#'     The metadata columns of the returned DuckDBDataFrame object are obtained
+#'     by combining the metadata columns of the input object with
 #'     \code{combineRows()}.
 #'   }
 #' }
 #'
 #' @section Displaying:
-#' The \code{show()} method for \code{DuckDBDataFrame} objects obeys global
-#' options \code{showHeadLines} and \code{showTailLines} for controlling the
-#' number of head and tail rows to display.
+#' The \code{show()} method for DuckDBDataFrame objects obeys global options
+#' \code{showHeadLines} and \code{showTailLines} for controlling the number of
+#' head and tail rows to display.
 #'
 #' @author Patrick Aboyoun, Aaron Lun
 #'

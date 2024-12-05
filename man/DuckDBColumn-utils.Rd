@@ -28,7 +28,7 @@ Common operations on \linkS4class{DuckDBColumn} objects.
 }
 \section{Group Generics}{
 
-\code{DuckDBColumn} objects have support for S4 group generic functionality:
+DuckDBColumn objects have support for S4 group generic functionality:
 \describe{
   \item{\code{Arith}}{\code{"+"}, \code{"-"}, \code{"*"}, \code{"^"},
     \code{"\%\%"}, \code{"\%/\%"}, \code{"/"}}
@@ -51,7 +51,7 @@ Common operations on \linkS4class{DuckDBColumn} objects.
 
 \section{Numerical Data Methods}{
 
-In the code snippets below, \code{x} is a \code{DuckDBColumn} object:
+In the code snippets below, \code{x} is a DuckDBColumn object:
 \describe{
   \item{\code{is.finite(x)}:}{
     Returns a DuckDBColumn containing logicals that indicate which values are
@@ -106,14 +106,14 @@ In the code snippets below, \code{x} is a \code{DuckDBColumn} object:
 
 \section{General Methods}{
 
-In the code snippets below, \code{x} is a \code{DuckDBColumn} object:
+In the code snippets below, \code{x} is a DuckDBColumn object:
 \describe{
   \item{\code{unique(x)}:}{
-    Returns a \code{DuckDBColumn} containing the distinct rows.
+    Returns a DuckDBColumn containing the distinct rows.
   }
   \item{\code{x \%in\% table}:}{
-    Returns a \code{DuckDBColumn} containing logicals that indicate the
-    elements of \code{x} in \code{table}.
+    Returns a DuckDBColumn containing logicals that indicate the elements of
+    \code{x} in \code{table}.
   }
   \item{\code{table(...)}:}{
     Returns a table containing the counts across the distinct values.
@@ -123,11 +123,11 @@ In the code snippets below, \code{x} is a \code{DuckDBColumn} object:
 
 \section{Sparisty Methods}{
 
-In the code snippets below, \code{x} is a \code{DuckDBColumn} object:
+In the code snippets below, \code{x} is a DuckDBColumn object:
 \describe{
   \item{\code{is_nonzero(x)}:}{
-    Returns a \code{DuckDBColumn} containing logicals that indicate if the
-    elements of \code{x} are non-zero.
+    Returns a DuckDBColumn containing logicals that indicate if the elements
+    of \code{x} are non-zero.
   }
   \item{\code{nzcount(x)}:}{
     Returns the total number of non-zero values.

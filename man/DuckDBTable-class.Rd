@@ -22,11 +22,11 @@
 \alias{show,DuckDBTable-method}
 \title{DuckDBTable objects}
 \description{
-The \code{DuckDBTable} class extends the \link{RectangularData} virtual
-class for DuckDB tables by wrapping a \code{tbl_duckdb_connection} object.
+The DuckDBTable class extends the \linkS4class{RectangularData} virtual
+class for DuckDB tables by wrapping a tbl_duckdb_connection object.
 }
 \details{
-The \code{DuckDBTable} class provides a way to define a DuckDB table as a
+The DuckDBTable class provides a way to define a DuckDB table as a
 \linkS4class{RectangularData} object. It supports \emph{standard 2D API}
 such as \code{dim()}, \code{nrow()}, \code{ncol()}, \code{dimnames()},
 \code{x[i, j]} and \code{cbind()}, but does not support \code{rbind()}.
@@ -35,13 +35,13 @@ such as \code{dim()}, \code{nrow()}, \code{ncol()}, \code{dimnames()},
 
 \describe{
   \item{\code{DuckDBTable(conn, datacols = colnames(conn), keycols = NULL, type = NULL)}:}{
-    Creates a \code{DuckDBTable} object.
+    Creates a DuckDBTable object.
     \describe{
       \item{\code{conn}}{
         Either a character vector containing the paths to parquet, csv, or
         gzipped csv data files; a string that defines a duckdb \code{read_*}
-        data source; a \code{DuckDBDataFrame} object; or a
-        \code{tbl_duckdb_connection} object.
+        data source; a DuckDBDataFrame object; or a tbl_duckdb_connection
+        object.
       }
       \item{\code{datacols}}{
         Either a character vector of column names from \code{conn} or a
@@ -68,7 +68,7 @@ such as \code{dim()}, \code{nrow()}, \code{ncol()}, \code{dimnames()},
 
 \section{Accessors}{
 
-In the code snippets below, \code{x} is a \code{DuckDBTable} object:
+In the code snippets below, \code{x} is a DuckDBTable object:
 \describe{
   \item{\code{dim(x)}:}{
     Length two integer vector defined as \code{c(nrow(x), ncol(x))}.
@@ -100,11 +100,11 @@ In the code snippets below, \code{x} is a \code{DuckDBTable} object:
 
 \section{Subsetting}{
 
-In the code snippets below, \code{x} is a \code{DuckDBTable} object:
+In the code snippets below, \code{x} is a DuckDBTable object:
 \describe{
   \item{\code{x[i, j]}:}{
-    Return a new \code{DuckDBTable} of the same class as \code{x}
-    made of the selected rows and columns.
+    Return a new DuckDBTable of the same class as \code{x} made of the
+    selected rows and columns.
   }
 }
 }

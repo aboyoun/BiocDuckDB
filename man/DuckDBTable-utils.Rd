@@ -27,11 +27,11 @@
 \alias{is_sparse,DuckDBTable-method}
 \title{Common operations on DuckDBTable objects}
 \description{
-Common operations on \link{DuckDBTable} objects.
+Common operations on \linkS4class{DuckDBTable} objects.
 }
 \section{Group Generics}{
 
-\code{DuckDBTable} objects have support for S4 group generic functionality:
+DuckDBTable objects have support for S4 group generic functionality:
 \describe{
   \item{\code{Arith}}{\code{"+"}, \code{"-"}, \code{"*"}, \code{"^"},
     \code{"\%\%"}, \code{"\%/\%"}, \code{"/"}}
@@ -54,7 +54,7 @@ Common operations on \link{DuckDBTable} objects.
 
 \section{Numerical Data Methods}{
 
-In the code snippets below, \code{x} is a \code{DuckDBTable} object:
+In the code snippets below, \code{x} is a DuckDBTable object:
 \describe{
   \item{\code{is.finite(x)}:}{
     Returns a DuckDBTable containing logicals that indicate which values are
@@ -123,13 +123,13 @@ In the code snippets below, \code{x} is a \code{DuckDBTable} object:
 
 \section{General Methods}{
 
-In the code snippets below, \code{x} is a \code{DuckDBTable} object:
+In the code snippets below, \code{x} is a DuckDBTable object:
 \describe{
   \item{\code{unique(x)}:}{
-    Returns a \code{DuckDBTable} containing the distinct rows.
+    Returns a DuckDBTable containing the distinct rows.
   }
   \item{\code{x \%in\% table}:}{
-    Returns a \code{DuckDBTable} containing logicals that indicate if the
+    Returns a DuckDBTable containing logicals that indicate if the
     values in each of the columns of \code{x} are in \code{table}.
   }
   \item{\code{table(...)}:}{
@@ -140,10 +140,10 @@ In the code snippets below, \code{x} is a \code{DuckDBTable} object:
 
 \section{Sparisty Methods}{
 
-In the code snippets below, \code{x} is a \code{DuckDBTable} object:
+In the code snippets below, \code{x} is a DuckDBTable object:
 \describe{
   \item{\code{is_nonzero(x)}:}{
-    Returns a \code{DuckDBTable} containing logicals that indicate if the
+    Returns a DuckDBTable containing logicals that indicate if the
     values in each of the columns of \code{x} are non-zero.
   }
   \item{\code{nzcount(x)}:}{

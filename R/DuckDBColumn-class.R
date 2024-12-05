@@ -1,11 +1,11 @@
 #' DuckDBColumn objects
 #'
 #' @description
-#' The \code{DuckDBColumn} class extends \link{Vector} to represent a column
-#' extracted from a \code{DuckDBDataFrame} object.
+#' The DuckDBColumn class extends \linkS4class{Vector} to represent a column
+#' extracted from a \linkS4class{DuckDBDataFrame} object.
 #'
 #' @section Accessors:
-#' In the code snippets below, \code{x} is a \code{DuckDBColumn} object:
+#' In the code snippets below, \code{x} is a DuckDBColumn object:
 #' \describe{
 #'   \item{\code{length(x)}:}{
 #'     Get the number of elements in \code{x}.
@@ -25,11 +25,10 @@
 #' }
 #'
 #' @section Subsetting:
-#' In the code snippets below, \code{x} is a \code{DuckDBColumn} object:
+#' In the code snippets below, \code{x} is a DuckDBColumn object:
 #' \describe{
 #'   \item{\code{x[i]}:}{
-#'     Returns either a \code{DuckDBColumn} object containing the selected
-#'     elements.
+#'     Returns either a DuckDBColumn object containing the selected elements.
 #'   }
 #'   \item{\code{head(x, n = 6L)}:}{
 #'     If \code{n} is non-negative, returns the first n elements of \code{x}.
