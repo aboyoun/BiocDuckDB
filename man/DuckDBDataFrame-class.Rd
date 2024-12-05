@@ -25,43 +25,146 @@
 \alias{as.env,DuckDBDataFrame-method}
 \alias{makeNakedCharacterMatrixForDisplay,DuckDBDataFrame-method}
 \alias{show,DuckDBDataFrame-method}
-\title{DuckDB-backed DataFrame}
-\usage{
-DuckDBDataFrame(conn, datacols = colnames(conn), keycols = NULL, type = NULL)
-}
-\arguments{
-\item{conn}{Either a character vector containing the paths to parquet, csv,
-or gzipped csv data files; a string that defines a duckdb \code{read_*} data
-source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
-object.}
-
-\item{datacols}{Either a character vector of column names from \code{conn}
-or a named \code{expression} that will be evaluated in the context of `conn`
-that defines the data.}
-
-\item{keycols}{An optional character vector of column names from \code{conn}
-that will define the primary key, or a named list of character vectors where
-the names of the list define the key and the character vectors set the
-distinct values for the key. If missing, a \code{row_number} column is
-created as an identifier.}
-
-\item{type}{An optional named character vector where the names specify the
-column names and the values specify the column type; one of
-\code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
-\code{"character"}.}
-}
-\value{
-A DuckDBDataFrame where each column is a \linkS4class{DuckDBColumn}.
-}
+\title{DuckDBDataFrame objects}
 \description{
-Create a DuckDB-backed \linkS4class{DataFrame} object.
+The \code{DuckDBTable} class extends both \link{DuckDBTable} and
+\link{DataFrame} to represent a DuckDB table as a \link{DataFrame}
+object.
 }
 \details{
-The DuckDBDataFrame is essentially just a \linkS4class{DataFrame} of \linkS4class{DuckDBColumn} objects.
-It is primarily useful for indicating that the R representation is consistent with the underlying data
-(e.g., no delayed filter/mutate operations have been applied, no data has been added from other files).
-Thus, users can specialize code paths for a DuckDBDataFrame to operate directly on the underlying data.
+\code{DuckDBDataFrame} adds \code{DataFrame} semantics to a DuckDB table.
+It achieves a balance between the flexibility of a
+\code{tbl_duckdb_connection} object and the familiarity of a
+\code{DataFrame} object.
 }
+\section{Constructor}{
+
+\describe{
+  \item{\code{DuckDBDataFrame(conn, datacols = colnames(conn), keycols = NULL, type = NULL)}:}{
+    Creates a \code{DuckDBDataFrame} object.
+    \describe{
+      \item{\code{conn}}{
+        Either a character vector containing the paths to parquet, csv, or
+        gzipped csv data files; a string that defines a duckdb \code{read_*}
+        data source; a \code{DuckDBDataFrame} object; or a
+        \code{tbl_duckdb_connection} object.
+      }
+      \item{\code{datacols}}{
+        Either a character vector of column names from \code{conn} or a
+        named \code{expression} that will be evaluated in the context of
+        \code{conn} that defines the data.
+      }
+      \item{\code{keycols}}{
+        An optional character vector of column names from \code{conn} that
+        will define the primary key, or a named list of character vectors
+        where the names of the list define the key and the character vectors
+        set the distinct values for the key. If missing, a \code{row_number}
+        column is created as an identifier.
+      }
+      \item{\code{type}}{
+        An optional named character vector where the names specify the
+        column names and the values specify the column type; one of
+        \code{"logical"}, \code{"integer"}, \code{"integer64"},
+        \code{"double"}, or \code{"character"}.
+      }
+    }
+  }
+}
+}
+
+\section{Accessors}{
+
+In the code snippets below, \code{x} is a \code{DuckDBDataFrame} object:
+\describe{
+  \item{\code{dim(x)}:}{
+    Length two integer vector defined as \code{c(nrow(x), ncol(x))}.
+  }
+  \item{\code{nrow(x)}, \code{ncol(x)}:}{
+    Get the number of rows and columns, respectively.
+  }
+  \item{\code{NROW(x)}, \code{NCOL(x)}:}{
+    Same as \code{nrow(x)} and \code{ncol(x)}, respectively.
+  }
+  \item{\code{dimnames(x)}:}{
+    Length two list of character vectors defined as
+    \code{list(rownames(x), colnames(x))}.
+  }
+  \item{\code{rownames(x)}, \code{colnames(x)}:}{
+    Get the names of the rows and columns, respectively.
+  }
+}
+}
+
+\section{Coercion}{
+
+\describe{
+  \item{\code{as.data.frame(x)}:}{
+    Coerces \code{x} to a \code{data.frame}.
+  }
+  \item{\code{as(from, "data.frame")}:}{
+    Calls \code{as.data.frame(from)}.
+  }
+}
+}
+
+\section{Subsetting}{
+
+In the code snippets below, \code{x} is a \code{DuckDBDataFrame} object:
+\describe{
+  \item{\code{x[i, j, drop = TRUE]}:}{
+    Returns either a new \code{DuckDBDataFrame} object or a
+    \code{DuckDBColumn} if selecting a single column and \code{drop = TRUE}.
+  }
+  \item{\code{x[[i]]}:}{
+    Extracts a \code{DuckDBColumn} object from \code{x}.
+  }
+  \item{\code{x[[i]] <- value}:}{
+   Replaces column \code{i} in \code{x} with \code{value}.
+  }
+  \item{\code{head(x, n = 6L)}:}{
+    If \code{n} is non-negative, returns the first n rows of \code{x}.
+    If \code{n} is negative, returns all but the last \code{abs(n)} rows of
+    \code{x}.
+  }
+  \item{\code{tail(x, n = 6L)}:}{
+    If \code{n} is non-negative, returns the last n rows of \code{x}.
+    If \code{n} is negative, returns all but the first \code{abs(n)} rows of
+    \code{x}.
+  }
+  \item{\code{subset(x, subset, select, drop = FALSE)}:}{
+    Return a new \code{DuckDBDataFrame} using:
+    \describe{
+      \item{subset}{logical expression indicating rows to keep, where missing
+         values are taken as FALSE.}
+       \item{select}{expression indicating columns to keep.}
+       \item{drop}{passed on to \code{[} indexing operator.}
+    }
+  }
+}
+}
+
+\section{Combining}{
+
+\describe{
+  \item{\code{cbind(...)}:}{
+    Creates a new \code{DuckDBDataFrame} object by concatenating the columns
+    of the input objects.
+    The returned \code{DuckDBDataFrame} object concatenates the metadata
+    across the input objects.
+    The metadata columns of the returned \code{DuckDBDataFrame} object are
+    obtained by combining the metadata columns of the input object with
+    \code{combineRows()}.
+  }
+}
+}
+
+\section{Displaying}{
+
+The \code{show()} method for \code{DuckDBDataFrame} objects obeys global
+options \code{showHeadLines} and \code{showTailLines} for controlling the
+number of head and tail rows to display.
+}
+
 \examples{
 # Mocking up a file:
 tf <- tempfile(fileext = ".parquet")
@@ -89,3 +192,5 @@ class(combined2)
 \author{
 Patrick Aboyoun, Aaron Lun
 }
+\keyword{classes}
+\keyword{methods}
