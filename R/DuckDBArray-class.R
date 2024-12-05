@@ -10,7 +10,7 @@
 #' @section Constructor:
 #' \describe{
 #'   \item{\code{DuckDBArray(conn, datacols, keycols, type = NULL)}:}{
-#'     Creates a DuckDBDataFrame object.
+#'     Creates a DuckDBArray object.
 #'     \describe{
 #'       \item{\code{conn}}{
 #'         Either a character vector containing the paths to parquet, csv, or

@@ -1,4 +1,4 @@
-#' DuckDB tables as DelayedMatrix objects
+#' DuckDBMatrix objects
 #'
 #' @description
 #' The DuckDBMatrix class is a \link[DelayedArray]{DelayedMatrix} subclass
@@ -7,28 +7,87 @@
 #' All the operations available for \link[DelayedArray]{DelayedMatrix}
 #' objects work on DuckDBMatrix objects.
 #'
-#' @param conn Either a character vector containing the paths to parquet, csv,
-#' or gzipped csv data files; a string that defines a duckdb \code{read_*} data
-#' source; a \code{DuckDBDataFrame} object; or a \code{tbl_duckdb_connection}
-#' object.
-#' @param datacols Either a string specifying the column from \code{conn} or a
-#' named \code{expression} that will be evaluated in the context of \code{conn}
-#' that defines the values in the matrix.
-#' @param row Either a string that specifies the column in \code{conn} that
-#' specifies the row names of the matrix, or a named list containing a single
-#' character vector that defines the column in \code{conn} for the row names
-#' and its values.
-#' @param col Either a string that specifies the column in \code{conn} that
-#' specifies the column names of the matrix, or a named list containing a single
-#' character vector that defines the column in \code{conn} for the column names
-#' and its values.
-#' @param keycols An optional character vector that define the names of the
-#' columns in \code{conn} for the rows and columns of the matrix, or a named
-#' list of character vectors where the names of the list define rows and columns
-#' and the character vectors define distinct values for the rows and columns.
-#' @param type String specifying the type of the data values; one of
-#' \code{"logical"}, \code{"integer"}, \code{"integer64"}, \code{"double"}, or
-#' \code{"character"}. If \code{NULL}, it is determined by inspecting the data.
+#' @section Constructor:
+#' \describe{
+#'   \item{\code{DuckDBMatrix(conn, datacols, row, col, keycols = c(row, col), type = NULL)}:}{
+#'     Creates a DuckDBMatrix object.
+#'     \describe{
+#'       \item{\code{conn}}{
+#'         Either a character vector containing the paths to parquet, csv, or
+#'         gzipped csv data files; a string that defines a duckdb \code{read_*}
+#'         data source; a DuckDBDataFrame object; or a tbl_duckdb_connection
+#'         object.
+#'       }
+#'       \item{\code{datacols}}{
+#'         Either a string specifying the column from \code{conn} or a named
+#'         \code{expression} that will be evaluated in the context of
+#'         \code{conn} that defines the values in the matrix.
+#'       }
+#'       \item{\code{row}}{
+#'         Either a string that specifies the column in \code{conn} that
+#'         specifies the row names of the matrix, or a named list containing a
+#'         single character vector that defines the column in \code{conn} for
+#'         the row names and its values.
+#'       }
+#'       \item{\code{col}}{
+#'          Either a string that specifies the column in \code{conn} that
+#'          specifies the column names of the matrix, or a named list containing
+#'          a single character vector that defines the column in \code{conn} for
+#'          the column names and its values.
+#'       }
+#'       \item{\code{keycols}}{
+#'         An optional character vector that define the names of the columns in
+#'         \code{conn} for the rows and columns of the matrix, or a named list
+#'         of character vectors where the names of the list define rows and
+#'         columns and the character vectors define distinct values for the rows
+#'         and columns.
+#'       }
+#'       \item{\code{type}}{
+#'         String specifying the type of the data values; one of
+#'         \code{"logical"}, \code{"integer"}, \code{"integer64"},
+#'         \code{"double"}, or \code{"character"}. If \code{NULL}, it is
+#'         determined by inspecting the data.
+#'       }
+#'     }
+#'   }
+#' }
+#'
+#' @section Accessors:
+#' In the code snippets below, \code{x} is a DuckDBMatrix object:
+#' \describe{
+#'   \item{\code{dim(x)}:}{
+#'     An integer vector of the array dimensions.
+#'   }
+#'   \item{\code{dimnames(x)}:}{
+#'     List of array dimension names.
+#'   }
+#'   \item{\code{type(x)}, \code{type(x) <- value}:}{
+#'     Get or set the data type of the array elements; one of \code{"logical"},
+#'     \code{"integer"}, \code{"integer64"}, \code{"double"}, or
+#'     \code{"character"}.
+#'   }
+#' }
+#'
+#' @section Subsetting:
+#' In the code snippets below, \code{x} is a DuckDBMatrix object:
+#' \describe{
+#'   \item{\code{x[i, j, ..., drop = TRUE]}:}{
+#'     Returns a new DuckDBMatrix object. Empty dimensions are dropped if
+#'     \code{drop = TRUE}.
+#'   }
+#' }
+#'
+#' @section Transposition:
+#' In the code snippets below, \code{x} is a DuckDBMatrix object:
+#' \describe{
+#'   \item{\code{aperm(a, perm)}:}{
+#'     Returns a new DuckDBMatrix object with the dimensions permuted
+#'     according to the \code{perm} vector.
+#'   }
+#'   \item{\code{t(x)}:}{
+#'     Returns a new DuckDBMatrix object with the rows and columns transposed.
+#'   }
+#' }
 #'
 #' @author Patrick Aboyoun
 #'
@@ -56,6 +115,8 @@
 #' [,DuckDBMatrix,ANY,ANY,ANY-method
 #'
 #' @include DuckDBArray-class.R
+#'
+#' @keywords classes methods
 #'
 #' @name DuckDBMatrix-class
 NULL
@@ -88,7 +149,6 @@ setValidity2("DuckDBMatrix", function(x) {
 #' @export
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
-#' @rdname DuckDBMatrix-class
 DuckDBMatrix <- function(conn, datacols, row, col, keycols = c(row, col), type = NULL) {
     if (!missing(row) && isSingleString(row)) {
         row <- setNames(list(NULL), row)

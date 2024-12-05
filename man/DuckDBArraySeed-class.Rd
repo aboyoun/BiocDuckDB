@@ -30,7 +30,7 @@ more information.
 
 \describe{
   \item{\code{DuckDBArraySeed(conn, datacols, keycols, type = NULL)}:}{
-    Creates a DuckDBDataFrame object.
+    Creates a DuckDBArraySeed object.
     \describe{
       \item{\code{conn}}{
         Either a character vector containing the paths to parquet, csv, or
