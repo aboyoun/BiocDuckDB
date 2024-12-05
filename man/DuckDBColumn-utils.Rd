@@ -22,10 +22,121 @@
 \alias{table,DuckDBColumn-method}
 \alias{is_nonzero,DuckDBColumn-method}
 \alias{nzcount,DuckDBColumn-method}
-\title{DuckDBColumn Utilities}
+\title{Common operations on DuckDBColumn objects}
 \description{
-DuckDBColumn Utilities
+Common operations on \linkS4class{DuckDBColumn} objects.
 }
+\section{Group Generics}{
+
+\code{DuckDBColumn} objects have support for S4 group generic functionality:
+\describe{
+  \item{\code{Arith}}{\code{"+"}, \code{"-"}, \code{"*"}, \code{"^"},
+    \code{"\%\%"}, \code{"\%/\%"}, \code{"/"}}
+  \item{\code{Compare}}{\code{"=="}, \code{">"}, \code{"<"}, \code{"!="},
+    \code{"<="}, \code{">="}}
+  \item{\code{Logic}}{\code{"&"}, \code{"|"}}
+  \item{\code{Ops}}{\code{"Arith"}, \code{"Compare"}, \code{"Logic"}}
+  \item{\code{Math}}{\code{"abs"}, \code{"sign"}, \code{"sqrt"},
+    \code{"ceiling"}, \code{"floor"}, \code{"trunc"}, \code{"log"},
+    \code{"log10"}, \code{"log2"}, \code{"acos"}, \code{"acosh"},
+    \code{"asin"}, \code{"asinh"}, \code{"atan"}, \code{"atanh"},
+    \code{"exp"}, \code{"expm1"}, \code{"cos"}, \code{"cosh"},
+    \code{"sin"}, \code{"sinh"}, \code{"tan"}, \code{"tanh"},
+    \code{"gamma"}, \code{"lgamma"}}
+  \item{\code{Summary}}{\code{"max"}, \code{"min"}, \code{"range"},
+    \code{"prod"}, \code{"sum"}, \code{"any"}, \code{"all"}}
+ }
+ See \link[methods]{S4groupGeneric} for more details.
+}
+
+\section{Numerical Data Methods}{
+
+In the code snippets below, \code{x} is a \code{DuckDBColumn} object:
+\describe{
+  \item{\code{is.finite(x)}:}{
+    Returns a DuckDBColumn containing logicals that indicate which values are
+    finite.
+  }
+  \item{\code{is.infinite(x)}:}{
+    Returns a DuckDBColumn containing logicals that indicate which values are
+    infinite.
+  }
+  \item{\code{is.nan(x)}:}{
+    Returns a DuckDBColumn containing logicals that indicate which values are
+    Not a Number.
+  }
+  \item{\code{mean(x)}:}{
+    Calculates the mean of \code{x}.
+  }
+  \item{\code{var(x)}:}{
+    Calculates the variance of \code{x}.
+  }
+  \item{\code{sd(x)}:}{
+    Calculates the standard deviation of \code{x}.
+  }
+  \item{\code{median(x)}:}{
+    Calculates the median of \code{x}.
+  }
+  \item{\code{quantile(x, probs = seq(0, 1, 0.25), names = TRUE, type = 7)}:}{
+    Calculates the specified quantiles of \code{x}.
+    \describe{
+      \item{\code{probs}}{A numeric vector of probabilities with values in
+        [0,1].}
+      \item{\code{names}}{If \code{TRUE}, the result has names describing the
+        quantiles.}
+      \item{\code{type}}{Either 1 or 7 that specifies the quantile algorithm
+        detailed in \code{\link[stats]{quantile}}.}
+    }
+  }
+  \item{\code{mad(x, constant = 1.4826)}:}{
+    Calculates the median absolute deviation of \code{x}.
+    \describe{
+      \item{\code{constant}}{The scale factor.}
+    }
+  }
+  \item{\code{IQR(x, type = 7)}:}{
+    Calculates the interquartile range of \code{x}.
+    \describe{
+      \item{\code{type}}{Either 1 or 7 that specifies the quantile algorithm
+        detailed in \code{\link[stats]{quantile}}.}
+    }
+  }
+}
+}
+
+\section{General Methods}{
+
+In the code snippets below, \code{x} is a \code{DuckDBColumn} object:
+\describe{
+  \item{\code{unique(x)}:}{
+    Returns a \code{DuckDBColumn} containing the distinct rows.
+  }
+  \item{\code{x \%in\% table}:}{
+    Returns a \code{DuckDBColumn} containing logicals that indicate the
+    elements of \code{x} in \code{table}.
+  }
+  \item{\code{table(...)}:}{
+    Returns a table containing the counts across the distinct values.
+  }
+}
+}
+
+\section{Sparisty Methods}{
+
+In the code snippets below, \code{x} is a \code{DuckDBColumn} object:
+\describe{
+  \item{\code{is_nonzero(x)}:}{
+    Returns a \code{DuckDBColumn} containing logicals that indicate if the
+    elements of \code{x} are non-zero.
+  }
+  \item{\code{nzcount(x)}:}{
+    Returns the total number of non-zero values.
+  }
+}
+}
+
 \author{
 Patrick Aboyoun
 }
+\keyword{methods}
+\keyword{utilities}
