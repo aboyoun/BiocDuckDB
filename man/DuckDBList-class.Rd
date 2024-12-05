@@ -11,10 +11,79 @@
 \alias{getListElement,DuckDBList-method}
 \alias{head,DuckDBList-method}
 \alias{tail,DuckDBList-method}
-\title{DuckDB-backed List}
+\title{DuckDBList objects}
 \description{
-Create a DuckDB-backed \linkS4class{List} object.
+The DuckDBList virtual class extends the \linkS4class{List} virtual
+class for DuckDB tables using a design inspirted by the the
+\linkS4class{CompressedList} virtual class.
 }
+\details{
+Similar to the \linkS4class{CompressedList} class, the DuckDBList virtual
+class uses \code{unlistData} and \code{partitioning} slots that define the
+unlisted data and how to partition the data into a list, respectively. The
+difference is that the \code{partitioning} slot containing a logical
+expression rather than a \linkS4class{PartitioningByEnd} object.
+}
+\section{Accessors}{
+
+In the code snippets below, \code{x} is a DuckDBColumn object:
+\describe{
+  \item{\code{length(x)}:}{
+    Get the number of elements in \code{x}.
+  }
+  \item{\code{names(x)}, \code{names(x) <- value}:}{
+    Get or set the names of the elements of \code{x}.
+  }
+  \item{\code{mcols(x)}, \code{mcols(x) <- value}:}{
+     Get or set the metadata columns.
+  }
+  \item{\code{elementNROWS(x)}:}{
+    Get the length (or nb of row for a matrix-like object) of each of the
+    elements.
+  }
+}
+}
+
+\section{Coercion}{
+
+In the code snippets below, \code{x} is a DuckDBList object:
+\describe{
+  \item{\code{unlist(x)}:}{
+    Returns the underlying unlisted data.
+  }
+}
+}
+
+\section{Subsetting}{
+
+In the code snippets below, \code{x} is a DuckDBList object:
+\describe{
+  \item{\code{x[i]}:}{
+    Returns a DuckDBList object containing the selected elements.
+  }
+  \item{\code{x[[i]]}:}{
+    Return the selected list element \code{i}, where \code{i} is an numeric
+    or character vector of length 1.
+  }
+  \item{\code{x$name}:}{
+    Similar to \code{x[[name]]}, but \code{name} is taken literally as an
+    element name.
+  }
+  \item{\code{head(x, n = 6L)}:}{
+    If \code{n} is non-negative, returns the first n elements of \code{x}.
+    If \code{n} is negative, returns all but the last \code{abs(n)} elements
+    of \code{x}.
+  }
+  \item{\code{tail(x, n = 6L)}:}{
+    If \code{n} is non-negative, returns the last n elements of \code{x}.
+    If \code{n} is negative, returns all but the first \code{abs(n)} elements
+    of \code{x}.
+  }
+}
+}
+
 \author{
 Patrick Aboyoun
 }
+\keyword{classes}
+\keyword{methods}
