@@ -16,9 +16,15 @@
 \alias{DuckDBTable}
 \alias{all.equal.DuckDBTable}
 \alias{[,DuckDBTable,ANY,ANY,ANY-method}
+\alias{extractROWS,DuckDBTable,ANY-method}
+\alias{extractCOLS,DuckDBTable-method}
+\alias{head,DuckDBTable-method}
+\alias{tail,DuckDBTable-method}
+\alias{subset,DuckDBTable-method}
 \alias{bindROWS,DuckDBTable-method}
 \alias{bindCOLS,DuckDBTable-method}
 \alias{as.data.frame,DuckDBTable-method}
+\alias{as.env,DuckDBTable-method}
 \alias{show,DuckDBTable-method}
 \title{DuckDBTable objects}
 \description{
@@ -105,6 +111,24 @@ In the code snippets below, \code{x} is a DuckDBTable object:
   \item{\code{x[i, j]}:}{
     Return a new DuckDBTable of the same class as \code{x} made of the
     selected rows and columns.
+  }
+  \item{\code{head(x, n = 6L)}:}{
+    If \code{n} is non-negative, returns the first n rows of \code{x}.
+    If \code{n} is negative, returns all but the last \code{abs(n)} rows of
+    \code{x}.
+  }
+  \item{\code{tail(x, n = 6L)}:}{
+    If \code{n} is non-negative, returns the last n rows of \code{x}.
+    If \code{n} is negative, returns all but the first \code{abs(n)} rows of
+    \code{x}.
+  }
+  \item{\code{subset(x, subset, select)}:}{
+    Return a new DuckDBTable using:
+    \describe{
+      \item{subset}{logical expression indicating rows to keep, where missing
+         values are taken as FALSE.}
+       \item{select}{expression indicating columns to keep.}
+    }
   }
 }
 }

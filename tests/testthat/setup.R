@@ -106,7 +106,9 @@ arrow::write_parquet(granges_df, granges_tf)
 checkDuckDBTable <- function(object, expected) {
     expect_s4_class(object, "DuckDBTable")
     expect_gte(nrow(object), nrow(expected))
+    expect_gte(NROW(object), NROW(expected))
     expect_equal(nkey(object) + ncol(object), ncol(expected))
+    expect_equal(nkey(object) + NCOL(object), NCOL(expected))
     expect_identical(c(keynames(object), colnames(object)), colnames(expected))
     if (nkey(object) == 0L) {
         object <- as.data.frame(object)

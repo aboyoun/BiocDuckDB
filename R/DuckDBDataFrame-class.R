@@ -163,22 +163,17 @@
 #' DuckDBDataFrame
 #'
 #' [[,DuckDBDataFrame-method
-#' extractROWS,DuckDBDataFrame,ANY-method
-#' extractCOLS,DuckDBDataFrame-method
 #' [,DuckDBDataFrame,ANY,ANY,ANY-method
 #' replaceROWS,DuckDBDataFrame-method
 #' replaceCOLS,DuckDBDataFrame-method
 #' [[<-,DuckDBDataFrame-method
 #' normalizeSingleBracketReplacementValue,DuckDBDataFrame-method
-#' head,DuckDBDataFrame-method
-#' tail,DuckDBDataFrame-method
 #' subset,DuckDBDataFrame-method
 #'
 #' cbind,DuckDBDataFrame-method
 #' cbind.DuckDBDataFrame
 #'
 #' as.data.frame,DuckDBDataFrame-method
-#' as.env,DuckDBDataFrame-method
 #'
 #' makeNakedCharacterMatrixForDisplay,DuckDBDataFrame-method
 #' show,DuckDBDataFrame-method
@@ -331,33 +326,6 @@ setReplaceMethod("[[", "DuckDBDataFrame", function(x, i, j, ..., value) {
 })
 
 #' @export
-#' @importFrom S4Vectors extractROWS
-#' @importFrom stats setNames
-setMethod("extractROWS", "DuckDBDataFrame", function(x, i) {
-    if (missing(i)) {
-        return(x)
-    }
-    i <- setNames(list(i), names(x@keycols))
-    .subset_DuckDBTable(x, i = i)
-})
-
-#' @export
-#' @importFrom stats setNames
-#' @importFrom S4Vectors extractCOLS mcols normalizeSingleBracketSubscript
-setMethod("extractCOLS", "DuckDBDataFrame", function(x, i) {
-    if (missing(i)) {
-        return(x)
-    }
-    xstub <- setNames(seq_along(x), names(x))
-    i <- normalizeSingleBracketSubscript(i, xstub)
-    if (anyDuplicated(i)) {
-        stop("cannot extract duplicate columns in a DuckDBDataFrame")
-    }
-    mc <- extractROWS(mcols(x), i)
-    .subset_DuckDBTable(x, j = i, elementMetadata = mc)
-})
-
-#' @export
 setMethod("[", "DuckDBDataFrame", function(x, i, j, ..., drop = TRUE) {
     if (!missing(i)) {
         x <- extractROWS(x, i)
@@ -413,55 +381,6 @@ function(value, x) {
         return(new2("DuckDBDataFrame", value@table, check = FALSE))
     }
     callNextMethod()
-})
-
-.head_conn <- function(x, n) {
-    conn <- head(x@conn, n)
-    keycols <- x@keycols
-    keycols[[1L]] <- .keycols.row_number(conn)
-    replaceSlots(x, conn = conn, keycols = keycols, check = FALSE)
-}
-
-#' @export
-#' @importFrom S4Vectors head isSingleNumber
-setMethod("head", "DuckDBDataFrame", function(x, n = 6L, ...) {
-    if (!isSingleNumber(n)) {
-        stop("'n' must be a single number")
-    }
-    if (.has_row_number(x)) {
-        return(.head_conn(x, n))
-    }
-    n <- as.integer(n)
-    nr <- nrow(x)
-    if (n < 0) {
-        n <- max(0L, nr + n)
-    }
-    if (n > nr) {
-        x
-    } else {
-        extractROWS(x, seq_len(n))
-    }
-})
-
-#' @export
-#' @importFrom S4Vectors isSingleNumber tail
-setMethod("tail", "DuckDBDataFrame", function(x, n = 6L, ...) {
-    if (!isSingleNumber(n)) {
-        stop("'n' must be a single number")
-    }
-    if ((n > 0L) && .has_row_number(x)) {
-        stop("tail requires a keycols to be efficient")
-    }
-    n <- as.integer(n)
-    nr <- nrow(x)
-    if (n < 0) {
-        n <- max(0L, nr + n)
-    }
-    if (n > nr) {
-        x
-    } else {
-        extractROWS(x, (nr + 1L) - rev(seq_len(n)))
-    }
 })
 
 #' @export
@@ -550,13 +469,6 @@ setMethod("cbind", "DuckDBDataFrame", cbind.DuckDBDataFrame)
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Coercion
 ###
-
-#' @export
-#' @importFrom S4Vectors as.env
-setMethod("as.env", "DuckDBDataFrame",
-function(x, enclos = parent.frame(2), tform = identity) {
-    S4Vectors:::makeEnvForNames(x, colnames(x), enclos, tform)
-})
 
 #' @export
 #' @importFrom BiocGenerics as.data.frame
