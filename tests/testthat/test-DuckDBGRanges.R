@@ -4,6 +4,8 @@
 library(GenomicRanges)
 
 test_that("DuckDBGRanges constructor works as expected", {
+    seqinfo <- Seqinfo(paste0("chr", 1:3), c(1000, 2000, 1500), NA, "mock1")
+
     # start only
     expected <- GRanges(granges_df[["seqnames"]], ranges = IRanges(granges_df[["start"]]))
     object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start")

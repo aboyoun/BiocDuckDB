@@ -21,6 +21,7 @@ Depends:
     bit64,
     SparseArray (>= 1.5.42),
     DelayedArray (>= 0.31.8),
+    GenomeInfoDb,
     duckdb
 Imports:
     stats,
@@ -28,7 +29,6 @@ Imports:
     S4Vectors,
     S4Arrays (>= 1.1.1),
     IRanges,
-    GenomeInfoDb,
     GenomicRanges,
     DBI,
     dplyr,

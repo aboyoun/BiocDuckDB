@@ -190,6 +190,11 @@ checkDuckDBGRanges <- function(object, expected) {
         expect_identical(unname(as.vector(end(object))), end(expected))
         expect_identical(unname(as.vector(width(object))), width(expected))
         expect_identical(unname(as.vector(strand(object))), as.character(strand(expected)))
+        expect_setequal(seqlevels(object), seqlevels(expected))
+        expect_setequal(seqlengths(object), seqlengths(expected))
+        expect_setequal(isCircular(object), isCircular(expected))
+        expect_setequal(genome(object), genome(expected))
+        expect_identical(seqlevelsStyle(object), seqlevelsStyle(expected))
         df <- as.data.frame(expected)
         for (j in names(df)) {
             if (is.factor(df[[j]])) {

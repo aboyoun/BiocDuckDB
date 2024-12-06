@@ -95,10 +95,26 @@
 #'     Get the strand values as a \linkS4class{DuckDBColumn}.
 #'   }
 #'   \item{\code{mcols(x)}, \code{mcols(x) <- value}:}{
-#'      Get or set the metadata columns.
+#'     Get or set the metadata columns.
 #'   }
 #'   \item{\code{seqinfo(x)}:}{
 #'     Get the information about the underlying sequences.
+#'   }
+#'   \item{\code{seqlevels(x)}:}{
+#'     Get the sequence levels; equivalent to \code{seqlevels(seqinfo(x))}.
+#'   }
+#'   \item{\code{seqlengths(x)}:}{
+#'     Get the sequence lengths; equivalent to \code{seqlengths(seqinfo(x))}.
+#'   }
+#'   \item{\code{isCircular(x)}:}{
+#'     Get or set the circularity flags.
+#'   }
+#'   \item{\code{genome(x)}:}{
+#'     Get the genome identifier or assembly name for each sequence; equivalent
+#'     to \code{genome(seqinfo(x))}.
+#'   }
+#'   \item{\code{seqlevelsStyle(x)}:}{
+#'     Get the seqname style for \code{x}.
 #'   }
 #' }
 #'
@@ -150,7 +166,7 @@
 #' arrow::write_parquet(df, tf)
 #'
 #' # Create the DuckDBGRanges object
-#' seqinfo <- GenomeInfoDb::Seqinfo(paste0("chr", 1:3), c(1000, 2000, 1500), NA, "mock1")
+#' seqinfo <- Seqinfo(paste0("chr", 1:3), c(1000, 2000, 1500), NA, "mock1")
 #' gr <- DuckDBGRanges(tf, seqnames = "seqnames", start = "start", width = "width",
 #'                     strand = "strand", mcols = c("score", "GC"), seqinfo = seqinfo,
 #'                     keycols = "id")
