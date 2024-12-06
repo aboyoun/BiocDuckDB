@@ -95,8 +95,9 @@ function(x,
     # Add the dimnames, if any
     dimnames_x <- dimnames(x)
     for (j in seq_along(dimnames_x)) {
-        if (!is.null(dimnames_x[[j]])) {
-            df[[j]] <- dimnames_x[[j]][df[[j]]]
+        dimnames_x_j <- dimnames_x[[j]]
+        if (!is.null(dimnames_x_j)) {
+            df[[j]] <- structure(df[[j]], levels = dimnames_x_j, class = "factor")
         }
     }
 
