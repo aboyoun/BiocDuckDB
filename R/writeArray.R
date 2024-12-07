@@ -78,10 +78,15 @@ function(x,
         stop("'partition_size' must be a vector of positive integers")
     }
 
+    # Make column names unique
+    unique_names <- make.unique(c(dim_names, value_name), sep = "_")
+    dim_names <- head(unique_names, -1L)
+    value_name <- tail(unique_names, 1L)
+
     # Create a data frame with the non-zero values and their indices
     df <- data.frame(nzwhich(x, arr.ind = TRUE))
     colnames(df) <- dim_names
-    df <- do.call(cbind, list(df, setNames(list(nzvals(x)), value_name)))
+    df[[value_name]] <- nzvals(x)
 
     # Add the partitioning columns, if any
     partitioning <- setNames(partition_size < dim_x, partition_names)
