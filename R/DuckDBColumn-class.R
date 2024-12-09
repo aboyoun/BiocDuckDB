@@ -129,8 +129,8 @@ setValidity2("DuckDBColumn", function(x) {
         if (ncol(table) != 1L) {
             msg <- c(msg, "'table' slot must be a single-column DuckDBTable")
         }
-        if (nkey(table) != 1L) {
-            msg <- c(msg, "'table' slot must have a 'keycols' with a named list containing a single named character vector")
+        if (nkey(table) > 1L) {
+            msg <- c(msg, "'table' slot must have a 'keycols' slot with at most one element")
         }
     }
     msg %||% TRUE
