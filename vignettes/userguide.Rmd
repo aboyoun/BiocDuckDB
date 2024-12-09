@@ -150,6 +150,11 @@ infert_ddb <- DuckDBDataFrame(infert_tf)
 # preserve row order
 infert_ddb[c(8,6,7,5,3,9), ]
 
+# Assign metadata
+metadata(infert_ddb) <-
+    list(title = "Infertility after Spontaneous and Induced Abortion",
+         description = paste("This is a matched case-control study."))
+
 # Assign column descriptions as mcols
 mcols(infert_ddb) <-
     DataFrame(description = c("Education level",
