@@ -126,6 +126,13 @@
 #'   \item{\code{as.data.frame(x)}:}{
 #'     Coerces \code{x} to a data.frame.
 #'   }
+#'   \item{\code{as(from, "GRanges")}:}{
+#'     Converts a DuckDBGRanges object to a GRanges object. This conversion
+#'     begins by transforming the DuckDBGRanges into memory using
+#'     \code{as.data.frame}. A GRanges object is then instantiated using the
+#'     seqnames, start, width, and strand columns from the data.frame. Lastly,
+#'     the seqinfo, metadata, and mcols (metadata columns) are copied over.
+#'   }
 #' }
 #'
 #' @section Subsetting:
@@ -198,6 +205,7 @@
 #'
 #' coerce,DuckDBGRanges,DuckDBDataFrame-method
 #' as.data.frame,DuckDBGRanges-method
+#' coerce,DuckDBGRanges,GRanges-method
 #'
 #' show,DuckDBGRanges-method
 #'
@@ -456,6 +464,29 @@ setMethod("as.data.frame", "DuckDBGRanges",
 function(x, row.names = NULL, optional = FALSE, ...) {
     df <- as(x, "DuckDBDataFrame")
     callGeneric(df, row.names = row.names, optional = optional, ...)
+})
+
+#' @export
+#' @importFrom BiocGenerics strand
+#' @importFrom GenomeInfoDb seqinfo
+#' @importFrom GenomicRanges GRanges
+#' @importFrom IRanges IRanges
+#' @importFrom S4Vectors mcols mcols<- metadata metadata<- Rle
+setAs("DuckDBGRanges", "GRanges", function(from) {
+    df <- as.data.frame(from)
+    seqnames <- Rle(df[["seqnames"]])
+    ranges <- IRanges(start = df[["start"]], width = df[["width"]])
+    if (!.has_row_number(from)) {
+        names(ranges) <- rownames(df)
+    }
+    strand <- strand(df[["strand"]])
+    gr <- GRanges(seqnames, ranges = ranges, strand = strand,
+                  seqinfo = seqinfo(from))
+    metadata(gr) <- metadata(from)
+    if (ncol(mcols(from)) > 0L) {
+        mcols(gr) <- as(mcols(from), "DFrame")
+    }
+    gr
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

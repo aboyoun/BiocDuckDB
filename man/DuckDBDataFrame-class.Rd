@@ -102,7 +102,7 @@ In the code snippets below, \code{x} is a DuckDBDataFrame object:
     The resulting data.frame is then coerced into a DFrame. Additionally,
     any associated metadata and mcols (metadata columns) are preserved and
     added to the DFrame, if they exist.
-   }
+  }
 }
 }
 

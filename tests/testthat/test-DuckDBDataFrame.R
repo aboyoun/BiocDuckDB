@@ -280,7 +280,7 @@ test_that("coersion to a DFrame works for a DuckDBDataFrame", {
 
     dframe <- as(mtcars, "DFrame")
     metadata(dframe) <- md
-    mcols(dframe) <- mc  
+    mcols(dframe) <- mc
 
     expect_identical(as(ddb, "DFrame"), dframe)
 })

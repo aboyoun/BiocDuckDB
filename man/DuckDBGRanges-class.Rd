@@ -22,6 +22,7 @@
 \alias{tail,DuckDBGRanges-method}
 \alias{coerce,DuckDBGRanges,DuckDBDataFrame-method}
 \alias{as.data.frame,DuckDBGRanges-method}
+\alias{coerce,DuckDBGRanges,GRanges-method}
 \alias{show,DuckDBGRanges-method}
 \title{DuckDBGRanges objects}
 \description{
@@ -154,6 +155,13 @@ In the code snippets below, \code{x} is a DuckDBGRanges object:
   }
   \item{\code{as.data.frame(x)}:}{
     Coerces \code{x} to a data.frame.
+  }
+  \item{\code{as(from, "GRanges")}:}{
+    Converts a DuckDBGRanges object to a GRanges object. This conversion
+    begins by transforming the DuckDBGRanges into memory using
+    \code{as.data.frame}. A GRanges object is then instantiated using the
+    seqnames, start, width, and strand columns from the data.frame. Lastly,
+    the seqinfo, metadata, and mcols (metadata columns) are copied over.
   }
 }
 }
