@@ -104,6 +104,7 @@ arrow::write_parquet(granges_df, granges_tf)
 
 # Helper functions
 checkDuckDBTable <- function(object, expected) {
+    expect_true(validObject(object))
     expect_s4_class(object, "DuckDBTable")
     expect_gte(nrow(object), nrow(expected))
     expect_gte(NROW(object), NROW(expected))
@@ -124,6 +125,7 @@ checkDuckDBTable <- function(object, expected) {
 }
 
 checkDuckDBArraySeed <- function(object, expected) {
+    expect_true(validObject(object))
     expect_s4_class(object, "DuckDBArraySeed")
     expect_identical(type(object), type(expected))
     expect_identical(length(object), length(expected))
@@ -133,6 +135,7 @@ checkDuckDBArraySeed <- function(object, expected) {
 }
 
 checkDuckDBArray <- function(object, expected) {
+    expect_true(validObject(object))
     expect_s4_class(object, "DuckDBArray")
     expect_identical(type(object), type(expected))
     expect_identical(length(object), length(expected))
@@ -142,6 +145,7 @@ checkDuckDBArray <- function(object, expected) {
 }
 
 checkDuckDBMatrix <- function(object, expected) {
+    expect_true(validObject(object))
     expect_s4_class(object, "DuckDBMatrix")
     expect_identical(type(object), typeof(expected))
     expect_identical(length(object), length(expected))
@@ -151,6 +155,7 @@ checkDuckDBMatrix <- function(object, expected) {
 }
 
 checkDuckDBDataFrame <- function(object, expected) {
+    expect_true(validObject(object))
     expect_s4_class(object, "DuckDBDataFrame")
     expect_identical(nrow(object), nrow(expected))
     expect_identical(ncol(object), ncol(expected))
@@ -167,6 +172,7 @@ checkDuckDBDataFrame <- function(object, expected) {
 }
 
 checkDuckDBColumn <- function(object, expected) {
+    expect_true(validObject(object))
     expect_s4_class(object, "DuckDBColumn")
     expect_identical(length(object), length(expected))
     if (nkey(object@table) == 0L) {
@@ -206,6 +212,7 @@ checkDuckDBGRanges <- function(object, expected) {
 }
 
 checkDuckDBDataFrameList <- function(object, expected) {
+    expect_true(validObject(object))
     expect_s4_class(object, "DuckDBDataFrameList")
     expect_identical(length(object), length(expected))
     expect_identical(names(object), names(expected))
