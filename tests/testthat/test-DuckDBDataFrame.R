@@ -262,6 +262,29 @@ test_that("extracting duplicate columns produces errors", {
     expect_error(df[,c(1,1,2,2,3,4,3,5)])
 })
 
+test_that("coersion to a DFrame works for a DuckDBDataFrame", {
+    md <- list(title = "Motor Trend Car Road Tests",
+               description = "The data was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models).")
+
+    mc <- DataFrame(description = c("Miles/(US) gallon", "Number of cylinders",
+                                    "Displacement (cu.in.)", "Gross horsepower",
+                                    "Rear axle ratio", "Weight (1000 lbs)",
+                                    "1/4 mile time", "Engine (0 = V-shaped, 1 = straight)",
+                                    "Transmission (0 = automatic, 1 = manual)",
+                                    "Number of forward gears", "Number of carburetors"),
+                    row.names = colnames(mtcars))
+
+    ddb <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
+    metadata(ddb) <- md
+    mcols(ddb) <- mc
+
+    dframe <- as(mtcars, "DFrame")
+    metadata(dframe) <- md
+    mcols(dframe) <- mc  
+
+    expect_identical(as(ddb, "DFrame"), dframe)
+})
+
 test_that("as.env works for a DuckDBDataFrame", {
     df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
     env <- as.env(df)

@@ -69,9 +69,13 @@
 #'   \item{\code{as.data.frame(x)}:}{
 #'     Coerces \code{x} to a data.frame.
 #'   }
-#'   \item{\code{as(from, "data.frame")}:}{
-#'     Calls \code{as.data.frame(from)}.
-#'   }
+#'   \item{\code{as(from, "DFrame")}:}{
+#'     Converts a DuckDBDataFrame object to a DFrame object. This process
+#'     involves first loading the data into memory using \code{as.data.frame}.
+#'     The resulting data.frame is then coerced into a DFrame. Additionally,
+#'     any associated metadata and mcols (metadata columns) are preserved and
+#'     added to the DFrame, if they exist.
+#'    }
 #' }
 #'
 #' @section Subsetting:
@@ -174,6 +178,7 @@
 #' cbind.DuckDBDataFrame
 #'
 #' as.data.frame,DuckDBDataFrame-method
+#' coerce,DuckDBDataFrame,DFrame-method
 #'
 #' makeNakedCharacterMatrixForDisplay,DuckDBDataFrame-method
 #' show,DuckDBDataFrame-method
@@ -490,6 +495,18 @@ function(x, row.names = NULL, optional = FALSE, ...) {
     rownames(df) <- rnames
 
     df[rownames(x), colnames(x), drop = FALSE]
+})
+
+#' @export
+#' @importClassesFrom S4Vectors DFrame
+#' @importFrom S4Vectors mcols mcols<- metadata metadata<-
+setAs("DuckDBDataFrame", "DFrame", function(from) {
+    df <- as(as.data.frame(from), "DFrame")
+    metadata(df) <- metadata(from)
+    if (!is.null(mcols(from))) {
+        mcols(df) <- as(mcols(from), "DFrame")
+    }
+    df
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

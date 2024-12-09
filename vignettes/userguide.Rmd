@@ -93,6 +93,14 @@ mtcars_ddb <- DuckDBDataFrame(mtcars_tf, datacols = colnames(mtcars), keycol = "
 # reorder the rows to conform to the original mtcars data
 mtcars_ddb <- mtcars_ddb[rownames(mtcars), ]
 
+# Assign metadata
+metadata(mtcars_ddb) <-
+    list(title = "Motor Trend Car Road Tests",
+         description = paste("The data was extracted from the 1974 Motor Trend",
+                             "US magazine, and comprises fuel consumption and",
+                             "10 aspects of automobile design and performance",
+                             "for 32 automobiles (1973–74 models)."))
+
 # Assign column descriptions as mcols
 mcols(mtcars_ddb) <-
     DataFrame(description = c("Miles/(US) gallon", "Number of cylinders",
