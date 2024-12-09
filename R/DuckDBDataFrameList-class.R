@@ -57,6 +57,13 @@
 #'   \item{\code{unlist(x)}:}{
 #'     Returns the underlying DuckDBDataFrame object.
 #'   }
+#'   \item{\code{as(from, "DFrameList")}:}{
+#'     Converts a DuckDBDataFrameList object to a DFrameList object. This
+#'     process involves first loading the data into memory using
+#'     \code{as(from, "DFrame")}. The resulting DFrame is then split into a
+#'     DFrameList. Additionally, any associated metadata and mcols (metadata
+#'     columns) are preserved and added to the DFrameList, if they exist.
+#'   }
 #' }
 #'
 #' @section Subsetting:
@@ -98,6 +105,8 @@
 #' columnMetadata<-,DuckDBDataFrameList-method
 #'
 #' split,DuckDBDataFrame,DuckDBColumn-method
+#'
+#' coerce,DuckDBDataFrameList,DFrameList-method
 #'
 #' @include DuckDBDataFrame-class.R
 #' @include DuckDBList-class.R
@@ -204,4 +213,30 @@ setMethod("split", c("DuckDBDataFrame", "DuckDBColumn"), function(x, f, drop = F
     elementNROWS <- setNames(as.vector(elementNROWS), names(elementNROWS))
     new2("DuckDBDataFrameList", unlistData = x, partitioning = f@table@datacols,
          names = names(elementNROWS), elementNROWS = elementNROWS, check = FALSE)
+})
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Coercion
+###
+
+#' @export
+#' @importClassesFrom S4Vectors DFrame
+#' @importFrom S4Vectors mcols mcols<- metadata metadata<- split
+setAs("DuckDBDataFrameList", "DFrameList", function(from) {
+    unlistData <- unlist(from)
+    datacols <- c(unlistData@datacols, from@partitioning)
+    names(datacols) <- make.unique(names(datacols), sep = "_")
+    unlistData <- replaceSlots(unlistData, datacols = datacols, check = FALSE)
+
+    df <- as(unlistData, "DFrame")
+    group <- df[[ncol(df)]]
+    df <- df[-ncol(df)]
+    dflist <- split(df, group)
+
+    metadata(dflist) <- metadata(from)
+    if (!is.null(mcols(from))) {
+        mcols(dflist) <- as(mcols(from), "DFrame")
+    }
+
+    dflist
 })

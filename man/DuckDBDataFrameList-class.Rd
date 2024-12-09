@@ -9,6 +9,7 @@
 \alias{columnMetadata,DuckDBDataFrameList-method}
 \alias{columnMetadata<-,DuckDBDataFrameList-method}
 \alias{split,DuckDBDataFrame,DuckDBColumn-method}
+\alias{coerce,DuckDBDataFrameList,DFrameList-method}
 \title{DuckDBDataFrameList objects}
 \description{
 The DuckDBDataFrame class extends both \linkS4class{SplitDataFrameList} and
@@ -71,6 +72,13 @@ In the code snippets below, \code{x} is a DuckDBDataFrameList object:
 \describe{
   \item{\code{unlist(x)}:}{
     Returns the underlying DuckDBDataFrame object.
+  }
+  \item{\code{as(from, "DFrameList")}:}{
+    Converts a DuckDBDataFrameList object to a DFrameList object. This
+    process involves first loading the data into memory using
+    \code{as(from, "DFrame")}. The resulting DFrame is then split into a
+    DFrameList. Additionally, any associated metadata and mcols (metadata
+    columns) are preserved and added to the DFrameList, if they exist.
   }
 }
 }
