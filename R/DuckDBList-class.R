@@ -131,7 +131,7 @@ setMethod("elementNROWS", "DuckDBList", function(x) setNames(x@elementNROWS, nam
 setValidity2("DuckDBList", function(x) {
     msg <- NULL
     if (NROW(x) > 0L) {
-        if (length(x@expression) != 1L) {
+        if (length(x@partitioning) != 1L) {
             msg <- c(msg, "must have exactly one partitioning expression")
         }
     }
