@@ -414,6 +414,7 @@ function(x, subset, select, drop = FALSE, ...) {
 ###
 
 #' @export
+#' @importClassesFrom S4Vectors DFrame
 #' @importFrom dplyr rename
 #' @importFrom S4Vectors combineRows make_zero_col_DFrame mcols mcols<- metadata new2
 cbind.DuckDBDataFrame <- function(..., deparse.level = 1) {
