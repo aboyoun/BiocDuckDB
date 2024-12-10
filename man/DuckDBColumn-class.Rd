@@ -12,6 +12,7 @@
 \alias{head,DuckDBColumn-method}
 \alias{tail,DuckDBColumn-method}
 \alias{as.vector,DuckDBColumn-method}
+\alias{realize,DuckDBColumn-method}
 \alias{show,DuckDBColumn-method}
 \alias{showAsCell,DuckDBColumn-method}
 \title{DuckDBColumn objects}
@@ -40,6 +41,10 @@ In the code snippets below, \code{x} is a DuckDBColumn object:
 \describe{
   \item{\code{as.vector(x)}:}{
     Coerces \code{x} to a vector.
+  }
+  \item{\code{realize(x, BACKEND = getAutoRealizationBackend())}:}{
+    Realize an object into memory or on disk using the equivalent of
+    \code{realize(as.vector(x), BACKEND)}.
   }
 }
 }

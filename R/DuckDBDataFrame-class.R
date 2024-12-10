@@ -76,6 +76,10 @@
 #'     any associated metadata and mcols (metadata columns) are preserved and
 #'     added to the DFrame, if they exist.
 #'   }
+#'   \item{\code{realize(x, BACKEND = getAutoRealizationBackend())}:}{
+#'     Realize an object into memory or on disk using the equivalent of
+#'     \code{realize(as(x, "DFrame"), BACKEND)}.
+#'   }
 #' }
 #'
 #' @section Subsetting:
@@ -179,6 +183,7 @@
 #'
 #' as.data.frame,DuckDBDataFrame-method
 #' coerce,DuckDBDataFrame,DFrame-method
+#' realize,DuckDBDataFrame-method
 #'
 #' makeNakedCharacterMatrixForDisplay,DuckDBDataFrame-method
 #' show,DuckDBDataFrame-method
@@ -511,6 +516,17 @@ setAs("DuckDBDataFrame", "DFrame", function(from) {
     }
 
     df
+})
+
+#' @importClassesFrom S4Vectors DFrame
+#' @importFrom DelayedArray getAutoRealizationBackend realize
+setMethod("realize", "DuckDBDataFrame",
+function(x, BACKEND = getAutoRealizationBackend()) {
+    x <- as(x, "DFrame")
+    if (!is.null(BACKEND)) {
+        x <- callGeneric(x, BACKEND = BACKEND)
+    }
+    x
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

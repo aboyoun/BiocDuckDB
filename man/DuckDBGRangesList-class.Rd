@@ -15,6 +15,7 @@
 \alias{tail,DuckDBGRangesList-method}
 \alias{coerce,DuckDBGRangesList,DuckDBDataFrameList-method}
 \alias{coerce,DuckDBGRangesList,CompressedGRangesList-method}
+\alias{realize,DuckDBGRangesList-method}
 \alias{show,DuckDBGRangesList-method}
 \title{DuckDBGRangesList objects}
 \description{
@@ -74,6 +75,19 @@ In the code snippets below, \code{x} is a DuckDBGRangesList object:
   \item{\code{unlist(x)}:}{
     Returns the underlying DuckDBGRanges object.
   }
+  \item{\code{as(from, "DuckDBDataFrameList")}:}{
+    Creates a \linkS4class{DuckDBDataFrameList} object.
+  }
+  \item{\code{as(from, "CompressedGRangesList")}:}{
+    Converts a DuckDBGRanges object to a CompressedGRangesList object. This
+    conversion begins by transforming the DuckDBGRangesList into a
+    \code{as(from, "DuckDBDataFrameList")}, then bringing the data into
+    memory and contructing the GRangesList object.
+  }
+  \item{\code{realize(x, BACKEND = getAutoRealizationBackend())}:}{
+    Realize an object into memory or on disk using the equivalent of
+    \code{realize(as(x, "CompressedGRangesList"), BACKEND)}.
+  }
 }
 }
 
@@ -105,6 +119,28 @@ In the code snippets below, \code{x} is a DuckDBGRangesList object:
 }
 }
 
+\examples{
+# Create an example data set with start and width columns:
+df <- data.frame(id = head(letters, 10),
+                 seqnames = rep.int(c("chr2", "chr2", "chr1", "chr3"), c(1, 3, 2, 4)),
+                 start = 1:10, width = 10:1,
+                 strand = strand(rep.int(c("-", "+", "*", "+", "-"), c(1, 2, 2, 3, 2))),
+                 score = 1:10,
+                 GC = seq(1, 0, length = 10),
+                 group = rep(c("gr1", "gr2", "gr3", "gr4"), 1:4))
+tf <- tempfile(fileext = ".parquet")
+on.exit(unlink(tf))
+arrow::write_parquet(df, tf)
+
+# Create the DuckDBGRangesList object
+seqinfo <- Seqinfo(paste0("chr", 1:3), c(1000, 2000, 1500), NA, "mock1")
+gr <- DuckDBGRanges(tf, seqnames = "seqnames", start = "start", width = "width",
+                    strand = "strand", mcols = c("score", "GC", "group"),
+                    seqinfo = seqinfo, keycols = "id")
+grlist <- split(gr, gr$group)
+grlist
+
+}
 \author{
 Patrick Aboyoun
 }

@@ -23,6 +23,10 @@
 #'   \item{\code{as.vector(x)}:}{
 #'     Coerces \code{x} to a vector.
 #'   }
+#'   \item{\code{realize(x, BACKEND = getAutoRealizationBackend())}:}{
+#'     Realize an object into memory or on disk using the equivalent of
+#'     \code{realize(as.vector(x), BACKEND)}.
+#'   }
 #' }
 #'
 #' @section Subsetting:
@@ -60,6 +64,7 @@
 #' tail,DuckDBColumn-method
 #'
 #' as.vector,DuckDBColumn-method
+#' realize,DuckDBColumn-method
 #'
 #' show,DuckDBColumn-method
 #' showAsCell,DuckDBColumn-method
@@ -209,6 +214,16 @@ setMethod("as.vector", "DuckDBColumn", function(x, mode = "any") {
         storage.mode(vec) <- mode
     }
     vec
+})
+
+#' @importFrom DelayedArray getAutoRealizationBackend realize
+setMethod("realize", "DuckDBColumn",
+function(x, BACKEND = getAutoRealizationBackend()) {
+    x <- as.vector(x)
+    if (!is.null(BACKEND)) {
+        x <- callGeneric(x, BACKEND = BACKEND)
+    }
+    x
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

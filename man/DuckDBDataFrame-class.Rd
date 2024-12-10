@@ -19,6 +19,7 @@
 \alias{cbind.DuckDBDataFrame}
 \alias{as.data.frame,DuckDBDataFrame-method}
 \alias{coerce,DuckDBDataFrame,DFrame-method}
+\alias{realize,DuckDBDataFrame-method}
 \alias{makeNakedCharacterMatrixForDisplay,DuckDBDataFrame-method}
 \alias{show,DuckDBDataFrame-method}
 \title{DuckDBDataFrame objects}
@@ -102,6 +103,10 @@ In the code snippets below, \code{x} is a DuckDBDataFrame object:
     The resulting data.frame is then coerced into a DFrame. Additionally,
     any associated metadata and mcols (metadata columns) are preserved and
     added to the DFrame, if they exist.
+  }
+  \item{\code{realize(x, BACKEND = getAutoRealizationBackend())}:}{
+    Realize an object into memory or on disk using the equivalent of
+    \code{realize(as(x, "DFrame"), BACKEND)}.
   }
 }
 }

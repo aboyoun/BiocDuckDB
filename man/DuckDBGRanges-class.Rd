@@ -23,6 +23,7 @@
 \alias{coerce,DuckDBGRanges,DuckDBDataFrame-method}
 \alias{as.data.frame,DuckDBGRanges-method}
 \alias{coerce,DuckDBGRanges,GRanges-method}
+\alias{realize,DuckDBGRanges-method}
 \alias{show,DuckDBGRanges-method}
 \title{DuckDBGRanges objects}
 \description{
@@ -162,6 +163,10 @@ In the code snippets below, \code{x} is a DuckDBGRanges object:
     \code{as.data.frame}. A GRanges object is then instantiated using the
     seqnames, start, width, and strand columns from the data.frame. Lastly,
     the seqinfo, metadata, and mcols (metadata columns) are copied over.
+  }
+  \item{\code{realize(x, BACKEND = getAutoRealizationBackend())}:}{
+    Realize an object into memory or on disk using the equivalent of
+    \code{realize(as(x, "GRanges"), BACKEND)}.
   }
 }
 }

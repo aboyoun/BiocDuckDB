@@ -10,6 +10,7 @@
 \alias{columnMetadata<-,DuckDBDataFrameList-method}
 \alias{split,DuckDBDataFrame,DuckDBColumn-method}
 \alias{coerce,DuckDBDataFrameList,DFrameList-method}
+\alias{realize,DuckDBDataFrameList-method}
 \title{DuckDBDataFrameList objects}
 \description{
 The DuckDBDataFrame class extends both \linkS4class{SplitDataFrameList} and
@@ -80,6 +81,10 @@ In the code snippets below, \code{x} is a DuckDBDataFrameList object:
     DFrameList. Additionally, any associated metadata and mcols (metadata
     columns) are preserved and added to the DFrameList, if they exist.
   }
+  \item{\code{realize(x, BACKEND = getAutoRealizationBackend())}:}{
+    Realize an object into memory or on disk using the equivalent of
+    \code{realize(as(x, "DFrameList"), BACKEND)}.
+  }
 }
 }
 
@@ -111,6 +116,18 @@ In the code snippets below, \code{x} is a DuckDBDataFrameList object:
 }
 }
 
+\examples{
+# Mocking up a file:
+tf <- tempfile(fileext = ".parquet")
+on.exit(unlink(tf))
+arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
+
+# Creating our DuckDB-backed data frame:
+df <- DuckDBDataFrame(tf, datacols = colnames(mtcars), keycols = "model")
+dflist <- split(df, df$cyl)
+dflist
+
+}
 \author{
 Patrick Aboyoun
 }

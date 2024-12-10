@@ -133,6 +133,10 @@
 #'     seqnames, start, width, and strand columns from the data.frame. Lastly,
 #'     the seqinfo, metadata, and mcols (metadata columns) are copied over.
 #'   }
+#'   \item{\code{realize(x, BACKEND = getAutoRealizationBackend())}:}{
+#'     Realize an object into memory or on disk using the equivalent of
+#'     \code{realize(as(x, "GRanges"), BACKEND)}.
+#'   }
 #' }
 #'
 #' @section Subsetting:
@@ -206,6 +210,7 @@
 #' coerce,DuckDBGRanges,DuckDBDataFrame-method
 #' as.data.frame,DuckDBGRanges-method
 #' coerce,DuckDBGRanges,GRanges-method
+#' realize,DuckDBGRanges-method
 #'
 #' show,DuckDBGRanges-method
 #'
@@ -494,6 +499,17 @@ setAs("DuckDBGRanges", "GRanges", function(from) {
     }
 
     gr
+})
+
+#' @importClassesFrom GenomicRanges GRanges
+#' @importFrom DelayedArray getAutoRealizationBackend realize
+setMethod("realize", "DuckDBGRanges",
+function(x, BACKEND = getAutoRealizationBackend()) {
+    x <- as(x, "GRanges")
+    if (!is.null(BACKEND)) {
+        x <- callGeneric(x, BACKEND = BACKEND)
+    }
+    x
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
