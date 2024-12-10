@@ -235,8 +235,9 @@ setAs("DuckDBDataFrameList", "DFrameList", function(from) {
     dflist <- split(df, group)
 
     metadata(dflist) <- metadata(from)
-    if (!is.null(mcols(from))) {
-        mcols(dflist) <- as(mcols(from), "DFrame")
+    mc <- mcols(from)
+    if (!is.null(mc)) {
+        mcols(dflist) <- as(mc, "DFrame")
     }
 
     dflist

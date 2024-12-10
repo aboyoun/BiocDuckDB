@@ -474,6 +474,7 @@ function(x, row.names = NULL, optional = FALSE, ...) {
 #' @importFrom S4Vectors mcols mcols<- metadata metadata<- Rle
 setAs("DuckDBGRanges", "GRanges", function(from) {
     df <- as.data.frame(from)
+
     seqnames <- Rle(df[["seqnames"]])
     ranges <- IRanges(start = df[["start"]], width = df[["width"]])
     if (!.has_row_number(from)) {
@@ -482,11 +483,13 @@ setAs("DuckDBGRanges", "GRanges", function(from) {
     strand <- strand(df[["strand"]])
     gr <- GRanges(seqnames, ranges = ranges, strand = strand,
                   seqinfo = seqinfo(from))
+
     metadata(gr) <- metadata(from)
     mc <- mcols(from)
     if (ncol(mc) > 0L) {
         mcols(gr) <- as(df[, colnames(mc), drop = FALSE], "DFrame")
     }
+
     gr
 })
 

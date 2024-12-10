@@ -502,10 +502,13 @@ function(x, row.names = NULL, optional = FALSE, ...) {
 #' @importFrom S4Vectors mcols mcols<- metadata metadata<-
 setAs("DuckDBDataFrame", "DFrame", function(from) {
     df <- as(as.data.frame(from), "DFrame")
+
     metadata(df) <- metadata(from)
-    if (!is.null(mcols(from))) {
-        mcols(df) <- as(mcols(from), "DFrame")
+    mc <- mcols(from)
+    if (!is.null(mc)) {
+        mcols(df) <- as(mc, "DFrame")
     }
+
     df
 })
 
