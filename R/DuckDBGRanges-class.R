@@ -483,8 +483,9 @@ setAs("DuckDBGRanges", "GRanges", function(from) {
     gr <- GRanges(seqnames, ranges = ranges, strand = strand,
                   seqinfo = seqinfo(from))
     metadata(gr) <- metadata(from)
-    if (ncol(mcols(from)) > 0L) {
-        mcols(gr) <- as(mcols(from), "DFrame")
+    mc <- mcols(from)
+    if (ncol(mc) > 0L) {
+        mcols(gr) <- as(df[, colnames(mc), drop = FALSE], "DFrame")
     }
     gr
 })
