@@ -220,6 +220,7 @@ setMethod("split", c("DuckDBDataFrame", "DuckDBColumn"), function(x, f, drop = F
 ###
 
 #' @export
+#' @importClassesFrom IRanges DFrameList
 #' @importClassesFrom S4Vectors DFrame
 #' @importFrom S4Vectors mcols mcols<- metadata metadata<- split
 setAs("DuckDBDataFrameList", "DFrameList", function(from) {
