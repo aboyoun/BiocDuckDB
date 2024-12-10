@@ -203,7 +203,7 @@ setReplaceMethod("columnMetadata", "DuckDBDataFrameList", function(x, value) {
 ###
 
 #' @export
-#' @importFrom S4Vectors split
+#' @importFrom S4Vectors split new2
 #' @importFrom stats setNames
 setMethod("split", c("DuckDBDataFrame", "DuckDBColumn"), function(x, f, drop = FALSE, ...) {
     if (!isTRUE(all.equal(as(x, "DuckDBTable"), f@table))) {
