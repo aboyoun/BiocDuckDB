@@ -77,3 +77,24 @@ test_that("tail works for a DuckDBGRangesList", {
     checkDuckDBGRangesList(tail(object, 0), tail(expected, 0))
     checkDuckDBGRangesList(tail(object, 2), tail(expected, 2))
 })
+
+test_that("coersion to a GRangesList works for a DuckDBGRangesList", {
+    seqinfo <- Seqinfo(paste0("chr", 1:3), c(1000, 2000, 1500), NA, "mock1")
+
+    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end",
+                            strand = "strand", seqinfo = seqinfo, mcols = c("score", "GC", "group"),
+                            keycols = "id")
+    grlist <- as(split(object, object$group), "CompressedGRangesList")
+
+    expected <- GRanges(granges_df[["seqnames"]], ranges = IRanges(start = granges_df[["start"]], end = granges_df[["end"]], names = granges_df[["id"]]),
+                        strand = granges_df[["strand"]], seqinfo = seqinfo,
+                        score = granges_df[["score"]], GC = granges_df[["GC"]], group = granges_df[["group"]])
+    expected <- split(expected, expected$group)
+
+    for (i in names(grlist)) {
+        object_i <- grlist[[i]]
+        expected_i <- expected[[i]]
+        expected_i <- expected_i[names(object_i), , drop = FALSE]
+        expect_identical(object_i, expected_i)
+    }
+})

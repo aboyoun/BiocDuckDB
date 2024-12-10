@@ -101,6 +101,9 @@
 #' head,DuckDBGRangesList-method
 #' tail,DuckDBGRangesList-method
 #'
+#' coerce,DuckDBGRangesList,DuckDBDataFrameList-method
+#' coerce,DuckDBGRangesList,CompressedGRangesList-method
+#'
 #' show,DuckDBGRangesList-method
 #'
 #' @include DuckDBGRanges-class.R
@@ -148,7 +151,7 @@ setMethod("elementNROWS", "DuckDBGRangesList", getMethod("elementNROWS", "DuckDB
 ###
 
 #' @export
-#' @importFrom S4Vectors make_zero_col_DFrame split
+#' @importFrom S4Vectors make_zero_col_DFrame new2 split
 #' @importFrom stats setNames
 setMethod("split", c("DuckDBGRanges", "DuckDBColumn"), function(x, f, drop = FALSE, ...) {
     if (!isTRUE(all.equal(as(x@frame, "DuckDBTable"), f@table))) {
@@ -189,6 +192,62 @@ setMethod("head", "DuckDBGRangesList", getMethod("head", "DuckDBList"))
 #' @export
 #' @importFrom S4Vectors head
 setMethod("tail", "DuckDBGRangesList", getMethod("tail", "DuckDBList"))
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Coercion
+###
+
+#' @export
+#' @importFrom S4Vectors new2
+setAs("DuckDBGRangesList", "DuckDBDataFrameList", function(from) {
+    gr <- from@unlistData
+    df <- gr@frame
+    if (ncol(gr@elementMetadata) > 0L) {
+        df <- cbind.DuckDBDataFrame(df, gr@elementMetadata)
+    }
+    new2("DuckDBDataFrameList", unlistData = df, partitioning = from@partitioning,
+         names = from@names, elementNROWS = from@elementNROWS, check = FALSE)
+})
+
+#' @export
+#' @importClassesFrom GenomicRanges CompressedGRangesList
+#' @importClassesFrom S4Vectors DFrame
+#' @importFrom S4Vectors mcols mcols<- metadata metadata<- split
+setAs("DuckDBGRangesList", "CompressedGRangesList", function(from) {
+    unlistData <- unlist(as(from, "DuckDBDataFrameList"))
+    datacols <- c(unlistData@datacols, from@partitioning)
+    names(datacols) <- make.unique(names(datacols), sep = "_")
+    unlistData <- replaceSlots(unlistData, datacols = datacols, check = FALSE)
+
+    df <- as(unlistData, "DFrame")
+    group <- df[[ncol(df)]]
+    df <- df[-ncol(df)]
+
+    seqnames <- Rle(df[["seqnames"]])
+    ranges <- IRanges(start = df[["start"]], width = df[["width"]])
+    if (!.has_row_number(from@unlistData)) {
+        names(ranges) <- rownames(df)
+    }
+    strand <- strand(df[["strand"]])
+    gr <- GRanges(seqnames, ranges = ranges, strand = strand,
+                  seqinfo = seqinfo(from@unlistData))
+
+    metadata(gr) <- metadata(from@unlistData)
+    mc <- mcols(from@unlistData)
+    if (ncol(mc) > 0L) {
+        mcols(gr) <- as(df[, colnames(mc), drop = FALSE], "DFrame")
+    }
+
+    grlist <- split(gr, group)
+
+    metadata(grlist) <- metadata(from)
+    mc <- mcols(from)
+    if (!is.null(mc)) {
+        mcols(grlist) <- as(mc, "DFrame")
+    }
+
+    grlist
+})
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Display

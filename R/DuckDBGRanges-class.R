@@ -221,6 +221,7 @@ NULL
 #' @export
 #' @importClassesFrom GenomicRanges GenomicRanges
 #' @importClassesFrom GenomeInfoDb Seqinfo
+#' @importFrom S4Vectors new2
 setClass("DuckDBGRanges", contains = "GenomicRanges",
          slots = c(frame = "DuckDBDataFrame", seqinfo = "Seqinfo"),
          prototype = prototype(frame = new2("DuckDBDataFrame", datacols = .datacols_granges, check = FALSE)))
@@ -452,7 +453,7 @@ setMethod("tail", "DuckDBGRanges", function(x, n = 6L, ...) {
 #' @export
 setAs("DuckDBGRanges", "DuckDBDataFrame", function(from) {
     df <- from@frame
-    if (!is.null(from@elementMetadata)) {
+    if (ncol(from@elementMetadata) > 0L) {
         df <- cbind.DuckDBDataFrame(df, from@elementMetadata)
     }
     df
@@ -467,6 +468,8 @@ function(x, row.names = NULL, optional = FALSE, ...) {
 })
 
 #' @export
+#' @importClassesFrom GenomicRanges GRanges
+#' @importClassesFrom S4Vectors DFrame
 #' @importFrom BiocGenerics strand
 #' @importFrom GenomeInfoDb seqinfo
 #' @importFrom GenomicRanges GRanges

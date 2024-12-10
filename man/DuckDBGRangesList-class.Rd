@@ -13,6 +13,8 @@
 \alias{getListElement,DuckDBGRangesList-method}
 \alias{head,DuckDBGRangesList-method}
 \alias{tail,DuckDBGRangesList-method}
+\alias{coerce,DuckDBGRangesList,DuckDBDataFrameList-method}
+\alias{coerce,DuckDBGRangesList,CompressedGRangesList-method}
 \alias{show,DuckDBGRangesList-method}
 \title{DuckDBGRangesList objects}
 \description{
