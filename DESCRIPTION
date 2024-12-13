@@ -1,6 +1,6 @@
 Package: BiocDuckDB
 Version: 0.5.0
-Date: 2024-12-04
+Date: 2024-12-13
 Title: Bioconductor DuckDB Bindings
 Description:
     This package provides bindings for DuckDB tables that extend Bioconductor
@@ -27,9 +27,9 @@ Imports:
     stats,
     BiocGenerics (>= 0.51.2),
     S4Vectors,
-    S4Arrays (>= 1.1.1),
     IRanges,
     GenomicRanges,
+    S4Arrays (>= 1.1.1),
     DBI,
     dplyr,
     arrow
@@ -37,13 +37,20 @@ Suggests:
     knitr,
     rmarkdown,
     BiocStyle,
-    SummarizedExperiment,
+    SummarizedExperiment (>= 1.15.1),
     airway,
     testthat
-biocViews: DataRepresentation, Infrastructure, Software
+biocViews:
+    DataImport,
+    DataRepresentation,
+    Infrastructure,
+    RNASeq,
+    Sequencing,
+    SingleCell,
+    Software
 VignetteBuilder: knitr
-BugReports: https://github.com/LTLA/DuckDBDataFrame
-URL: https://github.com/LTLA/DuckDBDataFrame
+BugReports: https://github.com/aboyoun/DuckDBDataFrame
+URL: https://github.com/aboyoun/DuckDBDataFrame
 RoxygenNote: 7.3.2
 Encoding: UTF-8
 Collate:
