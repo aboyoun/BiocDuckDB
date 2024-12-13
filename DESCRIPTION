@@ -1,35 +1,75 @@
-Package: ParquetDataFrame
-Version: 0.1.1
-Date: 2024-11-04
-Title: Bioconductor-friendly Bindings for Parquet
-Description: 
-    Implements bindings for Parquet files that are compatible with Bioconductor
-    S4 data structures, namely the DataFrame and DelayedArray. This allows 
-    Parquet-derived data to be easily used inside other Bioconductor objects
-    (e.g., SummarizedExperiments) while keeping everything on disk.
+Package: BiocDuckDB
+Version: 0.5.0
+Date: 2024-12-13
+Title: Bioconductor DuckDB Bindings
+Description:
+    This package provides bindings for DuckDB tables that extend Bioconductor
+    S4 data structures, including DelayedArray, DataFrame, and GenomicRanges.
+    By leveraging these bindings, DuckDB-hosted data can seamlessly support
+    SummarizedExperiments and other relational objects, facilitating efficient
+    and scalable data analysis within the Bioconductor ecosystem.
 Authors@R:
     c(
-        person("Aaron", "Lun", role=c("aut", "cre"), email="infinite.monkeys.with.keyboards@gmail.com"),
+        person("Patrick", "Aboyoun", role=c("aut", "cre"), email="aboyounp@gene.com"),
+        person("Aaron", "Lun", role="aut", email="infinite.monkeys.with.keyboards@gmail.com"),
         person("Genentech, Inc.", role="cph")
     )
 License: MIT + file LICENSE
 Depends:
-    DelayedArray,
-    S4Vectors
-Imports: 
-    stats,
-    utils,
+    R (>= 3.4),
     methods,
-    BiocGenerics,
+    bit64,
+    SparseArray (>= 1.5.42),
+    DelayedArray (>= 0.31.8),
+    GenomeInfoDb,
+    duckdb
+Imports:
+    stats,
+    BiocGenerics (>= 0.51.2),
+    S4Vectors,
+    IRanges,
+    GenomicRanges,
+    S4Arrays (>= 1.1.1),
+    DBI,
+    dplyr,
     arrow
 Suggests:
     knitr,
     rmarkdown,
     BiocStyle,
+    SummarizedExperiment (>= 1.15.1),
+    airway,
     testthat
-biocViews: DataRepresentation, Infrastructure, Software
+biocViews:
+    DataImport,
+    DataRepresentation,
+    Infrastructure,
+    RNASeq,
+    Sequencing,
+    SingleCell,
+    Software
 VignetteBuilder: knitr
-BugReports: https://github.com/LTLA/ParquetDataFrame
-URL: https://github.com/LTLA/ParquetDataFrame
-RoxygenNote: 7.2.3
+BugReports: https://github.com/aboyoun/DuckDBDataFrame
+URL: https://github.com/aboyoun/DuckDBDataFrame
+RoxygenNote: 7.3.2
 Encoding: UTF-8
+Collate:
+    'tblconn.R'
+    'keynames.R'
+    'DuckDBConnection.R'
+    'DuckDBTable-class.R'
+    'DuckDBTable-utils.R'
+    'DuckDBArraySeed-class.R'
+    'DuckDBArraySeed-utils.R'
+    'DuckDBArray-class.R'
+    'DuckDBArray-utils.R'
+    'DuckDBColumn-class.R'
+    'DuckDBColumn-utils.R'
+    'DuckDBDataFrame-class.R'
+    'DuckDBList-class.R'
+    'DuckDBDataFrameList-class.R'
+    'DuckDBGRanges-class.R'
+    'DuckDBGRangesList-class.R'
+    'DuckDBMatrix-class.R'
+    'listParquetDirs.R'
+    'writeArray.R'

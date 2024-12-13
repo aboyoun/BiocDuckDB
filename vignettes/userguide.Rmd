@@ -1,10 +1,12 @@
 ---
-title: Using Parquet-backed DataFrames
+title: Using DuckDB-backed Bioconductor Objects
 author:
+- name: Patrick Aboyoun
+  email: aboyounp@gene.com
 - name: Aaron Lun
   email: infinite.monkeys.with.keyboards@gmail.com
-package: ParquetDataFrame
-date: "Revised: October 9, 2023"
+package: BiocDuckDB
+date: "Revised: December 4, 2024"
 output:
   BiocStyle::html_document
 vignette: >
@@ -16,97 +18,315 @@ vignette: >
 
 ```{r, echo=FALSE}
 library(BiocStyle)
-self <- Biocpkg("ParquetDataFrame");
+self <- Biocpkg("BiocDuckDB");
 knitr::opts_chunk$set(error=FALSE, warning=FALSE, message=FALSE)
 ```
 
 # Overview
 
-The `ParquetDataFrame`, as its name suggests, is a `DataFrame` where the columns are derived from data in a Parquet file.
-This is fully file-backed so no data is actually loaded into memory until requested, allowing users to represent large datasets in limited memory.
-As the `ParquetDataFrame` inherits from `r Biocpkg("S4Vectors")`' `DataFrame`, it can be used anywhere in Bioconductor's ecosystem that accepts a `DataFrame`, 
-e.g., as the column data of a `SummarizedExperiment`, or inside a `BumpyDataFrameMatrix` from the `r Biocpkg("BumpyMatrix")` package.
+The BiocDuckDB package provides a set of classes that use DuckDB as a backend
+for Bioconductor by extending classes defined in `r Biocpkg("S4Arrays")`,
+`r Biocpkg("DelayedArray")`, `r Biocpkg("GenomicRanges")`, and
+`r Biocpkg("S4Vectors")`. This package is designed to enhance the functionality
+of `r Biocpkg("SummarizedExperiment")` by enabling the use of `DuckDBMatrix`
+assays with `DuckDBGranges`/`DuckDBGRangesList` row ranges, and `DuckDBDataFrame`
+row and column data.
 
-# Basic usage
-
-Given a path to a Parquet file, we can just supply the path to the `ParquetDataFrame` constructor:
-
-```{r}
-# Mocking up a file.
-tf <- tempfile()
-arrow::write_parquet(mtcars, tf)
-
-# Creating the ParquetDataFrame.
-library(ParquetDataFrame)
-df <- ParquetDataFrame(tf)
-df
-```
-
-These support all the usual methods for a `DataFrame`, except that the data is kept on file and referenced as needed:
+The primary user-facing classes (`DuckDBMatrix`, `DuckDBDataFrame`,
+`DuckDBGRanges`) are defined by a connection to a DuckDB table. Each class
+specifies a set of column names for the table that serve as a key to define
+dimension names, and a set of column names that define the data populating the
+object.
 
 ```{r}
-nrow(df)
-colnames(df)
-class(as.data.frame(df))
+library(BiocDuckDB)
+
+args(DuckDBMatrix)
+args(DuckDBDataFrame)
+args(DuckDBGRanges)
 ```
 
-We extract individual columns as `ParquetColumnVector` objects.
-These are 1-dimensional file-backed `DelayedArray`s that pull a single column's data from the Parquet file on demand.
+`conn`
+: Either a character vector containing the paths to parquet, csv, or gzipped
+csv data files; a string that defines a duckdb `read_*` data source; or a
+`tbl_duckdb_connection` object.
+
+`keycols`
+: Either a character vector of column names from `conn` that will define the
+dimension names of the object, or a named list of character vectors where the
+names of the list define the dimension names and the character vectors define
+distinct values for each dimension.
+
+`datacols`
+: Either a character vector of column names from `conn` or a named `expression`
+that will be evaluated in the context of `conn` that defines the data.
+
+# Illustration using common example datasets
+
+We can familiarize ourselves with the `BiocDuckDB` package by wrapping commonly
+used `data.frame`, `array`, and `matrix` objects in `DuckDBDataFrame`,
+`DuckDBArray`, and `DuckDBMatrix` objects, respectively. This illustration will
+use the following datasets:
+
+1. `mtcars`: `data.frame` with row names
+2. `infert`: `data.frame` without row names
+3. `Titanic`: `array` with 4 dimensions
+4. `state.x77`: `matrix`
+
+## `DuckDBDataFrame` with row names
+
+The `DuckDBDataFrame` class extends `r Biocpkg("S4Vectors")` `DataFrame` to
+provide access to DuckDB tables. They may or may not have a key column that
+defines the row names of the object. When a key column is supplied, the
+resulting `DuckDBDataFrame` object will have row names that can be used for row
+subscripting.
 
 ```{r}
-df$mpg
+# Write a csv file to contain the mtcars data
+mtcars_tf <- tempfile(fileext = ".csv")
+write.csv(cbind(model = rownames(mtcars), mtcars), mtcars_tf, row.names = FALSE)
 
-# These can participate in usual vector operations:
-df$mpg * 10
-log1p(df$mpg)
+# Create a DuckDBDataFrame that uses a key column as row names
+mtcars_ddb <- DuckDBDataFrame(mtcars_tf, datacols = colnames(mtcars), keycol = "model")
 
-# Realize this into an ordinary vector.
-as.vector(df$mpg)
+# Since the resulting object is not guaranteed to have the samme row ordering,
+# reorder the rows to conform to the original mtcars data
+mtcars_ddb <- mtcars_ddb[rownames(mtcars), ]
+
+# Assign metadata
+metadata(mtcars_ddb) <-
+    list(title = "Motor Trend Car Road Tests",
+         description = paste("The data was extracted from the 1974 Motor Trend",
+                             "US magazine, and comprises fuel consumption and",
+                             "10 aspects of automobile design and performance",
+                             "for 32 automobiles (1973–74 models)."))
+
+# Assign column descriptions as mcols
+mcols(mtcars_ddb) <-
+    DataFrame(description = c("Miles/(US) gallon", "Number of cylinders",
+                              "Displacement (cu.in.)", "Gross horsepower",
+                              "Rear axle ratio", "Weight (1000 lbs)",
+                              "1/4 mile time", "Engine (0 = V-shaped, 1 = straight)",
+                              "Transmission (0 = automatic, 1 = manual)",
+                              "Number of forward gears", "Number of carburetors"),
+              row.names = colnames(mtcars_ddb))
 ```
 
-# Collapsing to a `DFrame`
-
-The main goal of a `ParquetDataFrame` is to serve as a consistent representation of the data inside a Parquet file.
-However, this cannot be easily reconciled with many `DataFrame` operations that add or change data - 
-at least, not without mutating the Parquet file, which is outside the scope of the `ParquetDataFrame` class.
-To handle such operations, the `ParquetDataFrame` will collapse to a `DFrame` of `ParquetColumnVector`s:
+We extract individual columns as `DuckDBColumn` objects and opporate on them
+as if they were ordinary vectors.
 
 ```{r}
-copy <- df
-copy$some_random_thing <- runif(nrow(df))
-class(copy)
-colnames(copy)
+# Extract the miles per gallon column
+mtcars_ddb$mpg
+
+# Use a linear model to motivate DuckDBColumn operations
+coeff <- coef(lm(log(mpg) ~ hp + wt, data = mtcars))
+hp <- mtcars_ddb$hp
+wt <- mtcars_ddb$wt
+pred <- exp(coeff["(Intercept)"] + coeff["hp"] * hp + coeff["wt"] * wt)
+pred
+
+# Can assign the result back to the DuckDBDataFrame
+copy <- mtcars_ddb
+copy$mpg_pred <- pred
+copy[, c("mpg", "mpg_pred")]
 ```
 
-This preserves the memory efficiency of file-backed data while supporting all `DataFrame` operations.
-For example, we can easily subset and mutate the various columns, which manifest as delayed operations inside each column.
+## `DuckDBDataFrame` without row names
+
+In most real world scenarios, the data will not have row names. In those cases,
+the `DuckDBDataFrame` object will contain a `row_number`-generated column that
+will provide some level of row idenification. 
 
 ```{r}
-copy$wt <- copy$wt * 1000
-top.hits <- head(copy)
-top.hits
+# Write a gzipped csv file to contain the infert data
+infert_tf <- tempfile(fileext = ".csv.gz")
+write.csv(infert, gzfile(infert_tf), row.names = FALSE)
+
+# Create a DuckDBDataFrame that doesn't use a key column as row names
+infert_ddb <- DuckDBDataFrame(infert_tf)
+
+# Unlike subscripting by row name, subscripting by row number does not
+# preserve row order
+infert_ddb[c(8,6,7,5,3,9), ]
+
+# Assign metadata
+metadata(infert_ddb) <-
+    list(title = "Infertility after Spontaneous and Induced Abortion",
+         description = paste("This is a matched case-control study."))
+
+# Assign column descriptions as mcols
+mcols(infert_ddb) <-
+    DataFrame(description = c("Education level",
+                              "Age in years of case",
+                              "Parity count",
+                              "Number of prior induced abortions",
+                              "Case status",
+                              "Number of prior spontaneous abortions",
+                              "Matched set number",
+                              "Stratum number"),
+              row.names = colnames(infert_ddb))
 ```
 
-The fallback to `DFrame` ensures that a `ParquetDataFrame` is interoperable with other Bioconductor data structures that need to perform arbitrary `DataFrame` operations.
-Of course, when a collapse occurs, we lose all guarantees that the in-memory representation is compatible with the underlying Parquet file.
-This may preclude further optimizations in cases where we consider directly operating on the file. 
+## `DuckDBArray` with more that two dimensions
 
-# Retrieving the Arrow Table
+The `DuckDBArray` class extends `r Biocpkg("DelayedArray")` `DelayedArray` to
+provide access to DuckDB tables. The `DuckDBArray` object uses key columns to
+define the dimensions of the array. If the values in the key columns are known,
+they can be supplied as named lists to the `keycols` argument to speed up
+object creation by avoiding a table scan.
 
-At any point, users can retrieve a handle to the underlying Parquet file via the `acquireTable()` function.
-This can be used with methods in the `r CRANpkg("arrow")` package to push more complex operations to the C++ libraries for greater efficiency.
+In this example we will write the 4-dimensional `Titanic` dataset to a parquet
+file using `BiocDuckDB::writeArray`.
 
 ```{r}
-handle <- acquireTable(path(df))
-handle
+# Write a parquet file to contain the titanic data
+titanic_tf <- tempfile()
+writeArray(Titanic, titanic_tf, value_name = "fate")
+list.files(titanic_tf, full.names = TRUE, recursive = TRUE)
+
+# Create a DuckDBArray
+titanic_ddb <- DuckDBArray(titanic_tf, datacol = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
+
+# Create a DuckDBArray using pre-defined dimension values
+titanic_ddb <- DuckDBArray(titanic_tf, datacol = "fate", keycols = dimnames(Titanic))
+
+# Susbcript by dimension name to learn the fate of the crew
+titanic_ddb["Crew", , "Adult", ]
 ```
 
-Note that the acquired handle will not capture any delayed subsetting/mutation operations that have been applied in the R session.
-In theory, it is possible to convert a subset of `r Biocpkg("DelayedArray")` operations into their `r CRANpkg("arrow")` equivalents,
-which would improve performance by avoiding the R interpreter when executing a query on the file.
-In practice, any performance boost tends to be rather fragile as only a subset of operations are supported,
-meaning that it is easy to silently fall back to R-based evaluation when an unsupported operation is executed.
-Users wanting to optimize query performance should just operate on the handle directly.
+## `DuckDBMatrix`
+
+The `DuckDBMatrix` class extends `r Biocpkg("DelayedArray")` `DelayedMatrix` to
+provide access to DuckDB tables. The `DuckDBMatrix` object uses columns in the
+underlying table to define the row and column names. If the row and column
+names are known, they can be supplied as named lists to the `row` and `col` or
+`keycols` arguments to speed up object creation by avoiding a table scan.
+
+In this example we can use the `BiocDuckDB::listParquetDirs` helper function to
+understand the parquet directory layout.
+
+```{r}
+# Write a set of parquet files to contain state data
+state <- data.frame(
+  region = rep(as.character(state.region), times = ncol(state.x77)),
+  division = rep(as.character(state.division), times = ncol(state.x77)),
+  rowname = rep(rownames(state.x77), times = ncol(state.x77)),
+  colname = rep(colnames(state.x77), each = nrow(state.x77)),
+  value = as.vector(state.x77)
+)
+state_tf <- tempfile()
+arrow::write_dataset(state, state_tf, format = "parquet", partitioning = c("region", "division"))
+listParquetDirs(state_tf)
+
+# Create a DuckDBMatrix and reorder the rows and columns to conform to state.x77
+state_ddb <- DuckDBMatrix(state_tf, row = "rowname", col = "colname", datacol = "value")
+state_ddb <- state_ddb[rownames(state.x77), colnames(state.x77)]
+
+# Create a DuckDBMatrix using pre-defined row and column values
+keycols <- setNames(dimnames(state.x77), c("rowname", "colname"))
+state_ddb <- DuckDBMatrix(state_tf, datacol = "value", keycols = keycols)
+```
+
+We can extract sub-matrices from the underlying parquet data by either reading
+from a subdirectory or using a `DuckDBDataFrame` to filter the data prior to
+constructing the matrix.
+
+```{r}
+# Use the data files for just the Western states
+western_state_ddb <- DuckDBMatrix(file.path(state_tf, "region=West"), row = "rowname", col = "colname", datacol = "value")
+western_state_ddb <- western_state_ddb[sort(rownames(western_state_ddb)), colnames(state.x77)]
+
+# Use a DuckDBDataFrame to filter the Southern states
+full_df <- DuckDBDataFrame(state_tf)
+southern_df <- full_df[full_df$region == "South", ]
+southern_state_ddb <- DuckDBMatrix(southern_df, row = "rowname", col = "colname", datacol = "value")
+southern_state_ddb <- southern_state_ddb[sort(rownames(southern_state_ddb)), colnames(state.x77)]
+```
+
+## `DuckDBArray` using a random sparse array
+
+The `DuckDBArray` and `DuckDBMatrix` classes support sparse arrays and matrices
+in a seemless manner. The following toy example creates a 26 x 26 x 12 sparse
+array, but this can be scaled to out to accommodate larger data.
+
+```{r}
+set.seed(123)
+ind <- arrayInd(sort(sample.int(26 * 26 * 12, 1000)), c(26, 26, 12))
+sparse_df <- data.frame(dim1 = letters[ind[, 1]],
+                        dim2 = LETTERS[ind[, 2]],
+                        dim3 = month.abb[ind[, 3]],
+                        value = sample(10L, 1000, replace = TRUE, prob = 2^(10:1)))
+sparse_tf <- tempfile(fileext = ".parquet")
+arrow::write_parquet(sparse_df, sparse_tf)
+
+# Create a DuckDBMatrix
+sparse_ddb <- DuckDBArray(sparse_tf, datacol = "value", keycols = list("dim1" = letters, "dim2" = LETTERS, "dim3" = month.abb))
+sparse_ddb
+```
+
+# Creating DuckDB-backed SummarizedExperiment objects
+
+We can now use the BiocDuckDB classes to manage and analyze large datasets
+efficiently within the Bioconductor ecosystem. For example, we could represent
+the `airway` example dataset from `r Biocpkg("SummarizedExperiment")` as a set
+of parquet tables to illustrate how to assemble a DuckDB-backed
+`SummarizedExperiment` object.
+
+By writing the row ranges, row data, column data, and assay data to DuckDB
+tables, we can create `DuckDBGRanges`, `DuckDBDataFrame`, and `DuckDBMatrix`
+objects that are backed by DuckDB tables. This setup allows for scalable data
+storage and computation, facilitating efficient manipulation and analysis of
+large datasets. The final `SummarizedExperiment` object, `airway_ddb`, is
+constructed using these DuckDB-backed components, demonstrating the seamless
+integration of DuckDB with Bioconductor's data structures.
+
+```{r}
+library(SummarizedExperiment)
+data(airway, package = "airway")
+
+airway_rowranges_td <- tempfile(pattern = "rowranges_")
+arrow::write_dataset(as.data.frame(rowRanges(airway)), airway_rowranges_td, format = "parquet")
+
+airway_rowdata_td <- tempfile(pattern = "rowdata_")
+arrow::write_dataset(as.data.frame(rowData(airway)), airway_rowdata_td, format = "parquet")
+
+airway_coldata_td <- tempfile(pattern = "coldata_")
+arrow::write_dataset(as.data.frame(colData(airway)), airway_coldata_td, format = "parquet")
+
+airway_counts_td <- tempfile(pattern = "counts_")
+writeArray(assays(airway)[["counts"]], airway_counts_td, dim_names = c("gene_id", "run"))
+
+rranges <- DuckDBGRanges(airway_rowranges_td, seqnames = "seqnames", start = "start", end = "end",
+                         strand = "strand", mcols = c("exon_id", "exon_name", "group_name"),
+                         seqinfo = seqinfo(airway))
+
+rdata <- DuckDBDataFrame(airway_rowdata_td, keycols = "gene_id")
+rdata <- rdata[sort(rownames(rdata)), ]
+
+rranges <- split(rranges, rranges$group_name)
+mcols(rranges) <- rdata
+
+cdata <- DuckDBDataFrame(airway_coldata_td, keycols = "Run")
+cdata <- cdata[sort(rownames(cdata)), ]
+
+counts <- DuckDBMatrix(airway_counts_td, row = "gene_id", col = "run", datacol = "value")
+counts <- counts[rownames(rdata), sort(rownames(cdata))]
+
+airway_ddb <- SummarizedExperiment(assays = SimpleList(counts = counts),
+                                   rowRanges = rranges, colData = cdata,
+                                   metadata = metadata(airway))
+```
+
+# Retrieving the DuckDB table connection
+
+At any point, users can retrieve the query to the underlying DuckDB table via the
+`dbconn` method. This can be used with methods in the `r CRANpkg("duckdb")` package
+to push more complex operations to the DuckDB for greater efficiency.
+
+```{r}
+dbconn(mtcars_ddb)
+```
 
 # Session information {-}
 
