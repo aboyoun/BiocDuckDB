@@ -23,6 +23,20 @@ test_that("basic methods work as expected for a DuckDBArray", {
 })
 
 test_that("basic methods work as expected for a sparse DuckDBArray", {
+    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate",
+                           keycols = list(Class = c("1st", "2nd", "Crew"),
+                                          Sex = c("Male", "Female"),
+                                          Age = "Child", Survived = "No"))
+    checkDuckDBArray(pqarray, titanic_array[c("1st", "2nd", "Crew"), c("Male", "Female"), "Child", "No", drop = FALSE])
+    expect_true(is_sparse(pqarray))
+
+    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate",
+                           keycols = list(Class = c("1st", "2nd", "3rd", "Crew"),
+                                          Sex = c("Male", "Female"),
+                                          Age = "Child", Survived = "No"))
+    checkDuckDBArray(pqarray, titanic_array[, , "Child", "No", drop = FALSE])
+    expect_true(is_sparse(pqarray))
+
     pqarray <- DuckDBArray(sparse_parquet, datacols = "value", keycols = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb))
     checkDuckDBArray(pqarray, sparse_array)
     expect_true(is_sparse(pqarray))
@@ -62,9 +76,21 @@ test_that("nonzero functions work for DuckDBArray", {
     checkDuckDBArray(is_nonzero(pqarray), is_nonzero(titanic_array))
     expect_equal(nzcount(pqarray), nzcount(titanic_array))
 
-    pqarray <- DuckDBArray(sparse_parquet, datacols = "value", keycols = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb))
-    checkDuckDBArray(is_nonzero(pqarray), is_nonzero(sparse_array))
-    expect_equal(nzcount(pqarray), nzcount(sparse_array))
+    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate",
+                           keycols = list(Class = c("1st", "2nd", "Crew"),
+                                          Sex = c("Male", "Female"),
+                                          Age = "Child", Survived = "No"))
+    expected <- titanic_array[c("1st", "2nd", "Crew"), c("Male", "Female"), "Child", "No", drop = FALSE]
+    checkDuckDBArray(is_nonzero(pqarray), is_nonzero(expected))
+    expect_equal(nzcount(pqarray), nzcount(expected))
+
+    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate",
+                           keycols = list(Class = c("1st", "2nd", "3rd", "Crew"),
+                                          Sex = c("Male", "Female"),
+                                          Age = "Child", Survived = "No"))
+    expected <- titanic_array[, , "Child", "No", drop = FALSE]
+    checkDuckDBArray(pqarray, expected)
+    expect_equal(nzcount(pqarray), nzcount(expected))
 })
 
 test_that("extraction methods work as expected for a DuckDBArray", {

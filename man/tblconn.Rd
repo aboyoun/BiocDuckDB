@@ -4,10 +4,13 @@
 \alias{tblconn}
 \title{Accessing DB Table Information}
 \usage{
-tblconn(x)
+tblconn(x, filter = TRUE)
 }
 \arguments{
 \item{x}{An object with a database table connection.}
+
+\item{filter}{A logical value indicating whether to apply key column
+filtering to the database table connection.}
 }
 \value{
 returns a database table connection object.
