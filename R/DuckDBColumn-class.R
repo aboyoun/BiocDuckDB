@@ -89,7 +89,9 @@ setClass("DuckDBColumn", contains = "Vector", slots = c(table = "DuckDBTable"))
 setMethod("dbconn", "DuckDBColumn", function(x) callGeneric(x@table))
 
 #' @export
-setMethod("tblconn", "DuckDBColumn", function(x) callGeneric(x@table))
+setMethod("tblconn", "DuckDBColumn", function(x, filter = TRUE) {
+    callGeneric(x@table, filter = filter)
+})
 
 setMethod(".keycols", "DuckDBColumn", function(x) callGeneric(x@table))
 
@@ -110,9 +112,7 @@ setMethod("names", "DuckDBColumn", function(x) {
 
 #' @export
 #' @importFrom BiocGenerics type
-setMethod("type", "DuckDBColumn", function(x) {
-    unname(coltypes(x@table))
-})
+setMethod("type", "DuckDBColumn", function(x) unname(coltypes(x@table)))
 
 #' @export
 #' @importFrom BiocGenerics type<-

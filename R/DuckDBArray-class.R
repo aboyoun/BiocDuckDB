@@ -131,13 +131,13 @@ setClass("DuckDBArray", contains = "DelayedArray", slots = c(seed = "DuckDBArray
 setMethod("dbconn", "DuckDBArray", function(x) callGeneric(x@seed))
 
 #' @export
-setMethod("tblconn", "DuckDBArray", function(x) callGeneric(x@seed))
+setMethod("tblconn", "DuckDBArray", function(x, filter = TRUE) {
+    callGeneric(x@seed, filter = filter)
+})
 
 #' @export
 #' @importFrom BiocGenerics type
-setMethod("type", "DuckDBArray", function(x) {
-    callGeneric(x@seed)
-})
+setMethod("type", "DuckDBArray", function(x) callGeneric(x@seed))
 
 #' @export
 #' @importFrom BiocGenerics type<-

@@ -186,7 +186,22 @@ setClass("DuckDBTable", contains = c("RectangularData", "OutOfMemoryObject"),
 setMethod("dbconn", "DuckDBTable", function(x) x@conn$src$con)
 
 #' @export
-setMethod("tblconn", "DuckDBTable", function(x) x@conn)
+#' @importFrom dplyr filter
+#' @importFrom S4Vectors isTRUEorFALSE
+setMethod("tblconn", "DuckDBTable", function(x, filter = TRUE) {
+    if (!isTRUEorFALSE(filter)) {
+        stop("'filter' must be TRUE or FALSE")
+    }
+    conn <- x@conn
+    if (filter && !.has_row_number(x)) {
+        keycols <- x@keycols
+        for (i in names(keycols)) {
+            set <- keycols[[i]]
+            conn <- filter(conn, !!as.name(i) %in% set)
+        }
+    }
+    conn
+})
 
 setGeneric(".keycols", function(x) standardGeneric(".keycols"))
 
@@ -668,25 +683,19 @@ function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TR
 
 #' @export
 #' @importFrom BiocGenerics as.data.frame
-#' @importFrom dplyr filter mutate select
+#' @importFrom dplyr mutate select
 setMethod("as.data.frame", "DuckDBTable",
 function(x, row.names = NULL, optional = FALSE, ...) {
-    conn <- x@conn
+    conn <- tblconn(x)
     keycols <- x@keycols
     datacols <- as.list(x@datacols)
 
-    if (!.has_row_number(x)) {
-        for (i in names(keycols)) {
-            set <- keycols[[i]]
-            conn <- filter(conn, !!as.name(i) %in% set)
-        }
-    }
-
+    # Mutate and select the data columns
     conn <- mutate(conn, !!!as.list(datacols))
     conn <- select(conn, c(names(keycols), names(datacols)))
 
-    # Allow for 1 extra row to check for duplicate keys
-    length <- nrow(x) + 1L
+    # Allow for 1 extra row to check for duplicate keys, up to integer.max
+    length <- as.integer(min(nrow(x) + 1L, .Machine$integer.max))
     conn <- head(conn, n = length)
 
     df <- as.data.frame(conn)[, c(names(keycols), names(datacols))]

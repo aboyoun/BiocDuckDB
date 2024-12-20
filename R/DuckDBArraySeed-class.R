@@ -143,13 +143,13 @@ setClass("DuckDBArraySeed", contains = "Array",
 setMethod("dbconn", "DuckDBArraySeed", function(x) callGeneric(x@table))
 
 #' @export
-setMethod("tblconn", "DuckDBArraySeed", function(x) callGeneric(x@table))
+setMethod("tblconn", "DuckDBArraySeed", function(x, filter = TRUE) {
+    callGeneric(x@table, filter = filter)
+})
 
 #' @export
 #' @importFrom BiocGenerics type
-setMethod("type", "DuckDBArraySeed", function(x) {
-    unname(coltypes(x@table))
-})
+setMethod("type", "DuckDBArraySeed", function(x) unname(coltypes(x@table)))
 
 #' @export
 #' @importFrom BiocGenerics type<-
@@ -281,7 +281,9 @@ setMethod("extract_sparse_array", "DuckDBArraySeed", function(x, index) {
 
     dim <- dim(x)
     dimnames <- dimnames(x)
-    nzcoo <- sapply(names(dimnames), function(j) match(df[[j]], dimnames[[j]]))
+    nzcoo <- lapply(names(dimnames), function(j) match(df[[j]], dimnames[[j]]))
+    names(nzcoo) <- names(dimnames)
+    nzcoo <- do.call(cbind, nzcoo)
     nzdata <- df[[colnames(table)]]
     coo <- COO_SparseArray(dim = dim, nzcoo = nzcoo, nzdata = nzdata, dimnames = dimnames)
     as(coo, "SVT_SparseArray")

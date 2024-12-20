@@ -246,7 +246,7 @@ setMethod("Math", "DuckDBTable", function(x) {
     } else {
         aggr <- call(fun, x@datacols[[1L]])
     }
-    pull(summarize(x@conn, !!aggr))
+    pull(summarize(tblconn(x), !!aggr))
 }
 
 #' @export
@@ -257,7 +257,7 @@ setMethod("Summary", "DuckDBTable", function(x, ..., na.rm = FALSE) {
         }
         aggr <- list(min = call("min", x@datacols[[1L]], na.rm = TRUE),
                      max = call("max", x@datacols[[1L]], na.rm = TRUE))
-        unlist(as.data.frame(summarize(x@conn, !!!aggr)), use.names = FALSE)
+        unlist(as.data.frame(summarize(tblconn(x), !!!aggr)), use.names = FALSE)
     } else if (.Generic == "sum") {
         .pull.aggregagte(x, "fsum")
     } else {
@@ -334,7 +334,7 @@ function(x, probs = seq(0, 1, 0.25), na.rm = FALSE, names = TRUE, type = 7, digi
         fun <- "quantile_cont"
     }
     aggr <- lapply(probs, function(p) call(fun, x@datacols[[1L]], p))
-    ans <- unlist(as.data.frame(summarize(x@conn, !!!aggr)), use.names = FALSE)
+    ans <- unlist(as.data.frame(summarize(tblconn(x), !!!aggr)), use.names = FALSE)
     if (names) {
         stopifnot(isSingleNumber(digits), digits >= 1)
         names(ans) <- paste0(formatC(100 * probs, format = "fg", width = 1, digits = digits), "%")
@@ -373,7 +373,7 @@ setMethod("rowSums", "DuckDBTable", function(x, na.rm = FALSE, dims = 1, ...) {
     keycols <- head(x@keycols, dims)
     groups <- lapply(names(keycols), as.name)
     aggr <- sapply(datacols, function(y) call("sum", y, na.rm = TRUE), simplify = FALSE)
-    conn <- summarize(group_by(x@conn, !!!groups), !!!aggr)
+    conn <- summarize(group_by(tblconn(x, filter = FALSE), !!!groups), !!!aggr)
     new2("DuckDBTable", conn = conn, datacols = datacols, keycols = keycols, check = FALSE)
 })
 
@@ -396,7 +396,7 @@ setMethod("colSums", "DuckDBTable", function(x, na.rm = FALSE, dims = 1, ...) {
     keycols <- tail(x@keycols, nk - dims)
     groups <- lapply(names(keycols), as.name)
     aggr <- sapply(datacols, function(y) call("sum", y, na.rm = TRUE), simplify = FALSE)
-    conn <- summarize(group_by(x@conn, !!!groups), !!!aggr)
+    conn <- summarize(group_by(tblconn(x, filter = FALSE), !!!groups), !!!aggr)
     new2("DuckDBTable", conn = conn, datacols = datacols, keycols = keycols, check = FALSE)
 })
 
@@ -412,7 +412,7 @@ function (x, incomparables = FALSE, fromLast = FALSE, ...)  {
     if (!isFALSE(incomparables)) {
         .NotYetUsed("incomparables != FALSE")
     }
-    conn <- x@conn
+    conn <- tblconn(x, filter = FALSE)
     datacols <- x@datacols
     keycols <- tail(make.unique(c(colnames(conn), "row_number"), sep = "_"), 1L)
     keycols <- setNames(list(call("row_number")), keycols)
@@ -441,7 +441,7 @@ setMethod("table", "DuckDBTable", function(...) {
         stop("\"table\" method for DuckDB data can only take one input object")
     }
     x <- args[[1L]]
-    conn <- x@conn
+    conn <- tblconn(x)
     groups <- as.list(x@datacols)
     counts <- as.data.frame(summarize(group_by(conn, !!!groups), count = n(), .groups = "drop"))
     dnames <- lapply(counts[seq_along(groups)], function(j) as.character(sort(unique(j))))
@@ -489,7 +489,11 @@ setMethod("nzcount", "DuckDBTable", function(x) {
     coltypes(tbl) <- rep.int("integer", ncol(tbl))
     datacols <- setNames(as.expression(Reduce(function(x, y) call("+", x, y), tbl@datacols)), "nonzero")
     tbl <- replaceSlots(tbl, datacols = datacols, check = FALSE)
-    sum(tbl)
+    cnt <- sum(tbl)
+    if (is.na(cnt)) {
+        cnt <- 0L
+    }
+    cnt
 })
 
 #' @export
