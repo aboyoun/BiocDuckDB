@@ -250,7 +250,6 @@ setMethod("dimnames", "DuckDBArraySeed", function(x) {
 setMethod("extract_array", "DuckDBArraySeed", function(x, index) {
     index <- .extract_array_index(x, index)
 
-
     # Initialize output array
     fill <- switch(type(x), logical = FALSE, integer = 0L, double = 0, character =, raw = "")
     output <- array(fill, dim = lengths(index, use.names = FALSE))

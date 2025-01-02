@@ -4,7 +4,7 @@
 test_that("basic methods work as expected for a DuckDBArraySeed", {
     seed <- DuckDBArraySeed(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array))
     checkDuckDBArraySeed(seed, titanic_array)
-    expect_false(is_sparse(seed))
+    expect_true(is_sparse(seed))
 
     seed <- DuckDBArraySeed(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array), type = "double")
     expect_s4_class(seed, "DuckDBArraySeed")

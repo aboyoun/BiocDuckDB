@@ -150,7 +150,7 @@ In the code snippets below, \code{x} is a DuckDBTable object:
     Returns the total number of non-zero values.
   }
   \item{\code{is_sparse(x)}:}{
-    Defined as \code{(ncol(x) == 1L) && ((nzcount(x) / nrow(x)) < 0.5)}.
+    Returns \code{TRUE} since data are stored in a sparse array representation.
   }
 }
 }

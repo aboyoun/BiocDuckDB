@@ -117,7 +117,7 @@
 #'     Returns the total number of non-zero values.
 #'   }
 #'   \item{\code{is_sparse(x)}:}{
-#'     Defined as \code{(ncol(x) == 1L) && ((nzcount(x) / nrow(x)) < 0.5)}.
+#'     Returns \code{TRUE} since data are stored in a sparse array representation.
 #'   }
 #' }
 #'
@@ -499,5 +499,5 @@ setMethod("nzcount", "DuckDBTable", function(x) {
 #' @export
 #' @importFrom S4Arrays is_sparse
 setMethod("is_sparse", "DuckDBTable", function(x) {
-    (ncol(x) == 1L) && ((nzcount(x) / nrow(x)) < 0.5)
+    TRUE
 })

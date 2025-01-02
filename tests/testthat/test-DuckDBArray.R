@@ -4,7 +4,7 @@
 test_that("basic methods work as expected for a DuckDBArray", {
     pqarray <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array))
     checkDuckDBArray(pqarray, titanic_array)
-    expect_false(is_sparse(pqarray))
+    expect_true(is_sparse(pqarray))
 
     pqarray <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array), type = "double")
     expect_s4_class(pqarray, "DuckDBArray")
