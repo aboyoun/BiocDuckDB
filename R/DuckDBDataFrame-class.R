@@ -577,7 +577,7 @@ setMethod("makeNakedCharacterMatrixForDisplay", "DuckDBDataFrame", function(x) {
 #' @export
 #' @importFrom S4Vectors classNameForDisplay DataFrame get_showHeadLines get_showTailLines makeNakedCharacterMatrixForDisplay
 setMethod("show", "DuckDBDataFrame", function(object) {
-    x_nrow <- nrow(object)
+    x_nrow <- as.double(nrow(object))
     x_ncol <- ncol(object)
 
     cat(classNameForDisplay(object), " with ",
