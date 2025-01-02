@@ -556,7 +556,7 @@ function(x, BACKEND = getAutoRealizationBackend()) {
             m <- rbind(makeNakedCharacterMatrixForDisplay(x_head), "...")
         } else {
             i <- c(seq_len(nhead), (x_nrow + 1L) - rev(seq_len(ntail)))
-            df <- DataFrame(as.data.frame(x[i, , drop = FALSE]))
+            df <- DataFrame(as.data.frame(x[i, , drop = FALSE]), check.names = FALSE)
             m <- rbind(makeNakedCharacterMatrixForDisplay(head(df, nhead)),
                        "...",
                        makeNakedCharacterMatrixForDisplay(tail(df, ntail)))
@@ -571,7 +571,7 @@ function(x, BACKEND = getAutoRealizationBackend()) {
 #' @export
 #' @importFrom S4Vectors DataFrame makeNakedCharacterMatrixForDisplay
 setMethod("makeNakedCharacterMatrixForDisplay", "DuckDBDataFrame", function(x) {
-    callGeneric(DataFrame(as.data.frame(x)))
+    callGeneric(DataFrame(as.data.frame(x), check.names = FALSE))
 })
 
 #' @export
