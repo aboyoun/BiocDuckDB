@@ -4,6 +4,8 @@
 \alias{DuckDBArray-class}
 \alias{dbconn,DuckDBArray-method}
 \alias{tblconn,DuckDBArray-method}
+\alias{dimtbls,DuckDBArray-method}
+\alias{dimtbls<-,DuckDBArray-method}
 \alias{type,DuckDBArray-method}
 \alias{type<-,DuckDBArray-method}
 \alias{DuckDBArray}
@@ -21,7 +23,7 @@ objects work on DuckDBArray objects.
 \section{Constructor}{
 
 \describe{
-  \item{\code{DuckDBArray(conn, datacols, keycols, type = NULL)}:}{
+  \item{\code{DuckDBArray(conn, datacols, keycols, dimtbls = NULL, type = NULL)}:}{
     Creates a DuckDBArray object.
     \describe{
       \item{\code{conn}}{
@@ -40,6 +42,14 @@ objects work on DuckDBArray objects.
         specify the dimension names, or a named list of character vectors
         where the names of the list specify the dimension names and the
         character vectors set the distinct values for the dimension names.
+      }
+      \item{\code{dimtbls}}{
+        A optional named \code{DataFrameList} that specifies the dimension
+        tables associated with the \code{keycols}. The name of the list
+        elements match the names of the \code{keycols} list. Additionally,
+        the \code{DataFrame} objects have row names that match the distinct
+        values of the corresponding \code{keycols} list element and columns
+        that define partitions in the data table for efficient querying.
       }
       \item{\code{type}}{
         String specifying the type of the data values; one of
@@ -61,6 +71,10 @@ In the code snippets below, \code{x} is a DuckDBArray object:
   }
   \item{\code{dimnames(x)}:}{
     List of array dimension names.
+  }
+  \item{\code{dimtbls(x)}, \code{dimtbls(x) <- value}:}{
+    Get or set the list of dimension tables used to define partitions for
+    efficient queries.
   }
   \item{\code{type(x)}, \code{type(x) <- value}:}{
     Get or set the data type of the array elements; one of \code{"logical"},

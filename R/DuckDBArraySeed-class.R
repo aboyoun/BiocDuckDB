@@ -11,7 +11,7 @@
 #'
 #' @section Constructor:
 #' \describe{
-#'   \item{\code{DuckDBArraySeed(conn, datacols, keycols, type = NULL)}:}{
+#'   \item{\code{DuckDBArraySeed(conn, datacols, keycols, dimtbls = NULL, type = NULL)}:}{
 #'     Creates a DuckDBArraySeed object.
 #'     \describe{
 #'       \item{\code{conn}}{
@@ -31,6 +31,14 @@
 #'         where the names of the list specify the dimension names and the
 #'         character vectors set the distinct values for the dimension names.
 #'       }
+#'       \item{\code{dimtbls}}{
+#'         A optional named \code{DataFrameList} that specifies the dimension
+#'         tables associated with the \code{keycols}. The name of the list
+#'         elements match the names of the \code{keycols} list. Additionally,
+#'         the \code{DataFrame} objects have row names that match the distinct
+#'         values of the corresponding \code{keycols} list element and columns
+#'         that define partitions in the data table for efficient querying.
+#'       }
 #'       \item{\code{type}}{
 #'         String specifying the type of the data values; one of
 #'         \code{"logical"}, \code{"integer"}, \code{"integer64"},
@@ -49,6 +57,10 @@
 #'   }
 #'   \item{\code{dimnames(x)}:}{
 #'     List of array dimension names.
+#'   }
+#'   \item{\code{dimtbls(x)}, \code{dimtbls(x) <- value}:}{
+#'     Get or set the list of dimension tables used to define partitions for
+#'     efficient queries.
 #'   }
 #'   \item{\code{type(x)}, \code{type(x) <- value}:}{
 #'     Get or set the data type of the array elements; one of \code{"logical"},
@@ -98,6 +110,8 @@
 #'
 #' dbconn,DuckDBArraySeed-method
 #' tblconn,DuckDBArraySeed-method
+#' dimtbls,DuckDBArraySeed-method
+#' dimtbls<-,DuckDBArraySeed-method
 #' type,DuckDBArraySeed-method
 #' type<-,DuckDBArraySeed-method
 #'
@@ -145,6 +159,14 @@ setMethod("dbconn", "DuckDBArraySeed", function(x) callGeneric(x@table))
 #' @export
 setMethod("tblconn", "DuckDBArraySeed", function(x, filter = TRUE) {
     callGeneric(x@table, filter = filter)
+})
+
+#' @export
+setMethod("dimtbls", "DuckDBArraySeed", function(x) callGeneric(x@table))
+
+#' @export
+setReplaceMethod("dimtbls", "DuckDBArraySeed", function(x, value) {
+    callGeneric(x@table, value)
 })
 
 #' @export
@@ -299,11 +321,12 @@ setMethod("DelayedArray", "DuckDBArraySeed", function(seed) DuckDBArray(seed))
 #' @export
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
-DuckDBArraySeed <- function(conn, datacols, keycols, type = NULL) {
+DuckDBArraySeed <- function(conn, datacols, keycols, dimtbls = NULL, type = NULL) {
     if (!is.null(type)) {
         type <- setNames(type, names(datacols) %||% datacols)
     }
-    table <- DuckDBTable(conn, datacols = datacols, keycols = keycols, type = type)
+    table <- DuckDBTable(conn, datacols = datacols, keycols = keycols,
+                         dimtbls = dimtbls, type = type)
     new2("DuckDBArraySeed", table = table, drop = FALSE, check = FALSE)
 }
 

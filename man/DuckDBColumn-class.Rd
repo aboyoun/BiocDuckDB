@@ -4,6 +4,8 @@
 \alias{DuckDBColumn-class}
 \alias{dbconn,DuckDBColumn-method}
 \alias{tblconn,DuckDBColumn-method}
+\alias{dimtbls,DuckDBColumn-method}
+\alias{dimtbls<-,DuckDBColumn-method}
 \alias{length,DuckDBColumn-method}
 \alias{names,DuckDBColumn-method}
 \alias{type,DuckDBColumn-method}
@@ -30,8 +32,14 @@ In the code snippets below, \code{x} is a DuckDBColumn object:
   \item{\code{names(x)}:}{
     Get the names of the elements of \code{x}.
   }
-  \item{\code{type(x)}:}{
-    Get the data type of the elements of \code{x}.
+  \item{\code{dimtbls(x)}, \code{dimtbls(x) <- value}:}{
+    Get or set the list of dimension tables used to define partitions for
+    efficient queries.
+  }
+  \item{\code{type(x)}, \code{type(x) <- value}:}{
+    Get or set the data type of the elements; one of \code{"logical"},
+    \code{"integer"}, \code{"integer64"}, \code{"double"}, or
+    \code{"character"}.
   }
 }
 }

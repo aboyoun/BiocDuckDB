@@ -13,8 +13,14 @@
 #'   \item{\code{names(x)}:}{
 #'     Get the names of the elements of \code{x}.
 #'   }
-#'   \item{\code{type(x)}:}{
-#'     Get the data type of the elements of \code{x}.
+#'   \item{\code{dimtbls(x)}, \code{dimtbls(x) <- value}:}{
+#'     Get or set the list of dimension tables used to define partitions for
+#'     efficient queries.
+#'   }
+#'   \item{\code{type(x)}, \code{type(x) <- value}:}{
+#'     Get or set the data type of the elements; one of \code{"logical"},
+#'     \code{"integer"}, \code{"integer64"}, \code{"double"}, or
+#'     \code{"character"}.
 #'   }
 #' }
 #'
@@ -54,6 +60,8 @@
 #'
 #' dbconn,DuckDBColumn-method
 #' tblconn,DuckDBColumn-method
+#' dimtbls,DuckDBColumn-method
+#' dimtbls<-,DuckDBColumn-method
 #' length,DuckDBColumn-method
 #' names,DuckDBColumn-method
 #' type,DuckDBColumn-method
@@ -96,6 +104,12 @@ setMethod("tblconn", "DuckDBColumn", function(x, filter = TRUE) {
 setMethod(".keycols", "DuckDBColumn", function(x) callGeneric(x@table))
 
 setMethod(".has_row_number", "DuckDBColumn", function(x) callGeneric(x@table))
+
+#' @export
+setMethod("dimtbls", "DuckDBColumn", function(x) callGeneric(x@table))
+
+#' @export
+setReplaceMethod("dimtbls", "DuckDBColumn", function(x, value) callGeneric(x@table, value))
 
 #' @export
 setMethod("length", "DuckDBColumn", function(x) nrow(x@table))

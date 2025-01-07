@@ -16,7 +16,7 @@ objects work on DuckDBMatrix objects.
 \section{Constructor}{
 
 \describe{
-  \item{\code{DuckDBMatrix(conn, datacols, row, col, keycols = c(row, col), type = NULL)}:}{
+  \item{\code{DuckDBMatrix(conn, datacols, row, col, keycols = c(row, col), dimtbls = NULL, type = NULL)}:}{
     Creates a DuckDBMatrix object.
     \describe{
       \item{\code{conn}}{
@@ -49,6 +49,14 @@ objects work on DuckDBMatrix objects.
         columns and the character vectors define distinct values for the rows
         and columns.
       }
+      \item{\code{dimtbls}}{
+        A optional named \code{DataFrameList} that specifies the dimension
+        tables associated with the \code{keycols}. The name of the list
+        elements match the names of the \code{keycols} list. Additionally,
+        the \code{DataFrame} objects have row names that match the distinct
+        values of the corresponding \code{keycols} list element and columns
+        that define partitions in the data table for efficient querying.
+      }
       \item{\code{type}}{
         String specifying the type of the data values; one of
         \code{"logical"}, \code{"integer"}, \code{"integer64"},
@@ -69,6 +77,10 @@ In the code snippets below, \code{x} is a DuckDBMatrix object:
   }
   \item{\code{dimnames(x)}:}{
     List of array dimension names.
+  }
+  \item{\code{dimtbls(x)}, \code{dimtbls(x) <- value}:}{
+    Get or set the list of dimension tables used to define partitions for
+    efficient queries.
   }
   \item{\code{type(x)}, \code{type(x) <- value}:}{
     Get or set the data type of the array elements; one of \code{"logical"},
