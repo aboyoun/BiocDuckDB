@@ -11,7 +11,7 @@
 #'
 #' @section Constructor:
 #' \describe{
-#'   \item{\code{DuckDBArraySeed(conn, datacols, keycols, dimtbls = NULL, type = NULL)}:}{
+#'   \item{\code{DuckDBArraySeed(conn, datacol, keycols, dimtbls = NULL, type = NULL)}:}{
 #'     Creates a DuckDBArraySeed object.
 #'     \describe{
 #'       \item{\code{conn}}{
@@ -20,7 +20,7 @@
 #'         data source; a DuckDBDataFrame object; or a tbl_duckdb_connection
 #'         object.
 #'       }
-#'       \item{\code{datacols}}{
+#'       \item{\code{datacol}}{
 #'         Either a string specifying the column from \code{conn} or a named
 #'         \code{expression} that will be evaluated in the context of
 #'         \code{conn} that defines the values in the array.
@@ -103,7 +103,7 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' pqaseed <- DuckDBArraySeed(tf, datacols = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
+#' pqaseed <- DuckDBArraySeed(tf, datacol = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
 #'
 #' @aliases
 #' DuckDBArraySeed-class
@@ -321,11 +321,11 @@ setMethod("DelayedArray", "DuckDBArraySeed", function(seed) DuckDBArray(seed))
 #' @export
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
-DuckDBArraySeed <- function(conn, datacols, keycols, dimtbls = NULL, type = NULL) {
+DuckDBArraySeed <- function(conn, datacol, keycols, dimtbls = NULL, type = NULL) {
     if (!is.null(type)) {
-        type <- setNames(type, names(datacols) %||% datacols)
+        type <- setNames(type, names(datacol) %||% datacol)
     }
-    table <- DuckDBTable(conn, datacols = datacols, keycols = keycols,
+    table <- DuckDBTable(conn, datacol = datacol, keycols = keycols,
                          dimtbls = dimtbls, type = type)
     new2("DuckDBArraySeed", table = table, drop = FALSE, check = FALSE)
 }

@@ -9,7 +9,7 @@
 #'
 #' @section Constructor:
 #' \describe{
-#'   \item{\code{DuckDBMatrix(conn, datacols, row, col, keycols = c(row, col), dimtbls = NULL, type = NULL)}:}{
+#'   \item{\code{DuckDBMatrix(conn, datacol, row, col, keycols = c(row, col), dimtbls = NULL, type = NULL)}:}{
 #'     Creates a DuckDBMatrix object.
 #'     \describe{
 #'       \item{\code{conn}}{
@@ -18,7 +18,7 @@
 #'         data source; a DuckDBDataFrame object; or a tbl_duckdb_connection
 #'         object.
 #'       }
-#'       \item{\code{datacols}}{
+#'       \item{\code{datacol}}{
 #'         Either a string specifying the column from \code{conn} or a named
 #'         \code{expression} that will be evaluated in the context of
 #'         \code{conn} that defines the values in the matrix.
@@ -116,7 +116,7 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' pqmat <- DuckDBMatrix(tf, row = "rowname", col = "colname", datacols = "value")
+#' pqmat <- DuckDBMatrix(tf, row = "rowname", col = "colname", datacol = "value")
 #'
 #' @aliases
 #' DuckDBMatrix-class
@@ -162,7 +162,7 @@ setValidity2("DuckDBMatrix", function(x) {
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
 DuckDBMatrix <-
-function(conn, datacols, row, col, keycols = c(row, col), dimtbls = NULL, type = NULL) {
+function(conn, datacol, row, col, keycols = c(row, col), dimtbls = NULL, type = NULL) {
     if (!missing(row) && isSingleString(row)) {
         row <- setNames(list(NULL), row)
     }
@@ -173,7 +173,7 @@ function(conn, datacols, row, col, keycols = c(row, col), dimtbls = NULL, type =
         if (length(keycols) != 2L) {
             stop("'keycols' must contain exactly 2 elements: rows and columns")
         }
-        conn <- DuckDBArraySeed(conn, datacols = datacols, keycols = keycols,
+        conn <- DuckDBArraySeed(conn, datacol = datacol, keycols = keycols,
                                 dimtbls = dimtbls, type = type)
     }
     new2("DuckDBMatrix", seed = conn, check = FALSE)

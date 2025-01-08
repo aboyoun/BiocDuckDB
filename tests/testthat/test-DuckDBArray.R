@@ -2,11 +2,11 @@
 # library(testthat); library(BiocDuckDB); source("setup.R"); source("test-DuckDBArray.R")
 
 test_that("basic methods work as expected for a DuckDBArray", {
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array))
+    pqarray <- DuckDBArray(titanic_parquet, datacol = "fate", keycols = dimnames(titanic_array))
     checkDuckDBArray(pqarray, titanic_array)
     expect_true(is_sparse(pqarray))
 
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array), type = "double")
+    pqarray <- DuckDBArray(titanic_parquet, datacol = "fate", keycols = dimnames(titanic_array), type = "double")
     expect_s4_class(pqarray, "DuckDBArray")
     expect_identical(type(pqarray), "double")
     expect_identical(length(pqarray), length(titanic_array))
@@ -14,7 +14,7 @@ test_that("basic methods work as expected for a DuckDBArray", {
     expect_identical(dimnames(pqarray), dimnames(titanic_array))
     expect_equal(as.array(pqarray), titanic_array)
 
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array), type = "character")
+    pqarray <- DuckDBArray(titanic_parquet, datacol = "fate", keycols = dimnames(titanic_array), type = "character")
     expect_s4_class(pqarray, "DuckDBArray")
     expect_identical(type(pqarray), "character")
     expect_identical(length(pqarray), length(titanic_array))
@@ -23,25 +23,25 @@ test_that("basic methods work as expected for a DuckDBArray", {
 })
 
 test_that("basic methods work as expected for a sparse DuckDBArray", {
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate",
+    pqarray <- DuckDBArray(titanic_parquet, datacol = "fate",
                            keycols = list(Class = c("1st", "2nd", "Crew"),
                                           Sex = c("Male", "Female"),
                                           Age = "Child", Survived = "No"))
     checkDuckDBArray(pqarray, titanic_array[c("1st", "2nd", "Crew"), c("Male", "Female"), "Child", "No", drop = FALSE])
     expect_true(is_sparse(pqarray))
 
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate",
+    pqarray <- DuckDBArray(titanic_parquet, datacol = "fate",
                            keycols = list(Class = c("1st", "2nd", "3rd", "Crew"),
                                           Sex = c("Male", "Female"),
                                           Age = "Child", Survived = "No"))
     checkDuckDBArray(pqarray, titanic_array[, , "Child", "No", drop = FALSE])
     expect_true(is_sparse(pqarray))
 
-    pqarray <- DuckDBArray(sparse_parquet, datacols = "value", keycols = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb))
+    pqarray <- DuckDBArray(sparse_parquet, datacol = "value", keycols = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb))
     checkDuckDBArray(pqarray, sparse_array)
     expect_true(is_sparse(pqarray))
 
-    pqarray <- DuckDBArray(sparse_parquet, datacols = "value", keycols = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), type = "double")
+    pqarray <- DuckDBArray(sparse_parquet, datacol = "value", keycols = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), type = "double")
     expect_s4_class(pqarray, "DuckDBArray")
     expect_identical(type(pqarray), "double")
     expect_identical(length(pqarray), length(sparse_array))
@@ -49,7 +49,7 @@ test_that("basic methods work as expected for a sparse DuckDBArray", {
     expect_identical(dimnames(pqarray), dimnames(sparse_array))
     expect_equal(as.array(pqarray), sparse_array)
 
-    pqarray <- DuckDBArray(sparse_parquet, datacols = "value", keycols = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), type = "character")
+    pqarray <- DuckDBArray(sparse_parquet, datacol = "value", keycols = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb), type = "character")
     expect_s4_class(pqarray, "DuckDBArray")
     expect_identical(type(pqarray), "character")
     expect_identical(length(pqarray), length(sparse_array))
@@ -58,13 +58,13 @@ test_that("basic methods work as expected for a sparse DuckDBArray", {
 })
 
 test_that("DuckDBArray can be cast to a different type", {
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array))
+    pqarray <- DuckDBArray(titanic_parquet, datacol = "fate", keycols = dimnames(titanic_array))
     type(pqarray) <- "double"
     expected <- titanic_array
     storage.mode(expected) <- "double"
     checkDuckDBArray(pqarray, expected)
 
-    pqarray <- DuckDBArray(sparse_parquet, datacols = "value", keycols = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb))
+    pqarray <- DuckDBArray(sparse_parquet, datacol = "value", keycols = list(dim1 = LETTERS, dim2 = letters, dim3 = month.abb))
     type(pqarray) <- "double"
     expected <- sparse_array
     storage.mode(expected) <- "double"
@@ -72,11 +72,11 @@ test_that("DuckDBArray can be cast to a different type", {
 })
 
 test_that("nonzero functions work for DuckDBArray", {
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array))
+    pqarray <- DuckDBArray(titanic_parquet, datacol = "fate", keycols = dimnames(titanic_array))
     checkDuckDBArray(is_nonzero(pqarray), is_nonzero(titanic_array))
     expect_equal(nzcount(pqarray), nzcount(titanic_array))
 
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate",
+    pqarray <- DuckDBArray(titanic_parquet, datacol = "fate",
                            keycols = list(Class = c("1st", "2nd", "Crew"),
                                           Sex = c("Male", "Female"),
                                           Age = "Child", Survived = "No"))
@@ -84,7 +84,7 @@ test_that("nonzero functions work for DuckDBArray", {
     checkDuckDBArray(is_nonzero(pqarray), is_nonzero(expected))
     expect_equal(nzcount(pqarray), nzcount(expected))
 
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate",
+    pqarray <- DuckDBArray(titanic_parquet, datacol = "fate",
                            keycols = list(Class = c("1st", "2nd", "3rd", "Crew"),
                                           Sex = c("Male", "Female"),
                                           Age = "Child", Survived = "No"))
@@ -94,7 +94,7 @@ test_that("nonzero functions work for DuckDBArray", {
 })
 
 test_that("extraction methods work as expected for a DuckDBArray", {
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array))
+    pqarray <- DuckDBArray(titanic_parquet, datacol = "fate", keycols = dimnames(titanic_array))
 
     expect_error(pqarray[,])
 
@@ -127,14 +127,14 @@ test_that("extraction methods work as expected for a DuckDBArray", {
 })
 
 test_that("aperm and t methods work as expected for a DuckDBArray", {
-    seed <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array))
+    seed <- DuckDBArray(titanic_parquet, datacol = "fate", keycols = dimnames(titanic_array))
 
     object <- aperm(seed, c(4, 2, 1, 3))
     expected <- aperm(titanic_array, c(4, 2, 1, 3))
     checkDuckDBArray(object, expected)
 
     names(dimnames(state.x77)) <- c("rowname", "colname")
-    seed <- DuckDBArray(state_path, datacols = "value", keycols = dimnames(state.x77))
+    seed <- DuckDBArray(state_path, datacol = "value", keycols = dimnames(state.x77))
 
     object <- t(seed)
     expected <- t(state.x77)
@@ -148,7 +148,7 @@ test_that("aperm and t methods work as expected for a DuckDBArray", {
 })
 
 test_that("Arith methods work as expected for a DuckDBArray", {
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array))
+    pqarray <- DuckDBArray(titanic_parquet, datacol = "fate", keycols = dimnames(titanic_array))
 
     checkDuckDBArray(pqarray + sqrt(pqarray), as.array(pqarray) + sqrt(as.array(pqarray)))
     checkDuckDBArray(pqarray - 1L, as.array(pqarray) - 1L)
@@ -160,7 +160,7 @@ test_that("Arith methods work as expected for a DuckDBArray", {
 })
 
 test_that("Compare methods work as expected for a DuckDBArray", {
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array))
+    pqarray <- DuckDBArray(titanic_parquet, datacol = "fate", keycols = dimnames(titanic_array))
 
     checkDuckDBArray(pqarray == sqrt(pqarray), as.array(pqarray) == sqrt(as.array(pqarray)))
     checkDuckDBArray(pqarray > 1L, as.array(pqarray) > 1L)
@@ -171,7 +171,7 @@ test_that("Compare methods work as expected for a DuckDBArray", {
 })
 
 test_that("Logic methods work as expected for a DuckDBArray", {
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array))
+    pqarray <- DuckDBArray(titanic_parquet, datacol = "fate", keycols = dimnames(titanic_array))
 
     ## "&"
     x <- pqarray > 70
@@ -186,7 +186,7 @@ test_that("Logic methods work as expected for a DuckDBArray", {
 
 test_that("Math methods work as expected for a DuckDBArray", {
     names(dimnames(state.x77)) <- c("rowname", "colname")
-    pqarray <- DuckDBArray(state_path, datacols = "value", keycols = dimnames(state.x77))
+    pqarray <- DuckDBArray(state_path, datacol = "value", keycols = dimnames(state.x77))
 
     income <- pqarray[, "Income"]
     ikeep <-
@@ -248,7 +248,7 @@ test_that("Math methods work as expected for a DuckDBArray", {
 })
 
 test_that("Special numeric functions work as expected for a DuckDBArray", {
-    pqarray <- DuckDBArray(special_path, datacols = "x", keycols = list(id = letters[1:4]))
+    pqarray <- DuckDBArray(special_path, datacol = "x", keycols = list(id = letters[1:4]))
 
     checkDuckDBArray(is.finite(pqarray), is.finite(as.array(pqarray)))
     checkDuckDBArray(is.infinite(pqarray), is.infinite(as.array(pqarray)))
@@ -256,7 +256,7 @@ test_that("Special numeric functions work as expected for a DuckDBArray", {
 })
 
 test_that("row/colSums methods work as expected for a DuckDBArray", {
-    pqarray <- DuckDBArray(titanic_parquet, datacols = "fate", keycols = dimnames(titanic_array))
+    pqarray <- DuckDBArray(titanic_parquet, datacol = "fate", keycols = dimnames(titanic_array))
 
     object <- rowSums(pqarray)
     expect_identical(setNames(as.vector(object), names(object)), rowSums(as.array(pqarray)))

@@ -23,7 +23,7 @@ objects work on DuckDBArray objects.
 \section{Constructor}{
 
 \describe{
-  \item{\code{DuckDBArray(conn, datacols, keycols, dimtbls = NULL, type = NULL)}:}{
+  \item{\code{DuckDBArray(conn, datacol, keycols, dimtbls = NULL, type = NULL)}:}{
     Creates a DuckDBArray object.
     \describe{
       \item{\code{conn}}{
@@ -32,7 +32,7 @@ objects work on DuckDBArray objects.
         data source; a DuckDBDataFrame object; or a tbl_duckdb_connection
         object.
       }
-      \item{\code{datacols}}{
+      \item{\code{datacol}}{
         Either a string specifying the column from \code{conn} or a named
         \code{expression} that will be evaluated in the context of
         \code{conn} that defines the values in the array.
@@ -120,7 +120,7 @@ tf <- tempfile(fileext = ".parquet")
 on.exit(unlink(tf))
 arrow::write_parquet(df, tf)
 
-pqarray <- DuckDBArray(tf, datacols = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
+pqarray <- DuckDBArray(tf, datacol = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
 
 }
 \seealso{

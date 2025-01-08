@@ -16,7 +16,7 @@ objects work on DuckDBMatrix objects.
 \section{Constructor}{
 
 \describe{
-  \item{\code{DuckDBMatrix(conn, datacols, row, col, keycols = c(row, col), dimtbls = NULL, type = NULL)}:}{
+  \item{\code{DuckDBMatrix(conn, datacol, row, col, keycols = c(row, col), dimtbls = NULL, type = NULL)}:}{
     Creates a DuckDBMatrix object.
     \describe{
       \item{\code{conn}}{
@@ -25,7 +25,7 @@ objects work on DuckDBMatrix objects.
         data source; a DuckDBDataFrame object; or a tbl_duckdb_connection
         object.
       }
-      \item{\code{datacols}}{
+      \item{\code{datacol}}{
         Either a string specifying the column from \code{conn} or a named
         \code{expression} that will be evaluated in the context of
         \code{conn} that defines the values in the matrix.
@@ -128,7 +128,7 @@ tf <- tempfile(fileext = ".parquet")
 on.exit(unlink(tf))
 arrow::write_parquet(df, tf)
 
-pqmat <- DuckDBMatrix(tf, row = "rowname", col = "colname", datacols = "value")
+pqmat <- DuckDBMatrix(tf, row = "rowname", col = "colname", datacol = "value")
 
 }
 \author{
