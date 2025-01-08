@@ -84,7 +84,9 @@ function(x,
             if (is.null(dimnames(x)[[j]])) {
                 stop("dimnames must be defined for each dimension of 'x' when 'dimtbls' is specified")
             }
-            tbl <- tbl[dimnames(x)[[j]], , drop = FALSE]
+            if (!identical(rownames(tbl), dimnames(x)[[j]])) {
+                tbl <- tbl[dimnames(x)[[j]], , drop = FALSE]
+            }
             lst <- c(lst, sapply(tbl, function(z) z[lst[[j]]], simplify = FALSE))
        }
     }
