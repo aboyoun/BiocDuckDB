@@ -321,7 +321,21 @@ airway_ddb <- SummarizedExperiment(assays = SimpleList(counts = counts),
 
 ## `SingleCellExperiment` object with DuckDB-backed components
 
-```{r, eval = FALSE}
+We can also use the BiocDuckDB classes to manage and analyze single-cell RNA-seq
+datasets efficiently within the Bioconductor ecosystem. For example, we could
+represent the `ZilionisLungData` dataset from the `r Biocpkg("scRNAseq")`
+package as a set of parquet tables to illustrate how to assemble a
+DuckDB-backed `SingleCellExperiment` object.
+
+By writing the column data, counts matrix, and reduced dimensions to DuckDB
+tables, we can create `DuckDBDataFrame` and `DuckDBMatrix` objects that are
+backed by DuckDB tables. This setup allows for scalable data storage and
+computation, facilitating efficient manipulation and analysis of large
+single-cell RNA-seq datasets. The final `SingleCellExperiment` object,
+`zilionis`, is constructed using these DuckDB-backed components, demonstrating
+the seamless integration of DuckDB with Bioconductor's data structures.
+
+```{r, eval}
 library(scRNAseq)
 zilionis <- ZilionisLungData()
 
@@ -331,42 +345,41 @@ zilionis_cdata_path <- file.path(zilionis_path, "coldata")
 zilionis_counts_path <- file.path(zilionis_path, "assays", "assay=counts")
 zilionis_rdims_path <- file.path(zilionis_path, "reduced_dims")
 
-for (lib in sort(unique(colData(zilionis)[["Library"]]))) {
-    sce <- zilionis[, colData(zilionis)[["Library"]] == lib]
+# Column metadata
+arrow::write_dataset(as.data.frame(colData(zilionis)), zilionis_cdata_path, format = "parquet")
 
-    partition <- sprintf("Library=%s", lib)
+# Counts matrix
+dimtbls <- list(NULL, colData(zilionis)[, "Library", drop = FALSE])
+writeArray(counts(zilionis), zilionis_counts_path, keycols = c("Genename", "Barcode"),
+           datacol = "Value", dimtbls = dimtbls, partitioning = NULL)
 
-    # Column metadata
-    path <- file.path(zilionis_cdata_path, partition)
-    cdata <- colData(sce)
-    cdata[["Library"]] <- NULL
-    arrow::write_dataset(as.data.frame(cdata), path, format = "parquet")
-
-    # Counts matrix
-    path <- file.path(zilionis_counts_path, partition)
-    cnts <- counts(sce)
-    writeArray(cnts, path, keycols = c("Genename", "Barcode"), datacol = "Value")
-
-    # Reduced dimensions
-    for (rd in reducedDimNames(sce)) {
-        path <- file.path(zilionis_rdims_path, sprintf("type=%s", rd), partition)
-        mat <- na.omit(reducedDim(sce, rd))
-        if (nrow(mat) > 0L) {
-            writeArray(mat, path, keycols = c("Barcode", "Dim"), datacol = "Value")
-        }
-    }
+# Reduced dimensions
+dimtbls <- list(colData(zilionis)[, "Library", drop = FALSE], NULL)
+for (rd in reducedDimNames(zilionis)) {
+    mat <- reducedDim(zilionis, rd)
+    mat[is.na(mat)] <- 0 # Convert NAs to 0 to create a sparse matrix
+    path <- file.path(zilionis_rdims_path, sprintf("type=%s", rd))
+    writeArray(mat, path, keycols = c("Barcode", "Dim"), datacol = "Value",
+               dimtbls = dimtbls, partitioning = NULL)
 }
 ```
 
-```{r, eval = FALSE}
+This code block demonstrates how to construct a `SingleCellExperiment` object
+from the DuckDB-backed components. The `zilionis_ddb` object is created using
+`DuckDBDataFrame` and `DuckDBMatrix` objects that are backed by DuckDB tables.
+Since the original `SingleCellExperiment` object, `zilionis`, does not have
+unique sample identifiers, we concatenate the `Library` and `Barcode` metadata
+columns to create one.
+
+```{r}
 library(dplyr)
 tbl <- mutate(tblconn(DuckDBTable(zilionis_cdata_path)),
               ID = concat_ws("_", Library, Barcode),
               row_number = NULL)
 
 zilionis_coldata <- DuckDBDataFrame(tbl, datacols = setdiff(colnames(tbl), "ID"), keycols = "ID")
-zilionis_coldata <- zilionis_coldata[sort(rownames(zilionis_coldata)), ]
-
+zilionis_coldata <- zilionis_coldata[paste(colData(zilionis)[, "Library"],
+                                           colData(zilionis)[, "Barcode"], sep = "_"), ]
 
 tbl <- mutate(tblconn(DuckDBTable(zilionis_counts_path)),
               ID = concat_ws("_", Library, Barcode),
@@ -374,7 +387,21 @@ tbl <- mutate(tblconn(DuckDBTable(zilionis_counts_path)),
 zilionis_counts <- DuckDBMatrix(tbl, row = "Genename",
                                 col = list("ID" = rownames(zilionis_coldata)),
                                 datacol = "Value")
-zilionis_counts <- zilionis_counts[sort(rownames(zilionis_counts)), ]
+zilionis_counts <- zilionis_counts[rownames(zilionis), ]
+
+zilionis_rdims <-
+    sapply(reducedDimNames(zilionis), function(rd) {
+        tbl <- mutate(tblconn(DuckDBTable(file.path(zilionis_rdims_path, sprintf("type=%s", rd)))),
+                      ID = concat_ws("_", Library, Barcode),
+                      row_number = NULL)
+        mat <- DuckDBMatrix(tbl, row = list("ID" = rownames(zilionis_coldata)),
+                            col = "Dim", datacol = "Value")
+        mat[, c("x", "y")]
+    }, simplify = FALSE)
+
+zilionis_ddb <- SingleCellExperiment(assays = list(counts = zilionis_counts),
+                                     colData = zilionis_coldata,
+                                     reducedDims = zilionis_rdims)
 ```
 
 # Retrieving the DuckDB table connection
