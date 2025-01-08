@@ -182,7 +182,7 @@ file using `BiocDuckDB::writeArray`.
 ```{r}
 # Write a parquet file to contain the titanic data
 titanic_tf <- tempfile()
-writeArray(Titanic, titanic_tf, value_name = "fate")
+writeArray(Titanic, titanic_tf, datacol = "fate")
 list.files(titanic_tf, full.names = TRUE, recursive = TRUE)
 
 # Create a DuckDBArray
@@ -213,7 +213,7 @@ state_tables <- list(dim1 = data.frame(region = state.region,
                                        row.names = state.name),
                      dim2 = NULL)
 state_tf <- tempfile()
-writeArray(state.x77, state_tf, dim_tables = state_tables)
+writeArray(state.x77, state_tf, dimtbls = state_tables)
 listParquetDirs(state_tf)
 
 # Create a DuckDBMatrix and reorder the rows and columns to conform to state.x77
@@ -296,7 +296,7 @@ airway_coldata_td <- tempfile(pattern = "coldata_")
 arrow::write_dataset(as.data.frame(colData(airway)), airway_coldata_td, format = "parquet")
 
 airway_counts_td <- tempfile(pattern = "counts_")
-writeArray(assays(airway)[["counts"]], airway_counts_td, dim_names = c("gene_id", "run"))
+writeArray(assays(airway)[["counts"]], airway_counts_td, keycols = c("gene_id", "run"))
 
 rranges <- DuckDBGRanges(airway_rowranges_td, seqnames = "seqnames", start = "start", end = "end",
                          strand = "strand", mcols = c("exon_id", "exon_name", "group_name"),
@@ -345,14 +345,14 @@ for (lib in sort(unique(colData(zilionis)[["Library"]]))) {
     # Counts matrix
     path <- file.path(zilionis_counts_path, partition)
     cnts <- counts(sce)
-    writeArray(cnts, path, dim_names = c("Genename", "Barcode"), value_name = "Value")
+    writeArray(cnts, path, keycols = c("Genename", "Barcode"), datacol = "Value")
 
     # Reduced dimensions
     for (rd in reducedDimNames(sce)) {
         path <- file.path(zilionis_rdims_path, sprintf("type=%s", rd), partition)
         mat <- na.omit(reducedDim(sce, rd))
         if (nrow(mat) > 0L) {
-            writeArray(mat, path, dim_names = c("Barcode", "Dim"), value_name = "Value")
+            writeArray(mat, path, keycols = c("Barcode", "Dim"), datacol = "Value")
         }
     }
 }

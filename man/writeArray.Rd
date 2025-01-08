@@ -7,10 +7,10 @@
 writeArray(
   x,
   path,
-  dim_names = names(dimnames(x)) \%||\% sprintf("dim\%d", seq_along(dim(x))),
-  value_name = "value",
-  dim_tables = NULL,
-  partitioning = unlist(lapply(dim_tables, colnames), use.names = FALSE),
+  keycols = names(dimnames(x)) \%||\% sprintf("dim\%d", seq_along(dim(x))),
+  datacol = "value",
+  dimtbls = NULL,
+  partitioning = unlist(lapply(dimtbls, colnames), use.names = FALSE),
   ...
 )
 }
@@ -19,11 +19,11 @@ writeArray(
 
 \item{path}{The path to write the array-like object to.}
 
-\item{dim_names}{A character vector of names for the dimensions of the array.}
+\item{keycols}{A character vector of names for the dimensions of the array.}
 
-\item{value_name}{The name for the column containing the array values.}
+\item{datacol}{The name for the column containing the array values.}
 
-\item{dim_tables}{An optional list of data.frame or DataFrame objects that
+\item{dimtbls}{An optional list of data.frame or DataFrame objects that
 define the partitioning. If specified, the list must have the same length as
 the number of dimensions of the array and the elements must have rownames
 that match the corresponding dimnames element.}
@@ -49,11 +49,11 @@ list.files(tf2, full.names = TRUE, recursive = TRUE)
 
 # Write the state.x77 matrix to multiple Parquet files
 tf3 <- tempfile()
-dim_tables <- list(data.frame(region = state.region,
-                              division = state.division,
-                              row.names = state.name),
-                   NULL)
-writeArray(state.x77, tf3, dim_tables = dim_tables)
+dimtbls <- list(data.frame(region = state.region,
+                           division = state.division,
+                           row.names = state.name),
+                NULL)
+writeArray(state.x77, tf3, dimtbls = dimtbls)
 list.files(tf3, full.names = TRUE, recursive = TRUE)
 
 }

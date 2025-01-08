@@ -5,9 +5,9 @@
 #'
 #' @param x An array-like object.
 #' @param path The path to write the array-like object to.
-#' @param dim_names A character vector of names for the dimensions of the array.
-#' @param value_name The name for the column containing the array values.
-#' @param dim_tables An optional list of data.frame or DataFrame objects that
+#' @param keycols A character vector of names for the dimensions of the array.
+#' @param datacol The name for the column containing the array values.
+#' @param dimtbls An optional list of data.frame or DataFrame objects that
 #' define the partitioning. If specified, the list must have the same length as
 #' the number of dimensions of the array and the elements must have rownames
 #' that match the corresponding dimnames element.
@@ -30,11 +30,11 @@
 #'
 #' # Write the state.x77 matrix to multiple Parquet files
 #' tf3 <- tempfile()
-#' dim_tables <- list(data.frame(region = state.region,
-#'                               division = state.division,
-#'                               row.names = state.name),
-#'                    NULL)
-#' writeArray(state.x77, tf3, dim_tables = dim_tables)
+#' dimtbls <- list(data.frame(region = state.region,
+#'                            division = state.division,
+#'                            row.names = state.name),
+#'                 NULL)
+#' writeArray(state.x77, tf3, dimtbls = dimtbls)
 #' list.files(tf3, full.names = TRUE, recursive = TRUE)
 #'
 #' @name writeArray
@@ -47,10 +47,10 @@
 writeArray <-
 function(x,
          path,
-         dim_names = names(dimnames(x)) %||% sprintf("dim%d", seq_along(dim(x))),
-         value_name = "value",
-         dim_tables = NULL,
-         partitioning = unlist(lapply(dim_tables, colnames), use.names = FALSE),
+         keycols = names(dimnames(x)) %||% sprintf("dim%d", seq_along(dim(x))),
+         datacol = "value",
+         dimtbls = NULL,
+         partitioning = unlist(lapply(dimtbls, colnames), use.names = FALSE),
          ...)
 {
     dim_x <- dim(x)
@@ -62,27 +62,27 @@ function(x,
     }
 
     # Make column names unique
-    unique_names <- make.unique(c(dim_names, value_name), sep = "_")
-    dim_names <- head(unique_names, -1L)
-    value_name <- tail(unique_names, 1L)
+    unique_names <- make.unique(c(keycols, datacol), sep = "_")
+    keycols <- head(unique_names, -1L)
+    datacol <- tail(unique_names, 1L)
 
     # Create a list of columns containing the non-zero values and their indices
     lst <- apply(nzwhich(x, arr.ind = TRUE), 2L, identity, simplify = FALSE)
-    names(lst) <- dim_names
-    lst[[value_name]] <- nzvals(x)
+    names(lst) <- keycols
+    lst[[datacol]] <- nzvals(x)
 
     # Add the partitioning columns, if any
-    for (j in seq_along(dim_tables)) {
-        tbl <- dim_tables[[j]]
+    for (j in seq_along(dimtbls)) {
+        tbl <- dimtbls[[j]]
         if (NROW(tbl)) {
             if (length(dim(tbl)) != 2L) {
-                stop("'dim_tables' must have two dimensions")
+                stop("'dimtbls' must have two dimensions")
             }
             if (is.null(rownames(tbl))) {
-                stop("rownames must be defined for each element of 'dim_tables'")
+                stop("rownames must be defined for each element of 'dimtbls'")
             }
             if (is.null(dimnames(x)[[j]])) {
-                stop("dimnames must be defined for each dimension of 'x' when 'dim_tables' is specified")
+                stop("dimnames must be defined for each dimension of 'x' when 'dimtbls' is specified")
             }
             tbl <- tbl[dimnames(x)[[j]], , drop = FALSE]
             lst <- c(lst, sapply(tbl, function(z) z[lst[[j]]], simplify = FALSE))
