@@ -485,6 +485,7 @@ setValidity2("DuckDBTable", function(x) {
 
 #' @export
 #' @importClassesFrom IRanges DataFrameList
+#' @importFrom BiocGenerics nrows
 #' @importFrom dplyr distinct mutate pull select tbl
 #' @importFrom IRanges DataFrameList
 #' @importFrom S4Vectors new2
@@ -542,6 +543,7 @@ function(conn, datacols = colnames(conn), keycols = NULL, dimtbls = NULL, type =
     } else if (!is(dimtbls, "DataFrameList")) {
         dimtbls <- as(dimtbls, "DataFrameList")
     }
+    dimtbls <- dimtbls[nrows(dimtbls) > 0L]
 
     new2("DuckDBTable", conn = conn, datacols = datacols, keycols = keycols,
          dimtbls = dimtbls, check = FALSE)

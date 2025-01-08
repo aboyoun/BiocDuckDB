@@ -208,31 +208,23 @@ understand the parquet directory layout.
 
 ```{r}
 # Write a set of parquet files to contain state data
-state <- data.frame(
-  region = rep(as.character(state.region), times = ncol(state.x77)),
-  division = rep(as.character(state.division), times = ncol(state.x77)),
-  rowname = rep(rownames(state.x77), times = ncol(state.x77)),
-  colname = rep(colnames(state.x77), each = nrow(state.x77)),
-  value = as.vector(state.x77)
-)
+state_tables <- list(dim1 = data.frame(region = state.region,
+                                       division = state.division,
+                                       row.names = state.name),
+                     dim2 = NULL)
 state_tf <- tempfile()
-arrow::write_dataset(state, state_tf, format = "parquet", partitioning = c("region", "division"))
+writeArray(state.x77, state_tf, dim_tables = state_tables)
 listParquetDirs(state_tf)
 
-# Create a list for the dimention table containing the partitioning
-dimtbls <- DataFrameList(rowname = DataFrame(region = state[["region"]],
-                                             division = state[["division"]],
-                                             row.names = state[["rowname"]]))
-
 # Create a DuckDBMatrix and reorder the rows and columns to conform to state.x77
-state_ddb <- DuckDBMatrix(state_tf, row = "rowname", col = "colname", datacol = "value",
-                          dimtbls = dimtbls)
+state_ddb <- DuckDBMatrix(state_tf, row = "dim1", col = "dim2", datacol = "value",
+                          dimtbls = state_tables)
 state_ddb <- state_ddb[rownames(state.x77), colnames(state.x77)]
 
 # Create a DuckDBMatrix using pre-defined row and column values
-keycols <- setNames(dimnames(state.x77), c("rowname", "colname"))
+keycols <- setNames(dimnames(state.x77), c("dim1", "dim2"))
 state_ddb <- DuckDBMatrix(state_tf, datacol = "value", keycols = keycols,
-                          dimtbls = dimtbls)
+                          dimtbls = state_tables)
 ```
 
 We can extract sub-matrices from the underlying parquet data by either reading
@@ -241,13 +233,13 @@ constructing the matrix.
 
 ```{r}
 # Use the data files for just the Western states
-western_state_ddb <- DuckDBMatrix(file.path(state_tf, "region=West"), row = "rowname", col = "colname", datacol = "value")
+western_state_ddb <- DuckDBMatrix(file.path(state_tf, "region=West"), row = "dim1", col = "dim2", datacol = "value")
 western_state_ddb <- western_state_ddb[sort(rownames(western_state_ddb)), colnames(state.x77)]
 
 # Use a DuckDBDataFrame to filter the Southern states
 full_df <- DuckDBDataFrame(state_tf)
 southern_df <- full_df[full_df$region == "South", ]
-southern_state_ddb <- DuckDBMatrix(southern_df, row = "rowname", col = "colname", datacol = "value")
+southern_state_ddb <- DuckDBMatrix(southern_df, row = "dim1", col = "dim2", datacol = "value")
 southern_state_ddb <- southern_state_ddb[sort(rownames(southern_state_ddb)), colnames(state.x77)]
 ```
 
