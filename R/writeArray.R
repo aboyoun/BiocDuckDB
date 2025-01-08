@@ -7,10 +7,11 @@
 #' @param path The path to write the array-like object to.
 #' @param dim_names A character vector of names for the dimensions of the array.
 #' @param value_name The name for the column containing the array values.
-#' @param partition_size A vector of integers specifying the sub-array size of
-#' each partition. The default is to write the entire array as a single
-#' partition.
-#' @param partition_names A character vector of names for the partitions of the
+#' @param dim_tables An optional list of data.frame or DataFrame objects that
+#' define the partitioning. If specified, the list must have the same length as
+#' the number of dimensions of the array and the elements must have rownames
+#' that match the corresponding dimnames element.
+#' @param partitioning A character vector of names for the partitions of the
 #' array.
 #' @param ... Additional arguments to pass to \code{arrow::write_dataset}.
 #'
@@ -22,25 +23,19 @@
 #' writeArray(Titanic, tf1)
 #' list.files(tf1, full.names = TRUE, recursive = TRUE)
 #'
-#' # Write the Titanic dataset to multiple Parquet files
+#' # Write the Titanic dataset to a single csv file
 #' tf2 <- tempfile()
-#' writeArray(Titanic, tf2, partition_size = c(2, 2, 2, 2))
+#' writeArray(Titanic, tf2, format = "csv")
 #' list.files(tf2, full.names = TRUE, recursive = TRUE)
 #'
-#' # Write the Titanic dataset to multiple csv files
+#' # Write the state.x77 matrix to multiple Parquet files
 #' tf3 <- tempfile()
-#' writeArray(Titanic, tf3, partition_size = c(2, 2, 2, 2), format = "csv")
+#' dim_tables <- list(data.frame(region = state.region,
+#'                               division = state.division,
+#'                               row.names = state.name),
+#'                    NULL)
+#' writeArray(state.x77, tf3, dim_tables = dim_tables)
 #' list.files(tf3, full.names = TRUE, recursive = TRUE)
-#'
-#' # Write a random array to multiple Parquet files
-#' tf4 <- tempfile()
-#' X <- poissonSparseMatrix(50000, 2^17, density = 0.0005,
-#'                          dimnames = list(sprintf("FEAT%011d", seq_len(50000)),
-#'                                          sprintf("SAMP%011d", seq_len(2^17))))
-#' writeArray(X, tf4, partition_size = c(nrow(X), 2^16))
-#' files <- list.files(tf4, full.names = TRUE, recursive = TRUE)
-#' files <- setNames(sprintf("%.1f MB", file.size(files) / 2^20), files)
-#' files
 #'
 #' @name writeArray
 
@@ -54,8 +49,8 @@ function(x,
          path,
          dim_names = names(dimnames(x)) %||% sprintf("dim%d", seq_along(dim(x))),
          value_name = "value",
-         partition_size = dim(x),
-         partition_names = sprintf("%s_group", dim_names),
+         dim_tables = NULL,
+         partitioning = unlist(lapply(dim_tables, colnames), use.names = FALSE),
          ...)
 {
     dim_x <- dim(x)
@@ -66,45 +61,45 @@ function(x,
         x <- unclass(x)
     }
 
-    if (!(length(partition_size) %in% c(1L, length(dim_x)))) {
-        stop("'partition_size' must either be of length 1 or the dimensions of 'x'")
-    }
-
-    partition_size <- as.integer(partition_size)
-    if (length(partition_size) == 1L) {
-        partition_size <- rep.int(partition_size, length(dim_x))
-    }
-    if (anyNA(partition_size) || any(partition_size < 1L)) {
-        stop("'partition_size' must be a vector of positive integers")
-    }
-
     # Make column names unique
     unique_names <- make.unique(c(dim_names, value_name), sep = "_")
     dim_names <- head(unique_names, -1L)
     value_name <- tail(unique_names, 1L)
 
-    # Create a data frame with the non-zero values and their indices
-    df <- data.frame(nzwhich(x, arr.ind = TRUE))
-    colnames(df) <- dim_names
-    df[[value_name]] <- nzvals(x)
+    # Create a list of columns containing the non-zero values and their indices
+    lst <- apply(nzwhich(x, arr.ind = TRUE), 2L, identity, simplify = FALSE)
+    names(lst) <- dim_names
+    lst[[value_name]] <- nzvals(x)
 
     # Add the partitioning columns, if any
-    partitioning <- setNames(partition_size < dim_x, partition_names)
-    for (j in which(partitioning)) {
-        k <- ceiling(dim_x[j] / partition_size[j])
-        partition <- rep(0:(k - 1L), each = partition_size[j], length.out = dim_x[j])
-        df[[partition_names[j]]] <- partition[df[[j]]]
+    for (j in seq_along(dim_tables)) {
+        tbl <- dim_tables[[j]]
+        if (NROW(tbl)) {
+            if (length(dim(tbl)) != 2L) {
+                stop("'dim_tables' must have two dimensions")
+            }
+            if (is.null(rownames(tbl))) {
+                stop("rownames must be defined for each element of 'dim_tables'")
+            }
+            if (is.null(dimnames(x)[[j]])) {
+                stop("dimnames must be defined for each dimension of 'x' when 'dim_tables' is specified")
+            }
+            tbl <- tbl[dimnames(x)[[j]], , drop = FALSE]
+            lst <- c(lst, sapply(tbl, function(z) z[lst[[j]]], simplify = FALSE))
+       }
     }
-    partitioning <- names(partitioning)[partitioning]
 
     # Add the dimnames, if any
     dimnames_x <- dimnames(x)
     for (j in seq_along(dimnames_x)) {
         dimnames_x_j <- dimnames_x[[j]]
         if (!is.null(dimnames_x_j)) {
-            df[[j]] <- structure(df[[j]], levels = dimnames_x_j, class = "factor")
+            lst[[j]] <- dimnames_x_j[lst[[j]]]
         }
     }
 
-    write_dataset(df, path, partitioning = partitioning, ...)
+    class(lst) <- "data.frame"
+    attr(lst, "row.names") <- .set_row_names(length(lst[[1L]]))
+
+    write_dataset(lst, path, partitioning = partitioning, ...)
 }
