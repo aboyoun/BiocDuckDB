@@ -4,6 +4,8 @@
 \alias{DuckDBArraySeed-class}
 \alias{dbconn,DuckDBArraySeed-method}
 \alias{tblconn,DuckDBArraySeed-method}
+\alias{dimtbls,DuckDBArraySeed-method}
+\alias{dimtbls<-,DuckDBArraySeed-method}
 \alias{type,DuckDBArraySeed-method}
 \alias{type<-,DuckDBArraySeed-method}
 \alias{dim,DuckDBArraySeed-method}
@@ -29,7 +31,7 @@ more information.
 \section{Constructor}{
 
 \describe{
-  \item{\code{DuckDBArraySeed(conn, datacols, keycols, type = NULL)}:}{
+  \item{\code{DuckDBArraySeed(conn, datacol, keycols, dimtbls = NULL, type = NULL)}:}{
     Creates a DuckDBArraySeed object.
     \describe{
       \item{\code{conn}}{
@@ -38,7 +40,7 @@ more information.
         data source; a DuckDBDataFrame object; or a tbl_duckdb_connection
         object.
       }
-      \item{\code{datacols}}{
+      \item{\code{datacol}}{
         Either a string specifying the column from \code{conn} or a named
         \code{expression} that will be evaluated in the context of
         \code{conn} that defines the values in the array.
@@ -48,6 +50,14 @@ more information.
         specify the dimension names, or a named list of character vectors
         where the names of the list specify the dimension names and the
         character vectors set the distinct values for the dimension names.
+      }
+      \item{\code{dimtbls}}{
+        A optional named \code{DataFrameList} that specifies the dimension
+        tables associated with the \code{keycols}. The name of the list
+        elements match the names of the \code{keycols} list. Additionally,
+        the \code{DataFrame} objects have row names that match the distinct
+        values of the corresponding \code{keycols} list element and columns
+        that define partitions in the data table for efficient querying.
       }
       \item{\code{type}}{
         String specifying the type of the data values; one of
@@ -69,6 +79,10 @@ In the code snippets below, \code{x} is a DuckDBArraySeed object:
   }
   \item{\code{dimnames(x)}:}{
     List of array dimension names.
+  }
+  \item{\code{dimtbls(x)}, \code{dimtbls(x) <- value}:}{
+    Get or set the list of dimension tables used to define partitions for
+    efficient queries.
   }
   \item{\code{type(x)}, \code{type(x) <- value}:}{
     Get or set the data type of the array elements; one of \code{"logical"},
@@ -114,7 +128,7 @@ tf <- tempfile(fileext = ".parquet")
 on.exit(unlink(tf))
 arrow::write_parquet(df, tf)
 
-pqaseed <- DuckDBArraySeed(tf, datacols = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
+pqaseed <- DuckDBArraySeed(tf, datacol = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
 
 }
 \seealso{

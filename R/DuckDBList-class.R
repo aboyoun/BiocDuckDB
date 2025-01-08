@@ -159,7 +159,9 @@ setMethod("unlist", "DuckDBList", function(x, recursive = TRUE, use.names = TRUE
     conn <- tblconn(unlistData, filter = FALSE)
     datacols <- x@partitioning
     keycols <- .keycols(unlistData)
-    table <- new2("DuckDBTable", conn = conn, datacols = datacols, keycols = keycols, check = FALSE)
+    dimtbls <- dimtbls(unlistData)
+    table <- new2("DuckDBTable", conn = conn, datacols = datacols, keycols = keycols,
+                  dimtbls = dimtbls, check = FALSE)
     group <- new2("DuckDBColumn", table = table, check = FALSE)
     keep <- group %in% x@names
     extractROWS(unlistData, keep)
@@ -198,7 +200,9 @@ setMethod("getListElement", "DuckDBList", function(x, i) {
     conn <- tblconn(unlistData, filter = FALSE)
     datacols <- x@partitioning
     keycols <- .keycols(unlistData)
-    table <- new2("DuckDBTable", conn = conn, datacols = datacols, keycols = keycols, check = FALSE)
+    dimtbls <- dimtbls(unlistData)
+    table <- new2("DuckDBTable", conn = conn, datacols = datacols, keycols = keycols,
+                  dimtbls = dimtbls, check = FALSE)
     group <- new2("DuckDBColumn", table = table, check = FALSE)
     keep <- group == x@names[i]
     extractROWS(unlistData, keep)

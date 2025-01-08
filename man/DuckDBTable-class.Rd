@@ -13,6 +13,10 @@
 \alias{coltypes,DuckDBTable-method}
 \alias{coltypes<-}
 \alias{coltypes<-,DuckDBTable-method}
+\alias{dimtbls}
+\alias{dimtbls,DuckDBTable-method}
+\alias{dimtbls<-}
+\alias{dimtbls<-,DuckDBTable-method}
 \alias{DuckDBTable}
 \alias{all.equal.DuckDBTable}
 \alias{[,DuckDBTable,ANY,ANY,ANY-method}
@@ -40,7 +44,7 @@ such as \code{dim()}, \code{nrow()}, \code{ncol()}, \code{dimnames()},
 \section{Constructor}{
 
 \describe{
-  \item{\code{DuckDBTable(conn, datacols = colnames(conn), keycols = NULL, type = NULL)}:}{
+  \item{\code{DuckDBTable(conn, datacols = colnames(conn), keycols = NULL, dimtbls = NULL, type = NULL)}:}{
     Creates a DuckDBTable object.
     \describe{
       \item{\code{conn}}{
@@ -56,10 +60,19 @@ such as \code{dim()}, \code{nrow()}, \code{ncol()}, \code{dimnames()},
       }
       \item{\code{keycols}}{
         An optional character vector of column names from \code{conn} that
-        will define the primary key, or a named list of character vectors
-        where the names of the list define the key and the character vectors
-        set the distinct values for the key. If missing, a \code{row_number}
-        column is created as an identifier.
+        will define the set of foreign keys in the underlying table, or a
+        named list of character vectors where the names of the list define
+        the foreign keys and the character vectors set the distinct values
+        for those keys. If missing, a \code{row_number} column is created
+        as an identifier.
+      }
+      \item{\code{dimtbls}}{
+        A optional named \code{DataFrameList} that specifies the dimension
+        tables associated with the \code{keycols}. The name of the list
+        elements match the names of the \code{keycols} list. Additionally,
+        the \code{DataFrame} objects have row names that match the distinct
+        values of the corresponding \code{keycols} list element and columns
+        that define partitions in the data table for efficient querying.
       }
       \item{\code{type}}{
         An optional named character vector where the names specify the
@@ -91,6 +104,15 @@ In the code snippets below, \code{x} is a DuckDBTable object:
   }
   \item{\code{rownames(x)}, \code{colnames(x)}:}{
     Get the names of the rows and columns, respectively.
+  }
+  \item{\code{coltypes(x)}, \code{coltypes(x) <- value}:}{
+    Get or set the data type of the columns; one of \code{"logical"},
+    \code{"integer"}, \code{"integer64"}, \code{"double"}, or
+    \code{"character"}.
+  }
+  \item{\code{dimtbls(x)}, \code{dimtbls(x) <- value}:}{
+    Get or set the list of dimension tables used to define partitions for
+    efficient queries.
   }
 }
 }

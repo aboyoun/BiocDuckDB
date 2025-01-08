@@ -7,10 +7,10 @@
 writeArray(
   x,
   path,
-  dim_names = names(dimnames(x)) \%||\% sprintf("dim\%d", seq_along(dim(x))),
-  value_name = "value",
-  partition_size = dim(x),
-  partition_names = sprintf("\%s_group", dim_names),
+  keycols = names(dimnames(x)) \%||\% sprintf("dim\%d", seq_along(dim(x))),
+  datacol = "value",
+  dimtbls = NULL,
+  partitioning = unlist(lapply(dimtbls, colnames), use.names = FALSE),
   ...
 )
 }
@@ -19,15 +19,16 @@ writeArray(
 
 \item{path}{The path to write the array-like object to.}
 
-\item{dim_names}{A character vector of names for the dimensions of the array.}
+\item{keycols}{A character vector of names for the dimensions of the array.}
 
-\item{value_name}{The name for the column containing the array values.}
+\item{datacol}{The name for the column containing the array values.}
 
-\item{partition_size}{A vector of integers specifying the sub-array size of
-each partition. The default is to write the entire array as a single
-partition.}
+\item{dimtbls}{An optional list of data.frame or DataFrame objects that
+define the partitioning. If specified, the list must have the same length as
+the number of dimensions of the array and the elements must have rownames
+that match the corresponding dimnames element.}
 
-\item{partition_names}{A character vector of names for the partitions of the
+\item{partitioning}{A character vector of names for the partitions of the
 array.}
 
 \item{...}{Additional arguments to pass to \code{arrow::write_dataset}.}
@@ -41,25 +42,19 @@ tf1 <- tempfile()
 writeArray(Titanic, tf1)
 list.files(tf1, full.names = TRUE, recursive = TRUE)
 
-# Write the Titanic dataset to multiple Parquet files
+# Write the Titanic dataset to a single csv file
 tf2 <- tempfile()
-writeArray(Titanic, tf2, partition_size = c(2, 2, 2, 2))
+writeArray(Titanic, tf2, format = "csv")
 list.files(tf2, full.names = TRUE, recursive = TRUE)
 
-# Write the Titanic dataset to multiple csv files
+# Write the state.x77 matrix to multiple Parquet files
 tf3 <- tempfile()
-writeArray(Titanic, tf3, partition_size = c(2, 2, 2, 2), format = "csv")
+dimtbls <- list(data.frame(region = state.region,
+                           division = state.division,
+                           row.names = state.name),
+                NULL)
+writeArray(state.x77, tf3, dimtbls = dimtbls)
 list.files(tf3, full.names = TRUE, recursive = TRUE)
-
-# Write a random array to multiple Parquet files
-tf4 <- tempfile()
-X <- poissonSparseMatrix(50000, 2^17, density = 0.0005,
-                         dimnames = list(sprintf("FEAT\%011d", seq_len(50000)),
-                                         sprintf("SAMP\%011d", seq_len(2^17))))
-writeArray(X, tf4, partition_size = c(nrow(X), 2^16))
-files <- list.files(tf4, full.names = TRUE, recursive = TRUE)
-files <- setNames(sprintf("\%.1f MB", file.size(files) / 2^20), files)
-files
 
 }
 \author{

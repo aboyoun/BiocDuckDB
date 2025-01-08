@@ -12,7 +12,7 @@
 #'
 #' @section Constructor:
 #' \describe{
-#'   \item{\code{DuckDBTable(conn, datacols = colnames(conn), keycols = NULL, type = NULL)}:}{
+#'   \item{\code{DuckDBTable(conn, datacols = colnames(conn), keycols = NULL, dimtbls = NULL, type = NULL)}:}{
 #'     Creates a DuckDBTable object.
 #'     \describe{
 #'       \item{\code{conn}}{
@@ -28,10 +28,19 @@
 #'       }
 #'       \item{\code{keycols}}{
 #'         An optional character vector of column names from \code{conn} that
-#'         will define the primary key, or a named list of character vectors
-#'         where the names of the list define the key and the character vectors
-#'         set the distinct values for the key. If missing, a \code{row_number}
-#'         column is created as an identifier.
+#'         will define the set of foreign keys in the underlying table, or a
+#'         named list of character vectors where the names of the list define
+#'         the foreign keys and the character vectors set the distinct values
+#'         for those keys. If missing, a \code{row_number} column is created
+#'         as an identifier.
+#'       }
+#'       \item{\code{dimtbls}}{
+#'         A optional named \code{DataFrameList} that specifies the dimension
+#'         tables associated with the \code{keycols}. The name of the list
+#'         elements match the names of the \code{keycols} list. Additionally,
+#'         the \code{DataFrame} objects have row names that match the distinct
+#'         values of the corresponding \code{keycols} list element and columns
+#'         that define partitions in the data table for efficient querying.
 #'       }
 #'       \item{\code{type}}{
 #'         An optional named character vector where the names specify the
@@ -61,6 +70,15 @@
 #'   }
 #'   \item{\code{rownames(x)}, \code{colnames(x)}:}{
 #'     Get the names of the rows and columns, respectively.
+#'   }
+#'   \item{\code{coltypes(x)}, \code{coltypes(x) <- value}:}{
+#'     Get or set the data type of the columns; one of \code{"logical"},
+#'     \code{"integer"}, \code{"integer64"}, \code{"double"}, or
+#'     \code{"character"}.
+#'   }
+#'   \item{\code{dimtbls(x)}, \code{dimtbls(x) <- value}:}{
+#'     Get or set the list of dimension tables used to define partitions for
+#'     efficient queries.
 #'   }
 #' }
 #'
@@ -126,6 +144,10 @@
 #' coltypes,DuckDBTable-method
 #' coltypes<-
 #' coltypes<-,DuckDBTable-method
+#' dimtbls
+#' dimtbls,DuckDBTable-method
+#' dimtbls<-
+#' dimtbls<-,DuckDBTable-method
 #'
 #' DuckDBTable
 #'
@@ -167,15 +189,19 @@ replaceSlots <- BiocGenerics:::replaceSlots
 
 #' @export
 #' @importClassesFrom BiocGenerics OutOfMemoryObject
+#' @importClassesFrom IRanges DataFrameList
 #' @importClassesFrom S4Vectors RectangularData
+#' @importFrom IRanges DataFrameList
 #' @importFrom stats setNames
 setClass("DuckDBTable", contains = c("RectangularData", "OutOfMemoryObject"),
-    slots = c(conn = "tbl_duckdb_connection", datacols = "expression", keycols = "list"),
+    slots = c(conn = "tbl_duckdb_connection", datacols = "expression", keycols = "list",
+              dimtbls = "DataFrameList"),
     prototype = prototype(conn = structure(list(),
                                            class = c("tbl_duckdb_connection", "tbl_dbi",
                                                      "tbl_sql", "tbl_lazy", "tbl")),
                           datacols = setNames(expression(), character()),
-                          keycols = setNames(list(), character())))
+                          keycols = setNames(list(), character()),
+                          dimtbls = setNames(DataFrameList(), character())))
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Accessors
@@ -198,6 +224,16 @@ setMethod("tblconn", "DuckDBTable", function(x, filter = TRUE) {
         for (i in names(keycols)) {
             set <- keycols[[i]]
             conn <- filter(conn, !!as.name(i) %in% set)
+
+            # Filter by partitioning information, if available
+            if (i %in% names(x@dimtbls)) {
+                dimtbl <- x@dimtbls[[i]]
+                dimtbl <- dimtbl[set, , drop = FALSE]
+                for (j in colnames(dimtbl)) {
+                    part <- unique(dimtbl[[j]])
+                    conn <- filter(conn, !!as.name(j) %in% part)
+                }
+            }
         }
     }
     conn
@@ -361,6 +397,27 @@ setReplaceMethod("coltypes", "DuckDBTable", function(x, value) {
     replaceSlots(x, datacols = datacols, check = FALSE)
 })
 
+#' @export
+setGeneric("dimtbls", function(x) standardGeneric("dimtbls"))
+
+#' @export
+setMethod("dimtbls", "DuckDBTable", function(x) x@dimtbls)
+
+#' @export
+setGeneric("dimtbls<-", function(x, value) standardGeneric("dimtbls<-"))
+
+#' @export
+#' @importClassesFrom IRanges DataFrameList
+#' @importFrom IRanges DataFrameList
+setReplaceMethod("dimtbls", "DuckDBTable", function(x, value) {
+    if (length(value) == 0L) {
+        value <- setNames(DataFrameList(), character())
+    } else if (!is(value, "DataFrameList")) {
+        value <- as(value, "DataFrameList")
+    }
+    replaceSlots(x, dimtbls = value, check = FALSE)
+})
+
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Validity
 ###
@@ -368,6 +425,7 @@ setReplaceMethod("coltypes", "DuckDBTable", function(x, value) {
 #' @importFrom S4Vectors setValidity2
 setValidity2("DuckDBTable", function(x) {
     msg <- NULL
+
     if (is.null(names(x@keycols))) {
         msg <- c(msg, "'keycols' slot must be a named list")
     }
@@ -380,12 +438,21 @@ setValidity2("DuckDBTable", function(x) {
             break
         }
     }
+
+    if (is.null(names(x@dimtbls))) {
+        msg <- c(msg, "'dimtbls' slot must be a named DataFrameList")
+    }
+    if (!all(names(x@dimtbls) %in% names(x@keycols))) {
+        msg <- c(msg, "all names in 'dimtbls' slot must match names in 'keycols' slot")
+    }
     if (is.null(names(x@datacols))) {
         msg <- c(msg, "'datacols' slot must be a named expression")
     }
+
     if (length(intersect(names(x@keycols), names(x@datacols)))) {
         msg <- c(msg, "names in 'keycols' and 'datacols' slots must be unique")
     }
+
     msg %||% TRUE
 })
 
@@ -417,11 +484,14 @@ setValidity2("DuckDBTable", function(x) {
 }
 
 #' @export
+#' @importClassesFrom IRanges DataFrameList
+#' @importFrom BiocGenerics nrows
 #' @importFrom dplyr distinct mutate pull select tbl
+#' @importFrom IRanges DataFrameList
 #' @importFrom S4Vectors new2
 #' @importFrom stats setNames
 DuckDBTable <-
-function(conn, datacols = colnames(conn), keycols = NULL, type = NULL) {
+function(conn, datacols = colnames(conn), keycols = NULL, dimtbls = NULL, type = NULL) {
     # Acquire the connection if it is a string
     if (is.character(conn)) {
         conn <- tbl(acquireDuckDBConn(), .wrapConn(conn))
@@ -468,7 +538,15 @@ function(conn, datacols = colnames(conn), keycols = NULL, type = NULL) {
         }
     }
 
-    new2("DuckDBTable", conn = conn, datacols = datacols, keycols = keycols, check = FALSE)
+    if (length(dimtbls) == 0L) {
+        dimtbls <- setNames(DataFrameList(), character())
+    } else if (!is(dimtbls, "DataFrameList")) {
+        dimtbls <- as(dimtbls, "DataFrameList")
+    }
+    dimtbls <- dimtbls[nrows(dimtbls) > 0L]
+
+    new2("DuckDBTable", conn = conn, datacols = datacols, keycols = keycols,
+         dimtbls = dimtbls, check = FALSE)
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

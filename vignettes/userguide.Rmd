@@ -182,7 +182,7 @@ file using `BiocDuckDB::writeArray`.
 ```{r}
 # Write a parquet file to contain the titanic data
 titanic_tf <- tempfile()
-writeArray(Titanic, titanic_tf, value_name = "fate")
+writeArray(Titanic, titanic_tf, datacol = "fate")
 list.files(titanic_tf, full.names = TRUE, recursive = TRUE)
 
 # Create a DuckDBArray
@@ -208,24 +208,23 @@ understand the parquet directory layout.
 
 ```{r}
 # Write a set of parquet files to contain state data
-state <- data.frame(
-  region = rep(as.character(state.region), times = ncol(state.x77)),
-  division = rep(as.character(state.division), times = ncol(state.x77)),
-  rowname = rep(rownames(state.x77), times = ncol(state.x77)),
-  colname = rep(colnames(state.x77), each = nrow(state.x77)),
-  value = as.vector(state.x77)
-)
+state_tables <- list(dim1 = data.frame(region = state.region,
+                                       division = state.division,
+                                       row.names = state.name),
+                     dim2 = NULL)
 state_tf <- tempfile()
-arrow::write_dataset(state, state_tf, format = "parquet", partitioning = c("region", "division"))
+writeArray(state.x77, state_tf, dimtbls = state_tables)
 listParquetDirs(state_tf)
 
 # Create a DuckDBMatrix and reorder the rows and columns to conform to state.x77
-state_ddb <- DuckDBMatrix(state_tf, row = "rowname", col = "colname", datacol = "value")
+state_ddb <- DuckDBMatrix(state_tf, row = "dim1", col = "dim2", datacol = "value",
+                          dimtbls = state_tables)
 state_ddb <- state_ddb[rownames(state.x77), colnames(state.x77)]
 
 # Create a DuckDBMatrix using pre-defined row and column values
-keycols <- setNames(dimnames(state.x77), c("rowname", "colname"))
-state_ddb <- DuckDBMatrix(state_tf, datacol = "value", keycols = keycols)
+keycols <- setNames(dimnames(state.x77), c("dim1", "dim2"))
+state_ddb <- DuckDBMatrix(state_tf, datacol = "value", keycols = keycols,
+                          dimtbls = state_tables)
 ```
 
 We can extract sub-matrices from the underlying parquet data by either reading
@@ -234,13 +233,13 @@ constructing the matrix.
 
 ```{r}
 # Use the data files for just the Western states
-western_state_ddb <- DuckDBMatrix(file.path(state_tf, "region=West"), row = "rowname", col = "colname", datacol = "value")
+western_state_ddb <- DuckDBMatrix(file.path(state_tf, "region=West"), row = "dim1", col = "dim2", datacol = "value")
 western_state_ddb <- western_state_ddb[sort(rownames(western_state_ddb)), colnames(state.x77)]
 
 # Use a DuckDBDataFrame to filter the Southern states
 full_df <- DuckDBDataFrame(state_tf)
 southern_df <- full_df[full_df$region == "South", ]
-southern_state_ddb <- DuckDBMatrix(southern_df, row = "rowname", col = "colname", datacol = "value")
+southern_state_ddb <- DuckDBMatrix(southern_df, row = "dim1", col = "dim2", datacol = "value")
 southern_state_ddb <- southern_state_ddb[sort(rownames(southern_state_ddb)), colnames(state.x77)]
 ```
 
@@ -265,7 +264,9 @@ sparse_ddb <- DuckDBArray(sparse_tf, datacol = "value", keycols = list("dim1" = 
 sparse_ddb
 ```
 
-# Creating DuckDB-backed SummarizedExperiment objects
+# Creating DuckDB-backed `SummarizedExperiment` objects
+
+## Basic `SummarizedExperiment` with DuckDB-backed components
 
 We can now use the BiocDuckDB classes to manage and analyze large datasets
 efficiently within the Bioconductor ecosystem. For example, we could represent
@@ -295,7 +296,7 @@ airway_coldata_td <- tempfile(pattern = "coldata_")
 arrow::write_dataset(as.data.frame(colData(airway)), airway_coldata_td, format = "parquet")
 
 airway_counts_td <- tempfile(pattern = "counts_")
-writeArray(assays(airway)[["counts"]], airway_counts_td, dim_names = c("gene_id", "run"))
+writeArray(assays(airway)[["counts"]], airway_counts_td, keycols = c("gene_id", "run"))
 
 rranges <- DuckDBGRanges(airway_rowranges_td, seqnames = "seqnames", start = "start", end = "end",
                          strand = "strand", mcols = c("exon_id", "exon_name", "group_name"),
@@ -316,6 +317,91 @@ counts <- counts[rownames(rdata), sort(rownames(cdata))]
 airway_ddb <- SummarizedExperiment(assays = SimpleList(counts = counts),
                                    rowRanges = rranges, colData = cdata,
                                    metadata = metadata(airway))
+```
+
+## `SingleCellExperiment` object with DuckDB-backed components
+
+We can also use the BiocDuckDB classes to manage and analyze single-cell RNA-seq
+datasets efficiently within the Bioconductor ecosystem. For example, we could
+represent the `ZilionisLungData` dataset from the `r Biocpkg("scRNAseq")`
+package as a set of parquet tables to illustrate how to assemble a
+DuckDB-backed `SingleCellExperiment` object.
+
+By writing the column data, counts matrix, and reduced dimensions to DuckDB
+tables, we can create `DuckDBDataFrame` and `DuckDBMatrix` objects that are
+backed by DuckDB tables. This setup allows for scalable data storage and
+computation, facilitating efficient manipulation and analysis of large
+single-cell RNA-seq datasets. The final `SingleCellExperiment` object,
+`zilionis`, is constructed using these DuckDB-backed components, demonstrating
+the seamless integration of DuckDB with Bioconductor's data structures.
+
+```{r, eval}
+library(scRNAseq)
+zilionis <- ZilionisLungData()
+
+zilionis_path <- file.path(tempdir(), "zilionis")
+
+zilionis_cdata_path <- file.path(zilionis_path, "coldata")
+zilionis_counts_path <- file.path(zilionis_path, "assays", "assay=counts")
+zilionis_rdims_path <- file.path(zilionis_path, "reduced_dims")
+
+# Column metadata
+arrow::write_dataset(as.data.frame(colData(zilionis)), zilionis_cdata_path, format = "parquet")
+
+# Counts matrix
+dimtbls <- list(NULL, colData(zilionis)[, "Library", drop = FALSE])
+writeArray(counts(zilionis), zilionis_counts_path, keycols = c("Genename", "Barcode"),
+           datacol = "Value", dimtbls = dimtbls, partitioning = NULL)
+
+# Reduced dimensions
+dimtbls <- list(colData(zilionis)[, "Library", drop = FALSE], NULL)
+for (rd in reducedDimNames(zilionis)) {
+    mat <- reducedDim(zilionis, rd)
+    mat[is.na(mat)] <- 0 # Convert NAs to 0 to create a sparse matrix
+    path <- file.path(zilionis_rdims_path, sprintf("type=%s", rd))
+    writeArray(mat, path, keycols = c("Barcode", "Dim"), datacol = "Value",
+               dimtbls = dimtbls, partitioning = NULL)
+}
+```
+
+This code block demonstrates how to construct a `SingleCellExperiment` object
+from the DuckDB-backed components. The `zilionis_ddb` object is created using
+`DuckDBDataFrame` and `DuckDBMatrix` objects that are backed by DuckDB tables.
+Since the original `SingleCellExperiment` object, `zilionis`, does not have
+unique sample identifiers, we concatenate the `Library` and `Barcode` metadata
+columns to create one.
+
+```{r}
+library(dplyr)
+tbl <- mutate(tblconn(DuckDBTable(zilionis_cdata_path)),
+              ID = concat_ws("_", Library, Barcode),
+              row_number = NULL)
+
+zilionis_coldata <- DuckDBDataFrame(tbl, datacols = setdiff(colnames(tbl), "ID"), keycols = "ID")
+zilionis_coldata <- zilionis_coldata[paste(colData(zilionis)[, "Library"],
+                                           colData(zilionis)[, "Barcode"], sep = "_"), ]
+
+tbl <- mutate(tblconn(DuckDBTable(zilionis_counts_path)),
+              ID = concat_ws("_", Library, Barcode),
+              row_number = NULL)
+zilionis_counts <- DuckDBMatrix(tbl, row = "Genename",
+                                col = list("ID" = rownames(zilionis_coldata)),
+                                datacol = "Value")
+zilionis_counts <- zilionis_counts[rownames(zilionis), ]
+
+zilionis_rdims <-
+    sapply(reducedDimNames(zilionis), function(rd) {
+        tbl <- mutate(tblconn(DuckDBTable(file.path(zilionis_rdims_path, sprintf("type=%s", rd)))),
+                      ID = concat_ws("_", Library, Barcode),
+                      row_number = NULL)
+        mat <- DuckDBMatrix(tbl, row = list("ID" = rownames(zilionis_coldata)),
+                            col = "Dim", datacol = "Value")
+        mat[, c("x", "y")]
+    }, simplify = FALSE)
+
+zilionis_ddb <- SingleCellExperiment(assays = list(counts = zilionis_counts),
+                                     colData = zilionis_coldata,
+                                     reducedDims = zilionis_rdims)
 ```
 
 # Retrieving the DuckDB table connection

@@ -9,7 +9,7 @@
 #'
 #' @section Constructor:
 #' \describe{
-#'   \item{\code{DuckDBMatrix(conn, datacols, row, col, keycols = c(row, col), type = NULL)}:}{
+#'   \item{\code{DuckDBMatrix(conn, datacol, row, col, keycols = c(row, col), dimtbls = NULL, type = NULL)}:}{
 #'     Creates a DuckDBMatrix object.
 #'     \describe{
 #'       \item{\code{conn}}{
@@ -18,7 +18,7 @@
 #'         data source; a DuckDBDataFrame object; or a tbl_duckdb_connection
 #'         object.
 #'       }
-#'       \item{\code{datacols}}{
+#'       \item{\code{datacol}}{
 #'         Either a string specifying the column from \code{conn} or a named
 #'         \code{expression} that will be evaluated in the context of
 #'         \code{conn} that defines the values in the matrix.
@@ -42,6 +42,14 @@
 #'         columns and the character vectors define distinct values for the rows
 #'         and columns.
 #'       }
+#'       \item{\code{dimtbls}}{
+#'         A optional named \code{DataFrameList} that specifies the dimension
+#'         tables associated with the \code{keycols}. The name of the list
+#'         elements match the names of the \code{keycols} list. Additionally,
+#'         the \code{DataFrame} objects have row names that match the distinct
+#'         values of the corresponding \code{keycols} list element and columns
+#'         that define partitions in the data table for efficient querying.
+#'       }
 #'       \item{\code{type}}{
 #'         String specifying the type of the data values; one of
 #'         \code{"logical"}, \code{"integer"}, \code{"integer64"},
@@ -60,6 +68,10 @@
 #'   }
 #'   \item{\code{dimnames(x)}:}{
 #'     List of array dimension names.
+#'   }
+#'   \item{\code{dimtbls(x)}, \code{dimtbls(x) <- value}:}{
+#'     Get or set the list of dimension tables used to define partitions for
+#'     efficient queries.
 #'   }
 #'   \item{\code{type(x)}, \code{type(x) <- value}:}{
 #'     Get or set the data type of the array elements; one of \code{"logical"},
@@ -104,7 +116,7 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' pqmat <- DuckDBMatrix(tf, row = "rowname", col = "colname", datacols = "value")
+#' pqmat <- DuckDBMatrix(tf, row = "rowname", col = "colname", datacol = "value")
 #'
 #' @aliases
 #' DuckDBMatrix-class
@@ -149,7 +161,8 @@ setValidity2("DuckDBMatrix", function(x) {
 #' @export
 #' @importFrom S4Vectors isSingleString new2
 #' @importFrom stats setNames
-DuckDBMatrix <- function(conn, datacols, row, col, keycols = c(row, col), type = NULL) {
+DuckDBMatrix <-
+function(conn, datacol, row, col, keycols = c(row, col), dimtbls = NULL, type = NULL) {
     if (!missing(row) && isSingleString(row)) {
         row <- setNames(list(NULL), row)
     }
@@ -160,7 +173,8 @@ DuckDBMatrix <- function(conn, datacols, row, col, keycols = c(row, col), type =
         if (length(keycols) != 2L) {
             stop("'keycols' must contain exactly 2 elements: rows and columns")
         }
-        conn <- DuckDBArraySeed(conn, datacols = datacols, keycols = keycols, type = type)
+        conn <- DuckDBArraySeed(conn, datacol = datacol, keycols = keycols,
+                                dimtbls = dimtbls, type = type)
     }
     new2("DuckDBMatrix", seed = conn, check = FALSE)
 }

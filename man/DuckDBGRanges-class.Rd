@@ -4,6 +4,8 @@
 \alias{DuckDBGRanges-class}
 \alias{dbconn,DuckDBGRanges-method}
 \alias{tblconn,DuckDBGRanges-method}
+\alias{dimtbls,DuckDBGRanges-method}
+\alias{dimtbls<-,DuckDBGRanges-method}
 \alias{length,DuckDBGRanges-method}
 \alias{names,DuckDBGRanges-method}
 \alias{seqinfo,DuckDBGRanges-method}
@@ -40,7 +42,8 @@ slot is used to define the sequence information for the ranges.
 
 \describe{
   \item{\code{DuckDBGRanges(conn, seqnames, start = NULL, end = NULL, width = NULL,
-    strand = NULL, keycols = NULL, mcols = NULL, seqinfo = NULL, seqlengths = NULL)}:}{
+    strand = NULL, keycols = NULL, dimtbls = NULL, mcols = NULL, seqinfo = NULL,
+    seqlengths = NULL)}:}{
     Creates a DuckDBGRanges object.
     \describe{
       \item{\code{conn}}{
@@ -71,10 +74,19 @@ slot is used to define the sequence information for the ranges.
       }
       \item{\code{keycols}}{
         An optional character vector of column names from \code{conn} that
-        will define the primary key, or a named list of character vectors
-        where the names of the list define the key and the character vectors
-        set the distinct values for the key. If missing, a \code{row_number}
-        column is created as an identifier.
+        will define the set of foreign keys in the underlying table, or a
+        named list of character vectors where the names of the list define
+        the foreign keys and the character vectors set the distinct values
+        for those keys. If missing, a \code{row_number} column is created
+        as an identifier.
+      }
+      \item{\code{dimtbls}}{
+        A optional named \code{DataFrameList} that specifies the dimension
+        tables associated with the \code{keycols}. The name of the list
+        elements match the names of the \code{keycols} list. Additionally,
+        the \code{DataFrame} objects have row names that match the distinct
+        values of the corresponding \code{keycols} list element and columns
+        that define partitions in the data table for efficient querying.
       }
       \item{\code{mcols}}{
         Optional character vector specifying the columns that define the

@@ -35,7 +35,7 @@ airway_coldata_td <- tempfile(pattern = "coldata_")
 arrow::write_dataset(as.data.frame(colData(airway)), airway_coldata_td, format = "parquet")
 
 airway_counts_td <- tempfile(pattern = "counts_")
-writeArray(assays(airway)[["counts"]], airway_counts_td, dim_names = c("gene_id", "run"))
+writeArray(assays(airway)[["counts"]], airway_counts_td, keycols = c("gene_id", "run"))
 
 rranges <- DuckDBGRanges(airway_rowranges_td, seqnames = "seqnames", start = "start", end = "end",
                          strand = "strand", mcols = c("exon_id", "exon_name", "group_name"),

@@ -9,7 +9,7 @@
 #'
 #' @section Constructor:
 #' \describe{
-#'   \item{\code{DuckDBArray(conn, datacols, keycols, type = NULL)}:}{
+#'   \item{\code{DuckDBArray(conn, datacol, keycols, dimtbls = NULL, type = NULL)}:}{
 #'     Creates a DuckDBArray object.
 #'     \describe{
 #'       \item{\code{conn}}{
@@ -18,7 +18,7 @@
 #'         data source; a DuckDBDataFrame object; or a tbl_duckdb_connection
 #'         object.
 #'       }
-#'       \item{\code{datacols}}{
+#'       \item{\code{datacol}}{
 #'         Either a string specifying the column from \code{conn} or a named
 #'         \code{expression} that will be evaluated in the context of
 #'         \code{conn} that defines the values in the array.
@@ -28,6 +28,14 @@
 #'         specify the dimension names, or a named list of character vectors
 #'         where the names of the list specify the dimension names and the
 #'         character vectors set the distinct values for the dimension names.
+#'       }
+#'       \item{\code{dimtbls}}{
+#'         A optional named \code{DataFrameList} that specifies the dimension
+#'         tables associated with the \code{keycols}. The name of the list
+#'         elements match the names of the \code{keycols} list. Additionally,
+#'         the \code{DataFrame} objects have row names that match the distinct
+#'         values of the corresponding \code{keycols} list element and columns
+#'         that define partitions in the data table for efficient querying.
 #'       }
 #'       \item{\code{type}}{
 #'         String specifying the type of the data values; one of
@@ -47,6 +55,10 @@
 #'   }
 #'   \item{\code{dimnames(x)}:}{
 #'     List of array dimension names.
+#'   }
+#'   \item{\code{dimtbls(x)}, \code{dimtbls(x) <- value}:}{
+#'     Get or set the list of dimension tables used to define partitions for
+#'     efficient queries.
 #'   }
 #'   \item{\code{type(x)}, \code{type(x) <- value}:}{
 #'     Get or set the data type of the array elements; one of \code{"logical"},
@@ -89,13 +101,15 @@
 #' on.exit(unlink(tf))
 #' arrow::write_parquet(df, tf)
 #'
-#' pqarray <- DuckDBArray(tf, datacols = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
+#' pqarray <- DuckDBArray(tf, datacol = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
 #'
 #' @aliases
 #' DuckDBArray-class
 #'
 #' dbconn,DuckDBArray-method
 #' tblconn,DuckDBArray-method
+#' dimtbls,DuckDBArray-method
+#' dimtbls<-,DuckDBArray-method
 #' type,DuckDBArray-method
 #' type<-,DuckDBArray-method
 #'
@@ -136,6 +150,14 @@ setMethod("tblconn", "DuckDBArray", function(x, filter = TRUE) {
 })
 
 #' @export
+setMethod("dimtbls", "DuckDBArray", function(x) callGeneric(x@seed))
+
+#' @export
+setReplaceMethod("dimtbls", "DuckDBArray", function(x, value) {
+    callGeneric(x@seed, value)
+})
+
+#' @export
 #' @importFrom BiocGenerics type
 setMethod("type", "DuckDBArray", function(x) callGeneric(x@seed))
 
@@ -151,9 +173,10 @@ setReplaceMethod("type", "DuckDBArray", function(x, value) {
 
 #' @export
 #' @importFrom S4Vectors new2
-DuckDBArray <- function(conn, datacols, keycols, type = NULL) {
+DuckDBArray <- function(conn, datacol, keycols, dimtbls = NULL, type = NULL) {
     if (!is(conn, "DuckDBArraySeed")) {
-        conn <- DuckDBArraySeed(conn, datacols = datacols, keycols = keycols, type = type)
+        conn <- DuckDBArraySeed(conn, datacol = datacol, keycols = keycols,
+                                dimtbls = dimtbls, type = type)
     }
     new2("DuckDBArray", seed = conn, check = FALSE)
 }
