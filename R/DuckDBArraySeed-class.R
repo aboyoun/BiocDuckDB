@@ -325,7 +325,7 @@ DuckDBArraySeed <- function(conn, datacol, keycols, dimtbls = NULL, type = NULL)
     if (!is.null(type)) {
         type <- setNames(type, names(datacol) %||% datacol)
     }
-    table <- DuckDBTable(conn, datacol = datacol, keycols = keycols,
+    table <- DuckDBTable(conn, datacols = datacol, keycols = keycols,
                          dimtbls = dimtbls, type = type)
     new2("DuckDBArraySeed", table = table, drop = FALSE, check = FALSE)
 }
