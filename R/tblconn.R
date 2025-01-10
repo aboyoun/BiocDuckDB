@@ -18,6 +18,8 @@
 #' @aliases
 #' tblconn
 #'
+#' @keywords IO
+#'
 #' @name tblconn
 NULL
 

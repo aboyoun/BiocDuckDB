@@ -32,6 +32,8 @@
 #' listCsvDirs
 #' listParquetDirs
 #'
+#' @keywords IO
+#'
 #' @name listParquetDirs
 NULL
 

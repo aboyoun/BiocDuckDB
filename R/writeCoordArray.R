@@ -1,18 +1,23 @@
-#' Write an Array-Like Object
+#' Write an Array-Like Object in Coordinate Format
 #'
 #' @description
-#' An \code{arrow::write_dataset} wrapper function to write array-like objects.
+#' An \code{arrow::write_dataset} wrapper function to write array-like objects
+#' in coordinate format. If dimension names are present, they are substituted
+#' for the corresponding indices.
 #'
 #' @param x An array-like object.
 #' @param path The path to write the array-like object to.
-#' @param keycols A character vector of names for the dimensions of the array.
-#' @param datacol The name for the column containing the array values.
+#' @param keycols A character vector of column names for the dimensions of the
+#' array in the resulting table.
+#' @param datacol The name for the column containing the array values in the
+#' resulting table.
 #' @param dimtbls An optional list of data.frame or DataFrame objects that
-#' define the partitioning. If specified, the list must have the same length as
-#' the number of dimensions of the array and the elements must have rownames
-#' that match the corresponding dimnames element.
-#' @param partitioning A character vector of names for the partitions of the
-#' array.
+#' define the partitioning in \code{arrow::write_dataset}. If specified, the
+#' list must have the same length as the number of dimensions of the array and
+#' the elements must have rownames that match the corresponding dimnames
+#' element.
+#' @param partitioning A character vector of column names for the partitions of
+#' the array in the resulting table.
 #' @param ... Additional arguments to pass to \code{arrow::write_dataset}.
 #'
 #' @author Patrick Aboyoun
@@ -20,12 +25,12 @@
 #' @examples
 #' # Write the Titanic dataset to a single Parquet file
 #' tf1 <- tempfile()
-#' writeArray(Titanic, tf1)
+#' writeCoordArray(Titanic, tf1)
 #' list.files(tf1, full.names = TRUE, recursive = TRUE)
 #'
 #' # Write the Titanic dataset to a single csv file
 #' tf2 <- tempfile()
-#' writeArray(Titanic, tf2, format = "csv")
+#' writeCoordArray(Titanic, tf2, format = "csv")
 #' list.files(tf2, full.names = TRUE, recursive = TRUE)
 #'
 #' # Write the state.x77 matrix to multiple Parquet files
@@ -34,17 +39,19 @@
 #'                            division = state.division,
 #'                            row.names = state.name),
 #'                 NULL)
-#' writeArray(state.x77, tf3, dimtbls = dimtbls)
+#' writeCoordArray(state.x77, tf3, dimtbls = dimtbls)
 #' list.files(tf3, full.names = TRUE, recursive = TRUE)
 #'
-#' @name writeArray
+#' @keywords IO
+#'
+#' @name writeCoordArray
 
 #' @export
 #' @importFrom arrow write_dataset
 #' @importFrom SparseArray nzwhich nzvals
 #' @importFrom stats setNames
-#' @rdname writeArray
-writeArray <-
+#' @rdname writeCoordArray
+writeCoordArray <-
 function(x,
          path,
          keycols = names(dimnames(x)) %||% sprintf("dim%d", seq_along(dim(x))),

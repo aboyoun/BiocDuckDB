@@ -45,3 +45,4 @@ showMethods("nkey")
 \author{
 Patrick Aboyoun
 }
+\keyword{methods}

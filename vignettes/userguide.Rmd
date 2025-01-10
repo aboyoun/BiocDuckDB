@@ -177,12 +177,12 @@ they can be supplied as named lists to the `keycols` argument to speed up
 object creation by avoiding a table scan.
 
 In this example we will write the 4-dimensional `Titanic` dataset to a parquet
-file using `BiocDuckDB::writeArray`.
+file using `BiocDuckDB::writeCoordArray`.
 
 ```{r}
 # Write a parquet file to contain the titanic data
 titanic_tf <- tempfile()
-writeArray(Titanic, titanic_tf, datacol = "fate")
+writeCoordArray(Titanic, titanic_tf, datacol = "fate")
 list.files(titanic_tf, full.names = TRUE, recursive = TRUE)
 
 # Create a DuckDBArray
@@ -213,7 +213,7 @@ state_tables <- list(dim1 = data.frame(region = state.region,
                                        row.names = state.name),
                      dim2 = NULL)
 state_tf <- tempfile()
-writeArray(state.x77, state_tf, dimtbls = state_tables)
+writeCoordArray(state.x77, state_tf, dimtbls = state_tables)
 listParquetDirs(state_tf)
 
 # Create a DuckDBMatrix and reorder the rows and columns to conform to state.x77
@@ -296,7 +296,7 @@ airway_coldata_td <- tempfile(pattern = "coldata_")
 arrow::write_dataset(as.data.frame(colData(airway)), airway_coldata_td, format = "parquet")
 
 airway_counts_td <- tempfile(pattern = "counts_")
-writeArray(assays(airway)[["counts"]], airway_counts_td, keycols = c("gene_id", "run"))
+writeCoordArray(assays(airway)[["counts"]], airway_counts_td, keycols = c("gene_id", "run"))
 
 rranges <- DuckDBGRanges(airway_rowranges_td, seqnames = "seqnames", start = "start", end = "end",
                          strand = "strand", mcols = c("exon_id", "exon_name", "group_name"),
@@ -350,8 +350,8 @@ arrow::write_dataset(as.data.frame(colData(zilionis)), zilionis_cdata_path, form
 
 # Counts matrix
 dimtbls <- list(NULL, colData(zilionis)[, "Library", drop = FALSE])
-writeArray(counts(zilionis), zilionis_counts_path, keycols = c("Genename", "Barcode"),
-           datacol = "Value", dimtbls = dimtbls, partitioning = NULL)
+writeCoordArray(counts(zilionis), zilionis_counts_path, keycols = c("Genename", "Barcode"),
+                datacol = "Value", dimtbls = dimtbls, partitioning = NULL)
 
 # Reduced dimensions
 dimtbls <- list(colData(zilionis)[, "Library", drop = FALSE], NULL)
@@ -359,8 +359,8 @@ for (rd in reducedDimNames(zilionis)) {
     mat <- reducedDim(zilionis, rd)
     mat[is.na(mat)] <- 0 # Convert NAs to 0 to create a sparse matrix
     path <- file.path(zilionis_rdims_path, sprintf("type=%s", rd))
-    writeArray(mat, path, keycols = c("Barcode", "Dim"), datacol = "Value",
-               dimtbls = dimtbls, partitioning = NULL)
+    writeCoordArray(mat, path, keycols = c("Barcode", "Dim"), datacol = "Value",
+                    dimtbls = dimtbls, partitioning = NULL)
 }
 ```
 
