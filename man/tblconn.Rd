@@ -26,3 +26,4 @@ showMethods("tableconn")
 \author{
 Patrick Aboyoun
 }
+\keyword{IO}

@@ -36,6 +36,8 @@ reg.finalizer(.duckdb, function(env) {
 #' acquireDuckDBConn
 #' releaseDuckDBConn
 #'
+#' @keywords IO
+#'
 #' @name DuckDBConnection
 NULL
 

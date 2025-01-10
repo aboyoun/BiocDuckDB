@@ -30,6 +30,8 @@
 #' nkey,DuckDBTable-method
 #' nkeydim,DuckDBTable-method
 #'
+#' @keywords methods
+#'
 #' @name keynames
 NULL
 

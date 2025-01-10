@@ -36,3 +36,4 @@ releaseDuckDBConn()
 \author{
 Patrick Aboyoun
 }
+\keyword{IO}
