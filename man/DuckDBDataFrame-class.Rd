@@ -36,7 +36,7 @@ object and the familiarity of a \linkS4class{DataFrame} object.
 \section{Constructor}{
 
 \describe{
-  \item{\code{DuckDBDataFrame(conn, datacols = colnames(conn), keycols = NULL, dimtbls = NULL, type = NULL)}:}{
+  \item{\code{DuckDBDataFrame(conn, datacols = colnames(conn), keycol = NULL, dimtbl = NULL, type = NULL)}:}{
     Creates a DuckDBDataFrame object.
     \describe{
       \item{\code{conn}}{
@@ -50,20 +50,20 @@ object and the familiarity of a \linkS4class{DataFrame} object.
         named \code{expression} that will be evaluated in the context of
         \code{conn} that defines the data.
       }
-      \item{\code{keycols}}{
-        An optional character vector of column names from \code{conn} that
-        will define the set of foreign keys in the underlying table, or a
-        named list of character vectors where the names of the list define
-        the foreign keys and the character vectors set the distinct values
-        for those keys. If missing, a \code{row_number} column is created
-        as an identifier.
+      \item{\code{keycol}}{
+        An optional string specifying the column name from \code{conn} that
+        will define the foreign key in the underlying table, or a named list
+        containing a character vector where the name of the list element
+        defines the foreign key and the character vector set the distinct
+        values for that key. If missing, a \code{row_number} column is
+        created as an identifier.
       }
-      \item{\code{dimtbls}}{
+      \item{\code{dimtbl}}{
         A optional named \code{DataFrameList} that specifies the dimension
-        tables associated with the \code{keycols}. The name of the list
-        elements match the names of the \code{keycols} list. Additionally,
-        the \code{DataFrame} objects have row names that match the distinct
-        values of the corresponding \code{keycols} list element and columns
+        table associated with the \code{keycol}. The name of the list
+        element must match the name of the \code{keycol} list. Additionally,
+        the \code{DataFrame} object must have row names that match the
+        distinct values of the \code{keycol} list element and columns
         that define partitions in the data table for efficient querying.
       }
       \item{\code{type}}{
@@ -194,7 +194,7 @@ on.exit(unlink(tf))
 arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 
 # Creating our DuckDB-backed data frame:
-df <- DuckDBDataFrame(tf, datacols = colnames(mtcars), keycols = "model")
+df <- DuckDBDataFrame(tf, datacols = colnames(mtcars), keycol = "model")
 df
 
 # Extraction yields a DuckDBColumn:

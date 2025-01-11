@@ -13,35 +13,35 @@ test_that("DuckDBGRanges constructor works as expected", {
 
     # start and end
     expected <- GRanges(granges_df[["seqnames"]], ranges = IRanges(start = granges_df[["start"]], end = granges_df[["end"]], names = granges_df[["id"]]))
-    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", keycols = "id")
+    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", keycol = "id")
     checkDuckDBGRanges(object, expected)
 
     # start and end with mcols
     expected <- GRanges(granges_df[["seqnames"]], ranges = IRanges(start = granges_df[["start"]], end = granges_df[["end"]], names = granges_df[["id"]]),
                         score = granges_df[["score"]], GC = granges_df[["GC"]])
-    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", mcols = c("score", "GC"), keycols = "id")
+    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", mcols = c("score", "GC"), keycol = "id")
     checkDuckDBGRanges(object, expected)
 
     # start and width
     expected <- GRanges(granges_df[["seqnames"]], ranges = IRanges(start = granges_df[["start"]], width = granges_df[["width"]], names = granges_df[["id"]]))
-    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", width = "width", keycols = "id")
+    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", width = "width", keycol = "id")
     checkDuckDBGRanges(object, expected)
 
     # start and width with mcols
     expected <- GRanges(granges_df[["seqnames"]], ranges = IRanges(start = granges_df[["start"]], width = granges_df[["width"]], names = granges_df[["id"]]),
                         score = granges_df[["score"]], GC = granges_df[["GC"]])
-    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", width = "width", mcols = c("score", "GC"), keycols = "id")
+    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", width = "width", mcols = c("score", "GC"), keycol = "id")
     checkDuckDBGRanges(object, expected)
 
     # end and width
     expected <- GRanges(granges_df[["seqnames"]], ranges = IRanges(end = granges_df[["end"]], width = granges_df[["width"]], names = granges_df[["id"]]))
-    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", end = "end", width = "width", keycols = "id")
+    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", end = "end", width = "width", keycol = "id")
     checkDuckDBGRanges(object, expected)
 
     # end and width with mcols
     expected <- GRanges(granges_df[["seqnames"]], ranges = IRanges(end = granges_df[["end"]], width = granges_df[["width"]], names = granges_df[["id"]]),
                         score = granges_df[["score"]], GC = granges_df[["GC"]])
-    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", end = "end", width = "width", mcols = c("score", "GC"), keycols = "id")
+    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", end = "end", width = "width", mcols = c("score", "GC"), keycol = "id")
     checkDuckDBGRanges(object, expected)
 })
 
@@ -53,7 +53,7 @@ test_that("coersion to a GRanges works for a DuckDBGRanges", {
                         ranges = IRanges(start = granges_df[["start"]], width = granges_df[["width"]], names = granges_df[["id"]]),
                         seqinfo = seqinfo)
     object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", width = "width",
-                            keycols = list(id = granges_df[["id"]]), seqinfo = seqinfo)
+                            keycol = list(id = granges_df[["id"]]), seqinfo = seqinfo)
     expect_identical(as(object, "GRanges"), expected)
 
     # strand and seqinfo
@@ -61,7 +61,7 @@ test_that("coersion to a GRanges works for a DuckDBGRanges", {
                         ranges = IRanges(start = granges_df[["start"]], width = granges_df[["width"]], names = granges_df[["id"]]),
                         strand = granges_df[["strand"]], seqinfo = seqinfo)
     object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", width = "width", strand = "strand",
-                            keycols = list(id = granges_df[["id"]]), seqinfo = seqinfo)
+                            keycol = list(id = granges_df[["id"]]), seqinfo = seqinfo)
     expect_identical(as(object, "GRanges"), expected)
 
     # strand, mcols, and seqinfo
@@ -69,6 +69,6 @@ test_that("coersion to a GRanges works for a DuckDBGRanges", {
                         ranges = IRanges(start = granges_df[["start"]], width = granges_df[["width"]], names = granges_df[["id"]]),
                         strand = granges_df[["strand"]], score = granges_df[["score"]], GC = granges_df[["GC"]], seqinfo = seqinfo)
     object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", width = "width", strand = "strand",
-                            mcols = c("score", "GC"), keycols = list(id = granges_df[["id"]]), seqinfo = seqinfo)
+                            mcols = c("score", "GC"), keycol = list(id = granges_df[["id"]]), seqinfo = seqinfo)
     expect_identical(as(object, "GRanges"), expected)
 })

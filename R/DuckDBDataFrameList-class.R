@@ -105,7 +105,7 @@
 #' arrow::write_parquet(cbind(model = rownames(mtcars), mtcars), tf)
 #'
 #' # Creating our DuckDB-backed data frame:
-#' df <- DuckDBDataFrame(tf, datacols = colnames(mtcars), keycols = "model")
+#' df <- DuckDBDataFrame(tf, datacols = colnames(mtcars), keycol = "model")
 #' dflist <- split(df, df$cyl)
 #' dflist
 #'

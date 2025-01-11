@@ -41,13 +41,13 @@ rranges <- DuckDBGRanges(airway_rowranges_td, seqnames = "seqnames", start = "st
                          strand = "strand", mcols = c("exon_id", "exon_name", "group_name"),
                          seqinfo = seqinfo(airway))
 
-rdata <- DuckDBDataFrame(airway_rowdata_td, keycols = "gene_id")
+rdata <- DuckDBDataFrame(airway_rowdata_td, keycol = "gene_id")
 rdata <- rdata[sort(rownames(rdata)), ]
 
 rranges <- split(rranges, rranges$group_name)
 mcols(rranges) <- rdata
 
-cdata <- DuckDBDataFrame(airway_coldata_td, keycols = "Run")
+cdata <- DuckDBDataFrame(airway_coldata_td, keycol = "Run")
 cdata <- cdata[sort(rownames(cdata)), ]
 
 counts <- DuckDBMatrix(airway_counts_td, row = "gene_id", col = "run", datacol = "value")
