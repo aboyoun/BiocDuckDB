@@ -13,7 +13,7 @@
 #' @section Constructor:
 #' \describe{
 #'   \item{\code{DuckDBGRanges(conn, seqnames, start = NULL, end = NULL, width = NULL,
-#'     strand = NULL, keycols = NULL, dimtbls = NULL, mcols = NULL, seqinfo = NULL,
+#'     strand = NULL, keycol = NULL, dimtbl = NULL, mcols = NULL, seqinfo = NULL,
 #'     seqlengths = NULL)}:}{
 #'     Creates a DuckDBGRanges object.
 #'     \describe{
@@ -43,20 +43,20 @@
 #'         Either \code{NULL} or a string specifying the column from
 #'         \code{conn} that defines the width of the range.
 #'       }
-#'       \item{\code{keycols}}{
-#'         An optional character vector of column names from \code{conn} that
-#'         will define the set of foreign keys in the underlying table, or a
-#'         named list of character vectors where the names of the list define
-#'         the foreign keys and the character vectors set the distinct values
-#'         for those keys. If missing, a \code{row_number} column is created
-#'         as an identifier.
+#'       \item{\code{keycol}}{
+#'         An optional string specifying the column name from \code{conn} that
+#'         will define the foreign key in the underlying table, or a named list
+#'         containing a character vector where the name of the list element
+#'         defines the foreign key and the character vector set the distinct
+#'         values for that key. If missing, a \code{row_number} column is
+#'         created as an identifier.
 #'       }
-#'       \item{\code{dimtbls}}{
+#'       \item{\code{dimtbl}}{
 #'         A optional named \code{DataFrameList} that specifies the dimension
-#'         tables associated with the \code{keycols}. The name of the list
-#'         elements match the names of the \code{keycols} list. Additionally,
-#'         the \code{DataFrame} objects have row names that match the distinct
-#'         values of the corresponding \code{keycols} list element and columns
+#'         table associated with the \code{keycol}. The name of the list
+#'         element must match the name of the \code{keycol} list. Additionally,
+#'         the \code{DataFrame} object must have row names that match the
+#'         distinct values of the \code{keycol} list element and columns
 #'         that define partitions in the data table for efficient querying.
 #'       }
 #'       \item{\code{mcols}}{
@@ -190,7 +190,7 @@
 #' seqinfo <- Seqinfo(paste0("chr", 1:3), c(1000, 2000, 1500), NA, "mock1")
 #' gr <- DuckDBGRanges(tf, seqnames = "seqnames", start = "start", width = "width",
 #'                     strand = "strand", mcols = c("score", "GC"), seqinfo = seqinfo,
-#'                     keycols = "id")
+#'                     keycol = "id")
 #' gr
 #'
 #' @aliases
@@ -348,7 +348,7 @@ setValidity2("DuckDBGRanges", function(x) {
 #' @importFrom stats setNames
 DuckDBGRanges <-
 function(conn, seqnames, start = NULL, end = NULL, width = NULL, strand = NULL,
-         keycols = NULL, dimtbls = NULL, mcols = NULL, seqinfo = NULL,
+         keycol = NULL, dimtbl = NULL, mcols = NULL, seqinfo = NULL,
          seqlengths = NULL)
 {
     datacols <- .datacols_granges
@@ -389,7 +389,7 @@ function(conn, seqnames, start = NULL, end = NULL, width = NULL, strand = NULL,
         ccols <- c(ccols, mcols)
     }
 
-    comb <- DuckDBDataFrame(conn, datacols = ccols, keycols = keycols, dimtbls = dimtbls)
+    comb <- DuckDBDataFrame(conn, datacols = ccols, keycol = keycol, dimtbl = dimtbl)
     frame <- comb[, names(datacols), drop = FALSE]
     if (is.null(mcols)) {
         mcols <- comb[, character(), drop = FALSE]

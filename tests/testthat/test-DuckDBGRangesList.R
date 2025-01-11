@@ -4,7 +4,7 @@
 library(GenomicRanges)
 
 test_that("basic methods work as expected for a DuckDBGRangesList", {
-    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", strand = "strand", mcols = c("score", "GC", "group"), keycols = "id")
+    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", strand = "strand", mcols = c("score", "GC", "group"), keycol = "id")
     object <- split(object, object$group)
 
     expected <- GRanges(granges_df[["seqnames"]], ranges = IRanges(start = granges_df[["start"]], end = granges_df[["end"]], names = granges_df[["id"]]),
@@ -15,7 +15,7 @@ test_that("basic methods work as expected for a DuckDBGRangesList", {
 })
 
 test_that("element metadata work as expected for a DuckDBGRangesList", {
-    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", strand = "strand", mcols = c("score", "GC", "group"), keycols = "id")
+    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", strand = "strand", mcols = c("score", "GC", "group"), keycol = "id")
     object <- split(object, object$group)
     mcols(object) <- as.list(head(letters, length(object)))
 
@@ -29,7 +29,7 @@ test_that("element metadata work as expected for a DuckDBGRangesList", {
 })
 
 test_that("renaming list elements work for a DuckDBGRangesList", {
-    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", strand = "strand", mcols = c("score", "GC", "group"), keycols = "id")
+    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", strand = "strand", mcols = c("score", "GC", "group"), keycol = "id")
     object <- split(object, object$group)
     names(object) <- head(letters, length(object))
 
@@ -42,7 +42,7 @@ test_that("renaming list elements work for a DuckDBGRangesList", {
 })
 
 test_that("subscripting works for a DuckDBGRangesList", {
-    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", strand = "strand", mcols = c("score", "GC", "group"), keycols = "id")
+    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", strand = "strand", mcols = c("score", "GC", "group"), keycol = "id")
     object <- split(object, object$group)
 
     expected <- GRanges(granges_df[["seqnames"]], ranges = IRanges(start = granges_df[["start"]], end = granges_df[["end"]], names = granges_df[["id"]]),
@@ -55,7 +55,7 @@ test_that("subscripting works for a DuckDBGRangesList", {
 })
 
 test_that("head works for a DuckDBGRangesList", {
-    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", strand = "strand", mcols = c("score", "GC", "group"), keycols = "id")
+    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", strand = "strand", mcols = c("score", "GC", "group"), keycol = "id")
     object <- split(object, object$group)
 
     expected <- GRanges(granges_df[["seqnames"]], ranges = IRanges(start = granges_df[["start"]], end = granges_df[["end"]], names = granges_df[["id"]]),
@@ -67,7 +67,7 @@ test_that("head works for a DuckDBGRangesList", {
 })
 
 test_that("tail works for a DuckDBGRangesList", {
-    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", strand = "strand", mcols = c("score", "GC", "group"), keycols = "id")
+    object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end", strand = "strand", mcols = c("score", "GC", "group"), keycol = "id")
     object <- split(object, object$group)
 
     expected <- GRanges(granges_df[["seqnames"]], ranges = IRanges(start = granges_df[["start"]], end = granges_df[["end"]], names = granges_df[["id"]]),
@@ -83,7 +83,7 @@ test_that("coersion to a GRangesList works for a DuckDBGRangesList", {
 
     object <- DuckDBGRanges(granges_tf, seqnames = "seqnames", start = "start", end = "end",
                             strand = "strand", seqinfo = seqinfo, mcols = c("score", "GC", "group"),
-                            keycols = "id")
+                            keycol = "id")
     grlist <- as(split(object, object$group), "CompressedGRangesList")
 
     expected <- GRanges(granges_df[["seqnames"]], ranges = IRanges(start = granges_df[["start"]], end = granges_df[["end"]], names = granges_df[["id"]]),

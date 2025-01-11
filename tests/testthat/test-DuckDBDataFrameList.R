@@ -2,7 +2,7 @@
 # library(testthat); library(BiocDuckDB); source("setup.R"); source("test-DuckDBDataFrameList.R")
 
 test_that("basic methods work as expected for a DuckDBDataFrameList", {
-    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = list(model = rownames(mtcars)))
     dflist <- split(df, df[["carb"]])
 
     expected <- DataFrame(mtcars)
@@ -12,7 +12,7 @@ test_that("basic methods work as expected for a DuckDBDataFrameList", {
 })
 
 test_that("element metadata work as expected for a DuckDBDataFrameList", {
-    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = list(model = rownames(mtcars)))
     dflist <- split(df, df[["carb"]])
     mcols(dflist) <- as.list(head(letters, length(dflist)))
 
@@ -24,7 +24,7 @@ test_that("element metadata work as expected for a DuckDBDataFrameList", {
 })
 
 test_that("column metadata work as expected for a DuckDBDataFrameList", {
-    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = list(model = rownames(mtcars)))
     mcols(df) <- head(letters, ncol(df)[1L])
     dflist <- split(df, df[["carb"]])
 
@@ -35,7 +35,7 @@ test_that("column metadata work as expected for a DuckDBDataFrameList", {
     checkDuckDBDataFrameList(dflist, expected)
 
 
-    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = list(model = rownames(mtcars)))
     dflist <- split(df, df[["carb"]])
     columnMetadata(dflist) <- head(letters, ncols(dflist)[1L])
 
@@ -47,7 +47,7 @@ test_that("column metadata work as expected for a DuckDBDataFrameList", {
 })
 
 test_that("renaming list elements work for a DuckDBDataFrameList", {
-    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = list(model = rownames(mtcars)))
     dflist <- split(df, df[["carb"]])
     names(dflist) <- head(letters, length(dflist))
 
@@ -59,7 +59,7 @@ test_that("renaming list elements work for a DuckDBDataFrameList", {
 })
 
 test_that("renaming columns work for a DuckDBDataFrameList", {
-    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = list(model = rownames(mtcars)))
     dflist <- split(df, df[["carb"]])
     colnames(dflist) <- head(letters, ncols(dflist)[1L])
 
@@ -69,7 +69,7 @@ test_that("renaming columns work for a DuckDBDataFrameList", {
 
     checkDuckDBDataFrameList(dflist, expected)
 
-    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = list(model = rownames(mtcars)))
     dflist <- split(df, df[["carb"]])
     commonColnames(dflist) <- head(letters, ncols(dflist)[1L])
 
@@ -81,7 +81,7 @@ test_that("renaming columns work for a DuckDBDataFrameList", {
 })
 
 test_that("subscripting works for a DuckDBDataFrameList", {
-    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = list(model = rownames(mtcars)))
     dflist <- split(df, df[["carb"]])
 
     expected <- DataFrame(mtcars)
@@ -93,7 +93,7 @@ test_that("subscripting works for a DuckDBDataFrameList", {
 })
 
 test_that("head works for a DuckDBDataFrameList", {
-    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = list(model = rownames(mtcars)))
     dflist <- split(df, df[["carb"]])
 
     expected <- DataFrame(mtcars)
@@ -104,7 +104,7 @@ test_that("head works for a DuckDBDataFrameList", {
 })
 
 test_that("tail works for a DuckDBDataFrameList", {
-    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = list(model = rownames(mtcars)))
     dflist <- split(df, df[["carb"]])
 
     expected <- DataFrame(mtcars)
@@ -115,7 +115,7 @@ test_that("tail works for a DuckDBDataFrameList", {
 })
 
 test_that("coersion to a DFrameList works for a DuckDBDataFrameList", {
-    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycols = list(model = rownames(mtcars)))
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = list(model = rownames(mtcars)))
     dflist <- as(split(df, df[["carb"]]), "DFrameList")
 
     expected <- DataFrame(mtcars)

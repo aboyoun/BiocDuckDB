@@ -112,7 +112,7 @@
 #' seqinfo <- Seqinfo(paste0("chr", 1:3), c(1000, 2000, 1500), NA, "mock1")
 #' gr <- DuckDBGRanges(tf, seqnames = "seqnames", start = "start", width = "width",
 #'                     strand = "strand", mcols = c("score", "GC", "group"),
-#'                     seqinfo = seqinfo, keycols = "id")
+#'                     seqinfo = seqinfo, keycol = "id")
 #' grlist <- split(gr, gr$group)
 #' grlist
 #'
