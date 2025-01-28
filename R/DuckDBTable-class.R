@@ -761,6 +761,7 @@ function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TR
 
 #' @export
 #' @importFrom BiocGenerics as.data.frame
+#' @importFrom dbplyr remote_query remote_query_plan
 #' @importFrom dplyr mutate select
 setMethod("as.data.frame", "DuckDBTable",
 function(x, row.names = NULL, optional = FALSE, ...) {
@@ -773,8 +774,15 @@ function(x, row.names = NULL, optional = FALSE, ...) {
     conn <- select(conn, c(names(keycols), names(datacols)))
 
     # Allow for 1 extra row to check for duplicate keys, up to integer.max
-    length <- as.integer(min(nrow(x) + 1L, .Machine$integer.max))
-    conn <- head(conn, n = length)
+    n <- as.integer(min(nrow(x) + 1L, .Machine$integer.max))
+    conn <- head(conn, n = n)
+
+    # Explain query plan for debugging
+    if (getOption("BiocDuckDB.verbose", default = FALSE) && (n > 1L)) {
+        writeLines("\nQuery:")
+        print(remote_query(conn))
+        cat("\nQuery Plan:\n", remote_query_plan(conn), "\n\n")
+    }
 
     df <- as.data.frame(conn)[, c(names(keycols), names(datacols))]
     if (anyDuplicated(df[, names(keycols)])) {
