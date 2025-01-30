@@ -345,15 +345,17 @@ zilionis_cdata_path <- file.path(zilionis_path, "coldata")
 zilionis_counts_path <- file.path(zilionis_path, "assays", "assay=counts")
 zilionis_rdims_path <- file.path(zilionis_path, "reduced_dims")
 
-# Column metadata
-arrow::write_dataset(as.data.frame(colData(zilionis)), zilionis_cdata_path, format = "parquet")
+# Write column metadata
+arrow::write_dataset(as.data.frame(colData(zilionis)), zilionis_cdata_path,
+                     format = "parquet")
 
-# Counts matrix
+# Write counts matrix
 dimtbls <- list(NULL, colData(zilionis)[, "Library", drop = FALSE])
-writeCoordArray(counts(zilionis), zilionis_counts_path, keycols = c("Genename", "Barcode"),
-                datacol = "Value", dimtbls = dimtbls, partitioning = NULL)
+writeCoordArray(counts(zilionis), zilionis_counts_path,
+                keycols = c("Genename", "Barcode"), datacol = "Value",
+                dimtbls = dimtbls)
 
-# Reduced dimensions
+# Write reduced dimensions
 dimtbls <- list(colData(zilionis)[, "Library", drop = FALSE], NULL)
 for (rd in reducedDimNames(zilionis)) {
     mat <- reducedDim(zilionis, rd)
@@ -373,34 +375,46 @@ columns to create one.
 
 ```{r}
 library(dplyr)
-tbl <- mutate(tblconn(DuckDBTable(zilionis_cdata_path)),
-              ID = concat_ws("_", Library, Barcode),
-              row_number = NULL)
 
-zilionis_coldata <- DuckDBDataFrame(tbl, datacols = setdiff(colnames(tbl), "ID"), keycol = "ID")
-zilionis_coldata <- zilionis_coldata[paste(colData(zilionis)[, "Library"],
-                                           colData(zilionis)[, "Barcode"], sep = "_"), ]
+# Read column metadata
+tbl_ddb <- DuckDBTable(zilionis_cdata_path, keycols = c("Library", "Barcode"))
+tbl <- tblconn(tbl_ddb, filter = FALSE)
+tbl <- mutate(tbl, ID = concat_ws("_", Library, Barcode))
+zilionis_cdata <- DuckDBDataFrame(tbl, datacols = setdiff(colnames(tbl), "ID"),
+                                  keycol = "ID")
+zilionis_cdata <- zilionis_cdata[paste(colData(zilionis)[, "Library"],
+                                       colData(zilionis)[, "Barcode"],
+                                       sep = "_"), ]
 
-tbl <- mutate(tblconn(DuckDBTable(zilionis_counts_path)),
-              ID = concat_ws("_", Library, Barcode),
-              row_number = NULL)
+# Read counts matrix
+dimtbls <- list(NULL, colData(zilionis)[, "Library", drop = FALSE])
+rownames(dimtbls[[2L]]) <- paste(colData(zilionis)[, "Library"],
+                                 colData(zilionis)[, "Barcode"], sep = "_")
+tbl_ddb <- DuckDBTable(zilionis_counts_path,
+                       keycols = c("Genename", "Library", "Barcode"))
+tbl <- tblconn(tbl_ddb, filter = FALSE)
+tbl <- mutate(tbl, ID = concat_ws("_", Library, Barcode))
 zilionis_counts <- DuckDBMatrix(tbl, row = "Genename",
-                                col = list("ID" = rownames(zilionis_coldata)),
-                                datacol = "Value")
+                                col = list("ID" = rownames(zilionis_cdata)),
+                                datacol = "Value",
+                                dimtbls = dimtbls)
 zilionis_counts <- zilionis_counts[rownames(zilionis), ]
 
+# Read reduced dimensions
 zilionis_rdims <-
     sapply(reducedDimNames(zilionis), function(rd) {
-        tbl <- mutate(tblconn(DuckDBTable(file.path(zilionis_rdims_path, sprintf("type=%s", rd)))),
-                      ID = concat_ws("_", Library, Barcode),
-                      row_number = NULL)
-        mat <- DuckDBMatrix(tbl, row = list("ID" = rownames(zilionis_coldata)),
+        path <- file.path(zilionis_rdims_path, sprintf("type=%s", rd))
+        tbl_ddb <- DuckDBTable(path, keycols = c("Library", "Barcode", "Dim"))
+        tbl <- tblconn(tbl_ddb, filter = FALSE)
+        tbl <- mutate(tbl, ID = concat_ws("_", Library, Barcode))
+        mat <- DuckDBMatrix(tbl, row = list("ID" = rownames(zilionis_cdata)),
                             col = "Dim", datacol = "Value")
         mat[, c("x", "y")]
     }, simplify = FALSE)
 
+# Create the SingleCellExperiment object
 zilionis_ddb <- SingleCellExperiment(assays = list(counts = zilionis_counts),
-                                     colData = zilionis_coldata,
+                                     colData = zilionis_cdata,
                                      reducedDims = zilionis_rdims)
 ```
 
