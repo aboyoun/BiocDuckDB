@@ -349,10 +349,14 @@ zilionis_rdims_path <- file.path(zilionis_path, "reduced_dims")
 arrow::write_dataset(as.data.frame(colData(zilionis)), zilionis_cdata_path,
                      format = "parquet")
 
-# Write counts matrix
-dimtbls <- list(NULL, colData(zilionis)[, "Library", drop = FALSE])
-writeCoordArray(counts(zilionis), zilionis_counts_path,
-                keycols = c("Genename", "Barcode"), datacol = "Value",
+# Write (transposed) counts matrix
+genetbl <- rowData(zilionis)
+nr <- nrow(counts(zilionis))
+k <- 7L
+genetbl$Genegroup <- rep(seq_len(k), each = ceiling(nr / k), length.out = nr)
+dimtbls <- list(colData(zilionis)[, "Library", drop = FALSE], genetbl)
+writeCoordArray(t(counts(zilionis)), zilionis_counts_path,
+                keycols = c("Barcode", "Genename"), datacol = "Value",
                 dimtbls = dimtbls)
 
 # Write reduced dimensions
@@ -387,18 +391,18 @@ zilionis_cdata <- zilionis_cdata[paste(colData(zilionis)[, "Library"],
                                        sep = "_"), ]
 
 # Read counts matrix
-dimtbls <- list(NULL, colData(zilionis)[, "Library", drop = FALSE])
+dimtbls <- list("Genename" = genetbl, "ID" = colData(zilionis)[, "Library", drop = FALSE])
 rownames(dimtbls[[2L]]) <- paste(colData(zilionis)[, "Library"],
                                  colData(zilionis)[, "Barcode"], sep = "_")
 tbl_ddb <- DuckDBTable(zilionis_counts_path,
                        keycols = c("Genename", "Library", "Barcode"))
 tbl <- tblconn(tbl_ddb, filter = FALSE)
 tbl <- mutate(tbl, ID = concat_ws("_", Library, Barcode))
-zilionis_counts <- DuckDBMatrix(tbl, row = "Genename",
+zilionis_counts <- DuckDBMatrix(tbl,
+                                row = list("Genename" = rownames(zilionis)),
                                 col = list("ID" = rownames(zilionis_cdata)),
                                 datacol = "Value",
                                 dimtbls = dimtbls)
-zilionis_counts <- zilionis_counts[rownames(zilionis), ]
 
 # Read reduced dimensions
 zilionis_rdims <-
@@ -407,9 +411,10 @@ zilionis_rdims <-
         tbl_ddb <- DuckDBTable(path, keycols = c("Library", "Barcode", "Dim"))
         tbl <- tblconn(tbl_ddb, filter = FALSE)
         tbl <- mutate(tbl, ID = concat_ws("_", Library, Barcode))
-        mat <- DuckDBMatrix(tbl, row = list("ID" = rownames(zilionis_cdata)),
-                            col = "Dim", datacol = "Value")
-        mat[, c("x", "y")]
+        DuckDBMatrix(tbl,
+                     row = list("ID" = rownames(zilionis_cdata)),
+                     col = list("Dim" = c("x", "y")),
+                     datacol = "Value")
     }, simplify = FALSE)
 
 # Create the SingleCellExperiment object
