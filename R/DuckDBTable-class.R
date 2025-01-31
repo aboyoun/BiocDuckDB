@@ -223,16 +223,29 @@ setMethod("tblconn", "DuckDBTable", function(x, filter = TRUE) {
         keycols <- x@keycols
         for (i in names(keycols)) {
             set <- keycols[[i]]
-            conn <- filter(conn, !!as.name(i) %in% set)
 
-            # Filter by partitioning information, if available
             if (i %in% names(x@dimtbls)) {
+                # Filter with dimension tables
                 dimtbl <- x@dimtbls[[i]]
+
+                # Add the primary dimension filter
+                comp <- setdiff(rownames(dimtbl), set)
+                ncomp <- length(comp)
+                if (ncomp >= length(set)) {
+                    conn <- filter(conn, !!as.name(i) %in% set)
+                } else if (ncomp > 0L) {
+                    conn <- filter(conn, !(!!as.name(i) %in% comp))
+                }
+
+                # Add the secondary dimension table filters
                 dimtbl <- dimtbl[set, , drop = FALSE]
                 for (j in colnames(dimtbl)) {
                     part <- unique(dimtbl[[j]])
                     conn <- filter(conn, !!as.name(j) %in% part)
                 }
+            } else {
+                # Filter without dimension tables
+                conn <- filter(conn, !!as.name(i) %in% set)
             }
         }
     }
