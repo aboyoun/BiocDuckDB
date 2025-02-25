@@ -772,10 +772,43 @@ function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TR
 ### Coercion
 ###
 
+#' @importFrom dplyr select
+#' @importFrom stats setNames
+#' @importFrom rlang quo
+#' @importFrom tibble tibble
+.mutate_and_select <- function(conn, keycols, datacols) {
+    # Mutate the data columns
+    # conn <- mutate(conn, !!!as.list(datacols))
+
+    # Get the select list
+    slist <- conn[["lazy_query"]][["select"]]
+
+    # Create the tibble for the mutation
+    env <- setNames(slist[["expr"]], slist[["name"]])
+    expr <- lapply(unname(datacols), function(y) {
+        y <- do.call(substitute, list(y, env))
+        if (is.name(y)) y else quo(!!y)
+    })
+    k <- length(datacols)
+    klist <- tibble(name = names(datacols),
+                    expr = expr,
+                    group_vars = rep.int(list(character()), k),
+                    order_vars = rep.int(list(NULL), k),
+                    frame = rep.int(list(NULL), k))
+
+    # Combine the original select and mutate lists
+    slist <- slist[!(slist[["name"]] %in% klist[["name"]]), ]
+    slist <- rbind(slist, klist)
+    conn[["lazy_query"]][["select"]] <- slist
+    conn[["lazy_query"]][["x"]][["vars"]] <- slist[["name"]]
+
+    # Select the data columns
+    select(conn, c(names(keycols), names(datacols)))
+}
+
 #' @export
 #' @importFrom BiocGenerics as.data.frame
 #' @importFrom dbplyr remote_query remote_query_plan
-#' @importFrom dplyr mutate select
 setMethod("as.data.frame", "DuckDBTable",
 function(x, row.names = NULL, optional = FALSE, ...) {
     conn <- tblconn(x)
@@ -783,8 +816,7 @@ function(x, row.names = NULL, optional = FALSE, ...) {
     datacols <- as.list(x@datacols)
 
     # Mutate and select the data columns
-    conn <- mutate(conn, !!!as.list(datacols))
-    conn <- select(conn, c(names(keycols), names(datacols)))
+    conn <- .mutate_and_select(conn, keycols, datacols)
 
     # Allow for 1 extra row to check for duplicate keys, up to integer.max
     n <- as.integer(min(nrow(x) + 1L, .Machine$integer.max))
