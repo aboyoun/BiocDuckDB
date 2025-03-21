@@ -44,12 +44,14 @@ NULL
 #' @export
 #' @importFrom DBI dbConnect dbDisconnect
 #' @importFrom duckdb duckdb
+#' @importFrom duckdbfs load_spatial
 #' @rdname DuckDBConnection
 acquireDuckDBConn <- function(conn = dbConnect(duckdb(bigint = "integer64"))) {
     if (is.null(.duckdb$drv)) {
         if (!inherits(conn, "duckdb_connection")) {
             stop("'conn' must be a DuckDB connection")
         }
+        load_spatial(conn)
         .duckdb$drv <- conn
     }
     .duckdb$drv

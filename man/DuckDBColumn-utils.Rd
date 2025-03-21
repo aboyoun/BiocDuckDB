@@ -22,6 +22,19 @@
 \alias{table,DuckDBColumn-method}
 \alias{is_nonzero,DuckDBColumn-method}
 \alias{nzcount,DuckDBColumn-method}
+\alias{st_area.DuckDBColumn}
+\alias{st_as_binary.DuckDBColumn}
+\alias{st_as_text.DuckDBColumn}
+\alias{st_boundary.DuckDBColumn}
+\alias{st_centroid.DuckDBColumn}
+\alias{st_convex_hull.DuckDBColumn}
+\alias{st_exterior_ring.DuckDBColumn}
+\alias{st_is_valid.DuckDBColumn}
+\alias{st_line_merge.DuckDBColumn}
+\alias{st_make_valid.DuckDBColumn}
+\alias{st_normalize.DuckDBColumn}
+\alias{st_point_on_surface.DuckDBColumn}
+\alias{st_reverse.DuckDBColumn}
 \title{Common operations on DuckDBColumn objects}
 \description{
 Common operations on \linkS4class{DuckDBColumn} objects.
@@ -131,6 +144,58 @@ In the code snippets below, \code{x} is a DuckDBColumn object:
   }
   \item{\code{nzcount(x)}:}{
     Returns the total number of non-zero values.
+  }
+}
+}
+
+\section{Spatial Methods}{
+
+In the code snippets below, \code{x} is a DuckDBColumn object:
+\describe{
+  \item{\code{st_area(x)}:}{
+    Returns a DuckDBColumn containing the areas of geometries.
+  }
+  \item{\code{st_as_binary(x, hex = FALSE)}:}{
+    Returns the DuckDBColumn containing either WKB if \code{hex = FALSE} or
+    HEXWKB if \code{hex = TRUE} representations of geometries.
+  }
+  \item{\code{st_as_text(x, geojson = FALSE)}:}{
+    Returns the DuckDBColumn containing either WKT if \code{geojson = FALSE} or
+    GeoJSON if \code{geojson = TRUE} representations of geometries.
+  }
+  \item{\code{st_boundary(x)}:}{
+    Returns a DuckDBColumn containing the boundaries of geometries.
+  }
+  \item{\code{st_centroid(x)}:}{
+    Returns a DuckDBColumn containing the centroids of geometries.
+  }
+  \item{\code{st_convex_hull(x)}:}{
+    Returns a DuckDBColumn containing the convex hulls of geometries.
+  }
+  \item{\code{st_exterior_ring(x)}:}{
+    Returns a DuckDBColumn containing the exterior rings of geometries.
+  }
+  \item{\code{st_is_valid(x)}:}{
+    Returns a DuckDBColumn containing logicals that indicate if the
+    geometries are valid.
+  }
+  \item{\code{st_line_merge(x, directed = FALSE)}:}{
+    Returns a DuckDBColumn containing the merged lines of geometries,
+    optionally taking direction into account.
+  }
+  \item{\code{st_make_valid(x)}:}{
+    Returns a DuckDBColumn containing valid geometries.
+  }
+  \item{\code{st_normalize(x)}:}{
+    Returns a DuckDBColumn containing normalized geometries.
+  }
+  \item{\code{st_point_on_surface(x)}:}{
+    Returns a DuckDBColumn containing a point on the surface of the input
+    geometry.
+  }
+  \item{\code{st_reverse(x)}:}{
+    Returns a DuckDBColumn containing geometries with the vertice order
+    reversed.
   }
 }
 }

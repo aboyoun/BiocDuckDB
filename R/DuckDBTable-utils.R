@@ -121,6 +121,56 @@
 #'   }
 #' }
 #'
+#' @section Spatial Methods:
+#' In the code snippets below, \code{x} is a DuckDBTable object:
+#' \describe{
+#'   \item{\code{st_area(x)}:}{
+#'     Returns a DuckDBTable containing the areas of geometries.
+#'   }
+#'   \item{\code{st_as_binary(x, hex = FALSE)}:}{
+#'     Returns the DuckDBTable containing either WKB if \code{hex = FALSE} or
+#'     HEXWKB if \code{hex = TRUE} representations of geometries.
+#'   }
+#'   \item{\code{st_as_text(x, geojson = FALSE)}:}{
+#'     Returns the DuckDBTable containing either WKT if \code{geojson = FALSE} or
+#'     GeoJSON if \code{geojson = TRUE} representations of geometries.
+#'   }
+#'   \item{\code{st_boundary(x)}:}{
+#'     Returns a DuckDBTable containing the boundaries of geometries.
+#'   }
+#'   \item{\code{st_centroid(x)}:}{
+#'     Returns a DuckDBTable containing the centroids of geometries.
+#'   }
+#'   \item{\code{st_convex_hull(x)}:}{
+#'     Returns a DuckDBTable containing the convex hulls of geometries.
+#'   }
+#'   \item{\code{st_exterior_ring(x)}:}{
+#'     Returns a DuckDBTable containing the exterior rings of geometries.
+#'   }
+#'   \item{\code{st_is_valid(x)}:}{
+#'     Returns a DuckDBTable containing logicals that indicate if the
+#'     geometries are valid.
+#'   }
+#'   \item{\code{st_line_merge(x, directed = FALSE)}:}{
+#'     Returns a DuckDBTable containing the merged lines of geometries,
+#'     optionally taking direction into account.
+#'   }
+#'   \item{\code{st_make_valid(x)}:}{
+#'     Returns a DuckDBTable containing valid geometries.
+#'   }
+#'   \item{\code{st_normalize(x)}:}{
+#'     Returns a DuckDBTable containing normalized geometries.
+#'   }
+#'   \item{\code{st_point_on_surface(x)}:}{
+#'     Returns a DuckDBTable containing a point on the surface of the input
+#'     geometry.
+#'   }
+#'   \item{\code{st_reverse(x)}:}{
+#'     Returns a DuckDBTable containing geometries with the vertice order
+#'     reversed.
+#'   }
+#' }
+#'
 #' @author Patrick Aboyoun
 #'
 #' @aliases
@@ -150,6 +200,20 @@
 #' is_nonzero,DuckDBTable-method
 #' nzcount,DuckDBTable-method
 #' is_sparse,DuckDBTable-method
+#'
+#' st_area.DuckDBTable
+#' st_as_binary.DuckDBTable
+#' st_as_text.DuckDBTable
+#' st_boundary.DuckDBTable
+#' st_centroid.DuckDBTable
+#' st_convex_hull.DuckDBTable
+#' st_exterior_ring.DuckDBTable
+#' st_is_valid.DuckDBTable
+#' st_line_merge.DuckDBTable
+#' st_make_valid.DuckDBTable
+#' st_normalize.DuckDBTable
+#' st_point_on_surface.DuckDBTable
+#' st_reverse.DuckDBTable
 #'
 #' @include DuckDBTable-class.R
 #'
@@ -501,3 +565,100 @@ setMethod("nzcount", "DuckDBTable", function(x) {
 setMethod("is_sparse", "DuckDBTable", function(x) {
     TRUE
 })
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Spatial methods
+###
+
+#' @exportS3Method sf::st_area
+#' @importFrom sf st_area
+st_area.DuckDBTable <- function(x, ...) {
+    datacols <- endoapply(x@datacols, function(j) call("ST_Area", j))
+    replaceSlots(x, datacols = datacols, check = FALSE)
+}
+
+#' @exportS3Method sf::st_as_binary
+#' @importFrom sf st_as_binary
+st_as_binary.DuckDBTable <- function(x, ..., hex = FALSE) {
+    fun <- if (isTRUE(hex)) "ST_AsHEXWKB" else "ST_AsWKB"
+    datacols <- endoapply(x@datacols, function(j) call(fun, j))
+    replaceSlots(x, datacols = datacols, check = FALSE)
+}
+
+#' @exportS3Method sf::st_as_text
+#' @importFrom sf st_as_text
+st_as_text.DuckDBTable <- function(x, ..., geojson = FALSE) {
+    fun <- if (isTRUE(geojson)) "ST_AsGeoJSON" else "ST_AsText"
+    datacols <- endoapply(x@datacols, function(j) call(fun, j))
+    replaceSlots(x, datacols = datacols, check = FALSE)
+}
+
+#' @exportS3Method sf::st_boundary
+#' @importFrom sf st_boundary
+st_boundary.DuckDBTable <- function(x) {
+    datacols <- endoapply(x@datacols, function(j) call("ST_Boundary", j))
+    replaceSlots(x, datacols = datacols, check = FALSE)
+}
+
+#' @exportS3Method sf::st_centroid
+#' @importFrom sf st_centroid
+st_centroid.DuckDBTable <- function(x, ...) {
+    datacols <- endoapply(x@datacols, function(j) call("ST_Centroid", j))
+    replaceSlots(x, datacols = datacols, check = FALSE)
+}
+
+#' @exportS3Method sf::st_convex_hull
+#' @importFrom sf st_convex_hull
+st_convex_hull.DuckDBTable <- function(x) {
+    datacols <- endoapply(x@datacols, function(j) call("ST_ConvexHull", j))
+    replaceSlots(x, datacols = datacols, check = FALSE)
+}
+
+#' @exportS3Method sf::st_exterior_ring
+#' @importFrom sf st_exterior_ring
+st_exterior_ring.DuckDBTable <- function(x, ...) {
+    datacols <- endoapply(x@datacols, function(j) call("ST_ExteriorRing", j))
+    replaceSlots(x, datacols = datacols, check = FALSE)
+}
+
+#' @exportS3Method sf::st_is_valid
+#' @importFrom sf st_is_valid
+st_is_valid.DuckDBTable <- function(x, ...) {
+    datacols <- endoapply(x@datacols, function(j) call("ST_IsValid", j))
+    replaceSlots(x, datacols = datacols, check = FALSE)
+}
+
+#' @exportS3Method sf::st_line_merge
+#' @importFrom sf st_line_merge
+st_line_merge.DuckDBTable <- function(x, ..., directed = FALSE) {
+    datacols <- endoapply(x@datacols, function(j) call("ST_LineMerge", j, directed))
+    replaceSlots(x, datacols = datacols, check = FALSE)
+}
+
+#' @exportS3Method sf::st_make_valid
+#' @importFrom sf st_make_valid
+st_make_valid.DuckDBTable <- function(x, ...) {
+    datacols <- endoapply(x@datacols, function(j) call("ST_MakeValid", j))
+    replaceSlots(x, datacols = datacols, check = FALSE)
+}
+
+#' @exportS3Method sf::st_normalize
+#' @importFrom sf st_normalize
+st_normalize.DuckDBTable <- function(x, ...) {
+    datacols <- endoapply(x@datacols, function(j) call("ST_Normalize", j))
+    replaceSlots(x, datacols = datacols, check = FALSE)
+}
+
+#' @exportS3Method sf::st_point_on_surface
+#' @importFrom sf st_point_on_surface
+st_point_on_surface.DuckDBTable <- function(x) {
+    datacols <- endoapply(x@datacols, function(j) call("ST_PointOnSurface", j))
+    replaceSlots(x, datacols = datacols, check = FALSE)
+}
+
+#' @exportS3Method sf::st_reverse
+#' @importFrom sf st_reverse
+st_reverse.DuckDBTable <- function(x) {
+    datacols <- endoapply(x@datacols, function(j) call("ST_Reverse", j))
+    replaceSlots(x, datacols = datacols, check = FALSE)
+}
