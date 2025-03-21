@@ -104,6 +104,56 @@
 #'   }
 #' }
 #'
+#' @section Spatial Methods:
+#' In the code snippets below, \code{x} is a DuckDBColumn object:
+#' \describe{
+#'   \item{\code{st_area(x)}:}{
+#'     Returns a DuckDBColumn containing the areas of geometries.
+#'   }
+#'   \item{\code{st_as_binary(x, hex = FALSE)}:}{
+#'     Returns the DuckDBColumn containing either WKB if \code{hex = FALSE} or
+#'     HEXWKB if \code{hex = TRUE} representations of geometries.
+#'   }
+#'   \item{\code{st_as_text(x, geojson = FALSE)}:}{
+#'     Returns the DuckDBColumn containing either WKT if \code{geojson = FALSE} or
+#'     GeoJSON if \code{geojson = TRUE} representations of geometries.
+#'   }
+#'   \item{\code{st_boundary(x)}:}{
+#'     Returns a DuckDBColumn containing the boundaries of geometries.
+#'   }
+#'   \item{\code{st_centroid(x)}:}{
+#'     Returns a DuckDBColumn containing the centroids of geometries.
+#'   }
+#'   \item{\code{st_convex_hull(x)}:}{
+#'     Returns a DuckDBColumn containing the convex hulls of geometries.
+#'   }
+#'   \item{\code{st_exterior_ring(x)}:}{
+#'     Returns a DuckDBColumn containing the exterior rings of geometries.
+#'   }
+#'   \item{\code{st_is_valid(x)}:}{
+#'     Returns a DuckDBColumn containing logicals that indicate if the
+#'     geometries are valid.
+#'   }
+#'   \item{\code{st_line_merge(x, directed = FALSE)}:}{
+#'     Returns a DuckDBColumn containing the merged lines of geometries,
+#'     optionally taking direction into account.
+#'   }
+#'   \item{\code{st_make_valid(x)}:}{
+#'     Returns a DuckDBColumn containing valid geometries.
+#'   }
+#'   \item{\code{st_normalize(x)}:}{
+#'     Returns a DuckDBColumn containing normalized geometries.
+#'   }
+#'   \item{\code{st_point_on_surface(x)}:}{
+#'     Returns a DuckDBColumn containing a point on the surface of the input
+#'     geometry.
+#'   }
+#'   \item{\code{st_reverse(x)}:}{
+#'     Returns a DuckDBColumn containing geometries with the vertice order
+#'     reversed.
+#'   }
+#' }
+#'
 #' @author Patrick Aboyoun
 #'
 #' @aliases
@@ -130,6 +180,20 @@
 #'
 #' is_nonzero,DuckDBColumn-method
 #' nzcount,DuckDBColumn-method
+#'
+#' st_area.DuckDBColumn
+#' st_as_binary.DuckDBColumn
+#' st_as_text.DuckDBColumn
+#' st_boundary.DuckDBColumn
+#' st_centroid.DuckDBColumn
+#' st_convex_hull.DuckDBColumn
+#' st_exterior_ring.DuckDBColumn
+#' st_is_valid.DuckDBColumn
+#' st_line_merge.DuckDBColumn
+#' st_make_valid.DuckDBColumn
+#' st_normalize.DuckDBColumn
+#' st_point_on_surface.DuckDBColumn
+#' st_reverse.DuckDBColumn
 #'
 #' @include DuckDBColumn-class.R
 #' @include DuckDBTable-utils.R
@@ -269,3 +333,87 @@ setMethod("is_nonzero", "DuckDBColumn", function(x) {
 setMethod("nzcount", "DuckDBColumn", function(x) {
     callGeneric(x@table)
 })
+
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Spatial methods
+###
+
+#' @exportS3Method sf::st_area
+#' @importFrom sf st_area
+st_area.DuckDBColumn <- function(x, ...) {
+    replaceSlots(x, table = st_area(x@table), check = FALSE)
+}
+
+#' @exportS3Method sf::st_as_binary
+#' @importFrom sf st_as_binary
+st_as_binary.DuckDBColumn <- function(x, ..., hex = FALSE) {
+    replaceSlots(x, table = st_as_binary(x@table, hex = hex), check = FALSE)
+}
+
+#' @exportS3Method sf::st_as_text
+#' @importFrom sf st_as_text
+st_as_text.DuckDBColumn <- function(x, ..., geojson = FALSE) {
+    replaceSlots(x, table = st_as_text(x@table, geojson = geojson), check = FALSE)
+}
+
+#' @exportS3Method sf::st_boundary
+#' @importFrom sf st_boundary
+st_boundary.DuckDBColumn <- function(x) {
+    replaceSlots(x, table = st_boundary(x@table), check = FALSE)
+}
+
+#' @exportS3Method sf::st_centroid
+#' @importFrom sf st_centroid
+st_centroid.DuckDBColumn <- function(x, ...) {
+    replaceSlots(x, table = st_centroid(x@table), check = FALSE)
+}
+
+#' @exportS3Method sf::st_convex_hull
+#' @importFrom sf st_convex_hull
+st_convex_hull.DuckDBColumn <- function(x) {
+    replaceSlots(x, table = st_convex_hull(x@table), check = FALSE)
+}
+
+#' @exportS3Method sf::st_exterior_ring
+#' @importFrom sf st_exterior_ring
+st_exterior_ring.DuckDBColumn <- function(x, ...) {
+    replaceSlots(x, table = st_exterior_ring(x@table), check = FALSE)
+}
+
+#' @exportS3Method sf::st_is_valid
+#' @importFrom sf st_is_valid
+st_is_valid.DuckDBColumn <- function(x, ...) {
+    replaceSlots(x, table = st_is_valid(x@table), check = FALSE)
+}
+
+#' @exportS3Method sf::st_line_merge
+#' @importFrom sf st_line_merge
+st_line_merge.DuckDBColumn <- function(x, ..., directed = FALSE) {
+    replaceSlots(x, table = st_line_merge(x@table, directed = directed),
+                 check = FALSE)
+}
+
+#' @exportS3Method sf::st_make_valid
+#' @importFrom sf st_make_valid
+st_make_valid.DuckDBColumn <- function(x, ...) {
+    replaceSlots(x, table = st_make_valid(x@table), check = FALSE)
+}
+
+#' @exportS3Method sf::st_normalize
+#' @importFrom sf st_normalize
+st_normalize.DuckDBColumn <- function(x, ...) {
+    replaceSlots(x, table = st_normalize(x@table), check = FALSE)
+}
+
+#' @exportS3Method sf::st_point_on_surface
+#' @importFrom sf st_point_on_surface
+st_point_on_surface.DuckDBColumn <- function(x) {
+    replaceSlots(x, table = st_point_on_surface(x@table), check = FALSE)
+}
+
+#' @exportS3Method sf::st_reverse
+#' @importFrom sf st_reverse
+st_reverse.DuckDBColumn <- function(x) {
+    replaceSlots(x, table = st_reverse(x@table), check = FALSE)
+}

@@ -1,6 +1,6 @@
 Package: BiocDuckDB
-Version: 0.5.7
-Date: 2025-02-27
+Version: 0.5.8
+Date: 2025-03-21
 Title: Bioconductor DuckDB Bindings
 Description:
     This package provides bindings for DuckDB tables that extend Bioconductor
@@ -18,13 +18,13 @@ License: MIT + file LICENSE
 Depends:
     R (>= 3.4),
     methods,
+    stats,
     bit64,
+    sf,
     SparseArray (>= 1.5.42),
     DelayedArray (>= 0.31.8),
-    GenomeInfoDb,
-    duckdb
+    GenomeInfoDb
 Imports:
-    stats,
     BiocGenerics (>= 0.51.2),
     S4Vectors,
     IRanges,
@@ -33,6 +33,8 @@ Imports:
     DBI,
     dplyr,
     dbplyr,
+    duckdb,
+    duckdbfs,
     arrow,
     rlang,
     tibble

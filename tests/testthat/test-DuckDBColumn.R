@@ -93,6 +93,34 @@ test_that("Special numeric functions work as expected for a DuckDBColumn", {
     checkDuckDBColumn(is.nan(x), is.nan(as.vector(x)))
 })
 
+test_that("Special spatial functions work as expected for a DuckDBColumn", {
+    df <- DuckDBDataFrame(spatial_path)
+    df <- df[which(!is.na(spatial_wkt)),]
+
+    x <- df[["geometry"]]
+    type <- df[["type"]]
+    sfc <- st_as_sfc(spatial_wkt[!is.na(spatial_wkt)])
+
+    checkDuckDBColumn(st_area(x), st_area(sfc))
+    checkDuckDBColumn(st_as_binary(x, hex = TRUE), st_as_binary(sfc, hex = TRUE))
+    checkDuckDBColumn(st_as_text(x), st_as_text(sfc))
+    checkDuckDBColumn(st_as_text(st_boundary(x)), st_as_text(st_boundary(sfc)))
+    checkDuckDBColumn(st_as_text(st_centroid(x)), st_as_text(st_centroid(sfc)))
+    checkDuckDBColumn(st_as_text(st_convex_hull(x)), st_as_text(st_convex_hull(sfc)))
+    checkDuckDBColumn(st_as_text(st_exterior_ring(x)),
+                      c(rep(NA, 15), "LINESTRING (30 10, 40 40, 20 40, 10 20, 30 10)",
+                        "LINESTRING (35 10, 45 45, 15 40, 10 20, 35 10)", "LINESTRING EMPTY"))
+    checkDuckDBColumn(st_is_valid(x), st_is_valid(sfc))
+    checkDuckDBColumn(st_as_text(st_line_merge(df[df$type == "multilinestring", "geometry"])),
+                      st_as_text(st_line_merge(sfc[3:5])))
+    checkDuckDBColumn(st_as_text(st_line_merge(df[df$type == "multilinestring", "geometry"], directed = TRUE)),
+                      st_as_text(st_line_merge(sfc[3:5], directed = TRUE)))
+    checkDuckDBColumn(st_as_text(st_make_valid(x)), st_as_text(st_make_valid(sfc)))
+    checkDuckDBColumn(st_as_text(st_normalize(x)), st_as_text(st_normalize(sfc)))
+    checkDuckDBColumn(st_as_text(st_point_on_surface(x)), st_as_text(st_point_on_surface(sfc)))
+    checkDuckDBColumn(st_as_text(st_reverse(x)), st_as_text(st_reverse(sfc)))
+})
+
 test_that("Summary methods work as expected for a DuckDBColumn", {
     df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = "model")
     mpg <- df[["mpg"]]

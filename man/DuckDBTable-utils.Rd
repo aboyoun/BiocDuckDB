@@ -25,6 +25,19 @@
 \alias{is_nonzero,DuckDBTable-method}
 \alias{nzcount,DuckDBTable-method}
 \alias{is_sparse,DuckDBTable-method}
+\alias{st_area.DuckDBTable}
+\alias{st_as_binary.DuckDBTable}
+\alias{st_as_text.DuckDBTable}
+\alias{st_boundary.DuckDBTable}
+\alias{st_centroid.DuckDBTable}
+\alias{st_convex_hull.DuckDBTable}
+\alias{st_exterior_ring.DuckDBTable}
+\alias{st_is_valid.DuckDBTable}
+\alias{st_line_merge.DuckDBTable}
+\alias{st_make_valid.DuckDBTable}
+\alias{st_normalize.DuckDBTable}
+\alias{st_point_on_surface.DuckDBTable}
+\alias{st_reverse.DuckDBTable}
 \title{Common operations on DuckDBTable objects}
 \description{
 Common operations on \linkS4class{DuckDBTable} objects.
@@ -151,6 +164,58 @@ In the code snippets below, \code{x} is a DuckDBTable object:
   }
   \item{\code{is_sparse(x)}:}{
     Returns \code{TRUE} since data are stored in a sparse array representation.
+  }
+}
+}
+
+\section{Spatial Methods}{
+
+In the code snippets below, \code{x} is a DuckDBTable object:
+\describe{
+  \item{\code{st_area(x)}:}{
+    Returns a DuckDBTable containing the areas of geometries.
+  }
+  \item{\code{st_as_binary(x, hex = FALSE)}:}{
+    Returns the DuckDBTable containing either WKB if \code{hex = FALSE} or
+    HEXWKB if \code{hex = TRUE} representations of geometries.
+  }
+  \item{\code{st_as_text(x, geojson = FALSE)}:}{
+    Returns the DuckDBTable containing either WKT if \code{geojson = FALSE} or
+    GeoJSON if \code{geojson = TRUE} representations of geometries.
+  }
+  \item{\code{st_boundary(x)}:}{
+    Returns a DuckDBTable containing the boundaries of geometries.
+  }
+  \item{\code{st_centroid(x)}:}{
+    Returns a DuckDBTable containing the centroids of geometries.
+  }
+  \item{\code{st_convex_hull(x)}:}{
+    Returns a DuckDBTable containing the convex hulls of geometries.
+  }
+  \item{\code{st_exterior_ring(x)}:}{
+    Returns a DuckDBTable containing the exterior rings of geometries.
+  }
+  \item{\code{st_is_valid(x)}:}{
+    Returns a DuckDBTable containing logicals that indicate if the
+    geometries are valid.
+  }
+  \item{\code{st_line_merge(x, directed = FALSE)}:}{
+    Returns a DuckDBTable containing the merged lines of geometries,
+    optionally taking direction into account.
+  }
+  \item{\code{st_make_valid(x)}:}{
+    Returns a DuckDBTable containing valid geometries.
+  }
+  \item{\code{st_normalize(x)}:}{
+    Returns a DuckDBTable containing normalized geometries.
+  }
+  \item{\code{st_point_on_surface(x)}:}{
+    Returns a DuckDBTable containing a point on the surface of the input
+    geometry.
+  }
+  \item{\code{st_reverse(x)}:}{
+    Returns a DuckDBTable containing geometries with the vertice order
+    reversed.
   }
 }
 }
