@@ -212,6 +212,22 @@ checkDuckDBColumn <- function(object, expected) {
     }
 }
 
+checkDuckDBTransposedDataFrame <- function(object, texpected) {
+    expect_true(validObject(object))
+    expect_s4_class(object, "DuckDBTransposedDataFrame")
+    expect_identical(nrow(object), ncol(texpected))
+    expect_identical(ncol(object), nrow(texpected))
+    expect_identical(rownames(object), colnames(texpected))
+    expect_setequal(colnames(object), rownames(texpected))
+    if (nkey(t(object)) == 0L) {
+        tobject <- as.data.frame(t(object))
+        expect_identical(nrow(tobject), nrow(texpected))
+        expect_identical(ncol(tobject), ncol(texpected))
+        expect_identical(colnames(tobject), colnames(texpected))
+    } else {
+        expect_identical(as.data.frame(t(object))[rownames(texpected), , drop=FALSE], texpected)
+    }
+}
 
 checkDuckDBGRanges <- function(object, expected) {
     expect_s4_class(object, "DuckDBGRanges")
