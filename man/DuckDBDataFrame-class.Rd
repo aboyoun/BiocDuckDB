@@ -184,7 +184,7 @@ In the code snippets below, \code{x} is a DuckDBDataFrame object:
 
 The \code{show()} method for DuckDBDataFrame objects obeys global options
 \code{showHeadLines} and \code{showTailLines} for controlling the number of
-head and tail rows to display.
+head and tail rows and columns to display.
 }
 
 \examples{

@@ -150,7 +150,7 @@
 #' @section Displaying:
 #' The \code{show()} method for DuckDBDataFrame objects obeys global options
 #' \code{showHeadLines} and \code{showTailLines} for controlling the number of
-#' head and tail rows to display.
+#' head and tail rows and columns to display.
 #'
 #' @author Patrick Aboyoun, Aaron Lun
 #'
@@ -563,6 +563,14 @@ function(x, BACKEND = getAutoRealizationBackend()) {
         ntail <- get_showTailLines()
     }
 
+    x_ncol <- NCOL(x)
+    nleft <- get_showHeadLines()
+    nright <- get_showTailLines()
+    is_wide <- (x_ncol > nleft + nright + 1L)
+    if (is_wide) {
+        x <- x[, c(1L:nleft, (x_ncol - nright + 1L):x_ncol), drop = FALSE]
+    }
+
     x_nrow <- NROW(x)
     if (x_nrow <= nhead + ntail + 1L) {
         m <- makeNakedCharacterMatrixForDisplay(x)
@@ -586,7 +594,13 @@ function(x, BACKEND = getAutoRealizationBackend()) {
         rownames(m) <- S4Vectors:::make_rownames_for_RectangularData_display(x_rownames, x_nrow, nhead, ntail)
     }
 
-    rbind(sprintf("<%s>", coltypes(x)), m)
+    m <- rbind(sprintf("<%s>", coltypes(x)), m)
+
+    if (is_wide) {
+        m <- cbind(m[, 1L:nleft], "..." = "...", m[, (nleft + 1L):ncol(m)])
+    }
+
+    m
 }
 
 #' @export
