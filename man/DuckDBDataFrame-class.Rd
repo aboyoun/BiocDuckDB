@@ -24,7 +24,7 @@
 \alias{show,DuckDBDataFrame-method}
 \title{DuckDBDataFrame objects}
 \description{
-The DuckDBTable class extends both \linkS4class{DuckDBTable} and
+The DuckDBDataFrame class extends both \linkS4class{DuckDBTable} and
 \linkS4class{DataFrame} to represent a DuckDB table as a
 \linkS4class{DataFrame} object.
 }
@@ -184,7 +184,7 @@ In the code snippets below, \code{x} is a DuckDBDataFrame object:
 
 The \code{show()} method for DuckDBDataFrame objects obeys global options
 \code{showHeadLines} and \code{showTailLines} for controlling the number of
-head and tail rows to display.
+head and tail rows and columns to display.
 }
 
 \examples{

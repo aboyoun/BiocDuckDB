@@ -1,7 +1,7 @@
 #' DuckDBDataFrame objects
 #'
 #' @description
-#' The DuckDBTable class extends both \linkS4class{DuckDBTable} and
+#' The DuckDBDataFrame class extends both \linkS4class{DuckDBTable} and
 #' \linkS4class{DataFrame} to represent a DuckDB table as a
 #' \linkS4class{DataFrame} object.
 #'
@@ -150,7 +150,7 @@
 #' @section Displaying:
 #' The \code{show()} method for DuckDBDataFrame objects obeys global options
 #' \code{showHeadLines} and \code{showTailLines} for controlling the number of
-#' head and tail rows to display.
+#' head and tail rows and columns to display.
 #'
 #' @author Patrick Aboyoun, Aaron Lun
 #'
@@ -553,6 +553,7 @@ function(x, BACKEND = getAutoRealizationBackend()) {
 ### Display
 ###
 
+#' @importFrom S4Vectors DataFrame get_showHeadLines get_showTailLines makeNakedCharacterMatrixForDisplay
 .makePrettyCharacterMatrixForDisplay <- function(x) {
     if (.has_row_number(x)) {
         nhead <- get_showHeadLines() + get_showTailLines()
@@ -560,6 +561,14 @@ function(x, BACKEND = getAutoRealizationBackend()) {
     } else {
         nhead <- get_showHeadLines()
         ntail <- get_showTailLines()
+    }
+
+    x_ncol <- NCOL(x)
+    nleft <- get_showHeadLines()
+    nright <- get_showTailLines()
+    is_wide <- (x_ncol > nleft + nright + 1L)
+    if (is_wide) {
+        x <- x[, c(1L:nleft, (x_ncol - nright + 1L):x_ncol), drop = FALSE]
     }
 
     x_nrow <- NROW(x)
@@ -585,7 +594,13 @@ function(x, BACKEND = getAutoRealizationBackend()) {
         rownames(m) <- S4Vectors:::make_rownames_for_RectangularData_display(x_rownames, x_nrow, nhead, ntail)
     }
 
-    rbind(sprintf("<%s>", coltypes(x)), m)
+    m <- rbind(sprintf("<%s>", coltypes(x)), m)
+
+    if (is_wide) {
+        m <- cbind(m[, 1L:nleft], "..." = "...", m[, (nleft + 1L):ncol(m)])
+    }
+
+    m
 }
 
 #' @export
@@ -595,7 +610,7 @@ setMethod("makeNakedCharacterMatrixForDisplay", "DuckDBDataFrame", function(x) {
 })
 
 #' @export
-#' @importFrom S4Vectors classNameForDisplay DataFrame get_showHeadLines get_showTailLines makeNakedCharacterMatrixForDisplay
+#' @importFrom S4Vectors classNameForDisplay
 setMethod("show", "DuckDBDataFrame", function(object) {
     x_nrow <- as.double(nrow(object))
     x_ncol <- ncol(object)
