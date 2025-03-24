@@ -1,7 +1,7 @@
 #' DuckDBDataFrame objects
 #'
 #' @description
-#' The DuckDBTable class extends both \linkS4class{DuckDBTable} and
+#' The DuckDBDataFrame class extends both \linkS4class{DuckDBTable} and
 #' \linkS4class{DataFrame} to represent a DuckDB table as a
 #' \linkS4class{DataFrame} object.
 #'
@@ -553,6 +553,7 @@ function(x, BACKEND = getAutoRealizationBackend()) {
 ### Display
 ###
 
+#' @importFrom S4Vectors DataFrame get_showHeadLines get_showTailLines makeNakedCharacterMatrixForDisplay
 .makePrettyCharacterMatrixForDisplay <- function(x) {
     if (.has_row_number(x)) {
         nhead <- get_showHeadLines() + get_showTailLines()
@@ -595,7 +596,7 @@ setMethod("makeNakedCharacterMatrixForDisplay", "DuckDBDataFrame", function(x) {
 })
 
 #' @export
-#' @importFrom S4Vectors classNameForDisplay DataFrame get_showHeadLines get_showTailLines makeNakedCharacterMatrixForDisplay
+#' @importFrom S4Vectors classNameForDisplay
 setMethod("show", "DuckDBDataFrame", function(object) {
     x_nrow <- as.double(nrow(object))
     x_ncol <- ncol(object)

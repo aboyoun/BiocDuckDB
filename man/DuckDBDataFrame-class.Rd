@@ -24,7 +24,7 @@
 \alias{show,DuckDBDataFrame-method}
 \title{DuckDBDataFrame objects}
 \description{
-The DuckDBTable class extends both \linkS4class{DuckDBTable} and
+The DuckDBDataFrame class extends both \linkS4class{DuckDBTable} and
 \linkS4class{DataFrame} to represent a DuckDB table as a
 \linkS4class{DataFrame} object.
 }
