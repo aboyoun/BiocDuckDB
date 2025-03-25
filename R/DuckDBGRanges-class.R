@@ -523,6 +523,7 @@ setAs("DuckDBGRanges", "GRanges", function(from) {
     gr
 })
 
+#' @export
 #' @importClassesFrom GenomicRanges GRanges
 #' @importFrom DelayedArray getAutoRealizationBackend realize
 setMethod("realize", "DuckDBGRanges",

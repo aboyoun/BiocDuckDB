@@ -230,6 +230,7 @@ setMethod("as.vector", "DuckDBColumn", function(x, mode = "any") {
     vec
 })
 
+#' @export
 #' @importFrom DelayedArray getAutoRealizationBackend realize
 setMethod("realize", "DuckDBColumn",
 function(x, BACKEND = getAutoRealizationBackend()) {

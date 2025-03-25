@@ -72,6 +72,9 @@
 #' t,DuckDBDataFrame-method
 #' t.DuckDBDataFrame
 #'
+#' as.matrix,DuckDBTransposedDataFrame-method
+#' realize,DuckDBTransposedDataFrame-method
+#'
 #' show,DuckDBTransposedDataFrame-method
 #'
 #' @include DuckDBDataFrame-class.R
@@ -105,6 +108,38 @@ t.DuckDBDataFrame <- function(x)
 #' @export
 #' @importFrom BiocGenerics t
 setMethod("t", "DuckDBDataFrame", t.DuckDBDataFrame)
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Coercion
+###
+
+#' @export
+setMethod("as.matrix", "DuckDBTransposedDataFrame", function(x) {
+    df <- as.data.frame(x@data)
+    mat <- do.call(rbind, df)
+    colnames(mat) <- rownames(df)
+    mat
+})
+
+#' @export
+#' @importFrom DelayedArray getAutoRealizationBackend realize
+#' @importFrom S4Vectors mcols mcols<- metadata metadata<-
+setMethod("realize", "DuckDBTransposedDataFrame",
+function(x, BACKEND = getAutoRealizationBackend()) {
+    tdf <- t(realize(x@data))
+
+    metadata(tdf) <- metadata(x)
+    mc <- mcols(x)
+    if (!is.null(mc)) {
+        mcols(tdf) <- as(mc, "DFrame")
+    }
+
+    if (!is.null(BACKEND)) {
+        tdf <- callGeneric(tdf, BACKEND = BACKEND)
+    }
+
+    tdf
+})
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Display

@@ -284,6 +284,7 @@ setAs("DuckDBGRangesList", "CompressedGRangesList", function(from) {
     grlist
 })
 
+#' @export
 #' @importClassesFrom GenomicRanges CompressedGRangesList
 #' @importFrom DelayedArray getAutoRealizationBackend realize
 setMethod("realize", "DuckDBGRangesList",
