@@ -538,6 +538,7 @@ setAs("DuckDBDataFrame", "DFrame", function(from) {
     df
 })
 
+#' @export
 #' @importClassesFrom S4Vectors DFrame
 #' @importFrom DelayedArray getAutoRealizationBackend realize
 setMethod("realize", "DuckDBDataFrame",

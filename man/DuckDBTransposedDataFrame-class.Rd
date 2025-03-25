@@ -4,6 +4,8 @@
 \alias{DuckDBTransposedDataFrame-class}
 \alias{t,DuckDBDataFrame-method}
 \alias{t.DuckDBDataFrame}
+\alias{as.matrix,DuckDBTransposedDataFrame-method}
+\alias{realize,DuckDBTransposedDataFrame-method}
 \alias{show,DuckDBTransposedDataFrame-method}
 \title{DuckDBTransposedDataFrame objects}
 \description{

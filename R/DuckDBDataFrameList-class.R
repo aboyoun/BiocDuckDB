@@ -259,6 +259,7 @@ setAs("DuckDBDataFrameList", "DFrameList", function(from) {
     dflist
 })
 
+#' @export
 #' @importClassesFrom IRanges DFrameList
 #' @importFrom DelayedArray getAutoRealizationBackend realize
 setMethod("realize", "DuckDBDataFrameList",
