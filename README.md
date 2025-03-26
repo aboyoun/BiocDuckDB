@@ -6,7 +6,8 @@ BiocDuckDB leverages the power of DuckDB to enhance Bioconductor's relational
 data structures, such as `SummarizedExperiment` and `MultiAssayExperiment`. It
 introduces specialized classes to efficiently manage large datasets:
 
-- `DuckDBMatrix`: Optimizes assay data storage and retrieval.
+- `DuckDBMatrix` and `DuckDBTransposedDataFrame`: Store assay data in sparse and
+  dense formats respectively.
 - `DuckDBGRanges` and `DuckDBGRangesList`: Facilitate handling of genomic
   ranges.
 - `DuckDBDataFrame`: Manages row and column metadata seamlessly.
