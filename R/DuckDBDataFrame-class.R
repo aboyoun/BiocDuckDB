@@ -524,10 +524,12 @@ function(x, row.names = NULL, optional = FALSE, ...) {
     df <- df[rownames(x), colnames(x), drop = FALSE]
 
     # Downcast 64-bit to 32-bit integer where appropriate
-    for (j in seq_along(df)) {
-        if (is.integer64(df[[j]]) &&
-            (max(df[[j]], na.rm = TRUE) <= .Machine$integer.max)) {
-            df[[j]] <- as.integer(df[[j]])
+    if (nrow(df) > 0L) {
+        for (j in seq_along(df)) {
+            if (is.integer64(df[[j]]) &&
+                (max(df[[j]], na.rm = TRUE) <= .Machine$integer.max)) {
+                df[[j]] <- as.integer(df[[j]])
+            }
         }
     }
 
