@@ -114,8 +114,14 @@ setMethod("t", "DuckDBDataFrame", t.DuckDBDataFrame)
 ###
 
 #' @export
+#' @importFrom bit64 is.integer64
 setMethod("as.matrix", "DuckDBTransposedDataFrame", function(x) {
     df <- as.data.frame(x@data)
+    for (j in seq_along(df)) {
+        if (is.integer64(df[[j]])) {
+            df[[j]] <- as.double(df[[j]])
+        }
+    }
     mat <- do.call(rbind, df)
     colnames(mat) <- rownames(df)
     mat
@@ -126,16 +132,12 @@ setMethod("as.matrix", "DuckDBTransposedDataFrame", function(x) {
 #' @importFrom S4Vectors mcols mcols<- metadata metadata<-
 setMethod("realize", "DuckDBTransposedDataFrame",
 function(x, BACKEND = getAutoRealizationBackend()) {
-    tdf <- t(realize(x@data))
+    tdf <- t(callGeneric(x@data, BACKEND = BACKEND))
 
     metadata(tdf) <- metadata(x)
     mc <- mcols(x)
     if (!is.null(mc)) {
         mcols(tdf) <- as(mc, "DFrame")
-    }
-
-    if (!is.null(BACKEND)) {
-        tdf <- callGeneric(tdf, BACKEND = BACKEND)
     }
 
     tdf

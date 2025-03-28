@@ -28,15 +28,16 @@ The BiocDuckDB package provides a set of classes that use DuckDB as a backend
 for Bioconductor by extending classes defined in `r Biocpkg("S4Arrays")`,
 `r Biocpkg("DelayedArray")`, `r Biocpkg("GenomicRanges")`, and
 `r Biocpkg("S4Vectors")`. This package is designed to enhance the functionality
-of `r Biocpkg("SummarizedExperiment")` by enabling the use of `DuckDBMatrix`
-assays with `DuckDBGranges`/`DuckDBGRangesList` row ranges, and `DuckDBDataFrame`
-row and column data.
+of `r Biocpkg("SummarizedExperiment")` by enabling the use of
+`DuckDBMatrix`/`DuckDBTransposedDataFrame` assays with
+`DuckDBGranges`/`DuckDBGRangesList` row ranges, and `DuckDBDataFrame` row and
+column data.
 
-The primary user-facing classes (`DuckDBMatrix`, `DuckDBDataFrame`,
-`DuckDBGRanges`) are defined by a connection to a DuckDB table. Each class
-specifies a set of column names for the table that serve as a key to define
-dimension names, and a set of column names that define the data populating the
-object.
+The primary user-facing classes (`DuckDBMatrix`, `DuckDBTransposedDataFrame`,
+`DuckDBDataFrame`, `DuckDBGRanges`) are defined by a connection to a DuckDB
+table. Each class specifies a set of column names for the table that serve as a
+key to define dimension names, and a set of column names that define the data
+populating the object.
 
 ```{r}
 library(BiocDuckDB)
@@ -166,6 +167,19 @@ mcols(infert_ddb) <-
                               "Matched set number",
                               "Stratum number"),
               row.names = colnames(infert_ddb))
+```
+
+## `DuckDBTransposedDataFrame`
+
+The `DuckDBTransposedDataFrame` class extends
+`r Biocpkg("S4Vectors")` `TransposedDataFrame` to provide a dense matrix
+representation of assay data when the rows and columns from the
+underlying table corresponds to the samples and features respectively. These
+objects are created by transposing a `DuckDBDataFrame` object.
+
+```{r}
+# Create a DuckDBTransposedDataFrame from the mtcars data
+t_mtcars_ddb <- t(mtcars_ddb)
 ```
 
 ## `DuckDBArray` with more that two dimensions
