@@ -395,8 +395,8 @@ columns to create one.
 library(dplyr)
 
 # Read column metadata
-tbl_ddb <- DuckDBTable(zilionis_cdata_path, keycols = c("Library", "Barcode"))
-tbl <- tblconn(tbl_ddb, filter = FALSE)
+src <- sprintf("read_parquet('%s')", file.path(zilionis_cdata_path, "**"))
+tbl <- tbl(acquireDuckDBConn(), src)
 tbl <- mutate(tbl, ID = concat_ws("_", Library, Barcode))
 zilionis_cdata <- DuckDBDataFrame(tbl, datacols = setdiff(colnames(tbl), "ID"),
                                   keycol = "ID")
@@ -408,9 +408,8 @@ zilionis_cdata <- zilionis_cdata[paste(colData(zilionis)[, "Library"],
 dimtbls <- list("Genename" = genetbl, "ID" = colData(zilionis)[, "Library", drop = FALSE])
 rownames(dimtbls[[2L]]) <- paste(colData(zilionis)[, "Library"],
                                  colData(zilionis)[, "Barcode"], sep = "_")
-tbl_ddb <- DuckDBTable(zilionis_counts_path,
-                       keycols = c("Genename", "Library", "Barcode"))
-tbl <- tblconn(tbl_ddb, filter = FALSE)
+src <- sprintf("read_parquet('%s')", file.path(zilionis_counts_path, "**"))
+tbl <- tbl(acquireDuckDBConn(), src)
 tbl <- mutate(tbl, ID = concat_ws("_", Library, Barcode))
 zilionis_counts <- DuckDBMatrix(tbl,
                                 row = list("Genename" = rownames(zilionis)),
@@ -422,8 +421,8 @@ zilionis_counts <- DuckDBMatrix(tbl,
 zilionis_rdims <-
     sapply(reducedDimNames(zilionis), function(rd) {
         path <- file.path(zilionis_rdims_path, sprintf("type=%s", rd))
-        tbl_ddb <- DuckDBTable(path, keycols = c("Library", "Barcode", "Dim"))
-        tbl <- tblconn(tbl_ddb, filter = FALSE)
+        src <- sprintf("read_parquet('%s')", file.path(path, "**"))
+        tbl <- tbl(acquireDuckDBConn(), src)
         tbl <- mutate(tbl, ID = concat_ws("_", Library, Barcode))
         DuckDBMatrix(tbl,
                      row = list("ID" = rownames(zilionis_cdata)),
