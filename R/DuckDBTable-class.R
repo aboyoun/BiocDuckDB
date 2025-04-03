@@ -211,44 +211,101 @@ setClass("DuckDBTable", contains = c("RectangularData", "OutOfMemoryObject"),
 #' @importFrom BiocGenerics dbconn
 setMethod("dbconn", "DuckDBTable", function(x) x@conn$src$con)
 
-#' @export
+#' @importFrom stats setNames
+#' @importFrom rlang quo
+#' @importFrom tibble tibble
+.mutate_datacols <- function(conn, datacols) {
+    # Mutate the data columns
+    # conn <- mutate(conn, !!!as.list(datacols))
+
+    # Get the select list
+    slist <- conn[["lazy_query"]][["select"]]
+
+    # Create the tibble for the mutation
+    env <- setNames(slist[["expr"]], slist[["name"]])
+    expr <- lapply(unname(datacols), function(y) {
+        y <- do.call(substitute, list(y, env))
+        if (is.name(y)) y else quo(!!y)
+    })
+    k <- length(datacols)
+    klist <- tibble(name = names(datacols),
+                    expr = expr,
+                    group_vars = rep.int(list(character()), k),
+                    order_vars = rep.int(list(NULL), k),
+                    frame = rep.int(list(NULL), k))
+
+    # Combine the original select and mutate lists
+    slist <- slist[!(slist[["name"]] %in% klist[["name"]]), ]
+    slist <- rbind(slist, klist)
+    conn[["lazy_query"]][["select"]] <- slist
+    conn[["lazy_query"]][["x"]][["vars"]] <- slist[["name"]]
+
+    # Return the updated connection
+    conn
+}
+
+#' @importFrom dplyr select
+.select_tblconn <- function(conn, keycols, datacols) {
+    conn <- .mutate_datacols(conn, datacols)
+    conn <- select(conn, c(names(keycols), names(datacols)))
+    conn
+}
+
 #' @importFrom dplyr filter
+.filter_tblconn <- function(conn, keycols, dimtbls) {
+    for (i in names(keycols)) {
+        set <- keycols[[i]]
+
+        if (i %in% names(dimtbls)) {
+            # Filter with dimension tables
+            dimtbl <- dimtbls[[i]]
+
+            # Add the primary dimension filter
+            comp <- setdiff(rownames(dimtbl), set)
+            ncomp <- length(comp)
+            if (ncomp >= length(set)) {
+                conn <- filter(conn, !!as.name(i) %in% set)
+            } else if (ncomp > 0L) {
+                conn <- filter(conn, !(!!as.name(i) %in% comp))
+            }
+
+            # Add the secondary dimension table filters
+            dimtbl <- dimtbl[set, , drop = FALSE]
+            for (j in colnames(dimtbl)) {
+                part <- unique(dimtbl[[j]])
+                conn <- filter(conn, !!as.name(j) %in% part)
+            }
+        } else {
+            # Filter without dimension tables
+            conn <- filter(conn, !!as.name(i) %in% set)
+        }
+    }
+
+    conn
+}
+
+#' @export
+#' @importFrom dplyr filter select
 #' @importFrom S4Vectors isTRUEorFALSE
-setMethod("tblconn", "DuckDBTable", function(x, filter = TRUE) {
+setMethod("tblconn", "DuckDBTable", function(x, select = TRUE, filter = TRUE) {
     if (!isTRUEorFALSE(filter)) {
         stop("'filter' must be TRUE or FALSE")
     }
+
     conn <- x@conn
+
     if (filter && !.has_row_number(x)) {
-        keycols <- x@keycols
-        for (i in names(keycols)) {
-            set <- keycols[[i]]
+        conn <- .filter_tblconn(conn, keycols = x@keycols, dimtbls = x@dimtbls)
 
-            if (i %in% names(x@dimtbls)) {
-                # Filter with dimension tables
-                dimtbl <- x@dimtbls[[i]]
-
-                # Add the primary dimension filter
-                comp <- setdiff(rownames(dimtbl), set)
-                ncomp <- length(comp)
-                if (ncomp >= length(set)) {
-                    conn <- filter(conn, !!as.name(i) %in% set)
-                } else if (ncomp > 0L) {
-                    conn <- filter(conn, !(!!as.name(i) %in% comp))
-                }
-
-                # Add the secondary dimension table filters
-                dimtbl <- dimtbl[set, , drop = FALSE]
-                for (j in colnames(dimtbl)) {
-                    part <- unique(dimtbl[[j]])
-                    conn <- filter(conn, !!as.name(j) %in% part)
-                }
-            } else {
-                # Filter without dimension tables
-                conn <- filter(conn, !!as.name(i) %in% set)
-            }
-        }
+        # Allow for 1 extra row to check for duplicate keys, up to integer.max
+        n <- as.integer(min(nrow(x) + 1L, .Machine$integer.max))
+        conn <- head(conn, n = n)
     }
+
+    if (select) {
+        conn <- .select_tblconn(conn, keycols = x@keycols, datacols = as.list(x@datacols))
+    }
+
     conn
 })
 
@@ -772,63 +829,13 @@ function(x, objects = list(), use.names = TRUE, ignore.mcols = FALSE, check = TR
 ### Coercion
 ###
 
-#' @importFrom stats setNames
-#' @importFrom rlang quo
-#' @importFrom tibble tibble
-.mutate_datacols <- function(conn, datacols) {
-    # Mutate the data columns
-    # conn <- mutate(conn, !!!as.list(datacols))
-
-    # Get the select list
-    slist <- conn[["lazy_query"]][["select"]]
-
-    # Create the tibble for the mutation
-    env <- setNames(slist[["expr"]], slist[["name"]])
-    expr <- lapply(unname(datacols), function(y) {
-        y <- do.call(substitute, list(y, env))
-        if (is.name(y)) y else quo(!!y)
-    })
-    k <- length(datacols)
-    klist <- tibble(name = names(datacols),
-                    expr = expr,
-                    group_vars = rep.int(list(character()), k),
-                    order_vars = rep.int(list(NULL), k),
-                    frame = rep.int(list(NULL), k))
-
-    # Combine the original select and mutate lists
-    slist <- slist[!(slist[["name"]] %in% klist[["name"]]), ]
-    slist <- rbind(slist, klist)
-    conn[["lazy_query"]][["select"]] <- slist
-    conn[["lazy_query"]][["x"]][["vars"]] <- slist[["name"]]
-
-    # Return the updated connection
-    conn
-}
-
 #' @export
 #' @importFrom BiocGenerics as.data.frame
-#' @importFrom dbplyr remote_query remote_query_plan
-#' @importFrom dplyr select
 setMethod("as.data.frame", "DuckDBTable",
 function(x, row.names = NULL, optional = FALSE, ...) {
     conn <- tblconn(x)
     keycols <- x@keycols
     datacols <- as.list(x@datacols)
-
-    # Mutate and select the columns
-    conn <- .mutate_datacols(conn, datacols)
-    conn <- select(conn, c(names(keycols), names(datacols)))
-
-    # Allow for 1 extra row to check for duplicate keys, up to integer.max
-    n <- as.integer(min(nrow(x) + 1L, .Machine$integer.max))
-    conn <- head(conn, n = n)
-
-    # Explain query plan for debugging
-    if (getOption("BiocDuckDB.verbose", default = FALSE) && (n > 1L)) {
-        writeLines("\nQuery:")
-        print(remote_query(conn))
-        cat("\nQuery Plan:\n", remote_query_plan(conn), "\n\n")
-    }
 
     df <- as.data.frame(conn)[, c(names(keycols), names(datacols))]
     if (anyDuplicated(df[, names(keycols)])) {

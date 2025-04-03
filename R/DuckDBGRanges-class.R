@@ -252,8 +252,8 @@ setClass("DuckDBGRanges", contains = "GenomicRanges",
 setMethod("dbconn", "DuckDBGRanges", function(x) callGeneric(x@frame))
 
 #' @export
-setMethod("tblconn", "DuckDBGRanges", function(x, filter = TRUE) {
-    callGeneric(x@frame, filter = filter)
+setMethod("tblconn", "DuckDBGRanges", function(x, select = TRUE, filter = TRUE) {
+    callGeneric(x@frame, select = select, filter = filter)
 })
 
 setMethod(".keycols", "DuckDBGRanges", function(x) callGeneric(x@frame))
@@ -399,7 +399,7 @@ function(conn, seqnames, start = NULL, end = NULL, width = NULL, strand = NULL,
 
     seqinfo <- GenomicRanges:::normarg_seqinfo2(seqinfo, seqlengths)
     if (is.null(seqinfo)) {
-        conn <- tblconn(frame)
+        conn <- tblconn(frame, select = FALSE)
         seqinfo <- Seqinfo(sort(pull(distinct(select(conn, !!!as.list(seqnames))))))
     } else {
         seqinfo <- GenomicRanges:::normarg_seqinfo1(seqinfo)

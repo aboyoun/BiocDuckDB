@@ -3,6 +3,8 @@
 #' Get a database table connection object
 #'
 #' @param x An object with a database table connection.
+#' @param select A logical value indicating whether to apply column
+#'        selections to the database table connection.
 #' @param filter A logical value indicating whether to apply key column
 #'        filtering to the database table connection.
 #'
@@ -25,4 +27,4 @@ NULL
 
 #' @export
 #' @rdname tblconn
-setGeneric("tblconn", function(x, filter = TRUE) standardGeneric("tblconn"))
+setGeneric("tblconn", function(x, select = TRUE, filter = TRUE) standardGeneric("tblconn"))

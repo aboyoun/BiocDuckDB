@@ -97,8 +97,8 @@ setClass("DuckDBColumn", contains = "Vector", slots = c(table = "DuckDBTable"))
 setMethod("dbconn", "DuckDBColumn", function(x) callGeneric(x@table))
 
 #' @export
-setMethod("tblconn", "DuckDBColumn", function(x, filter = TRUE) {
-    callGeneric(x@table, filter = filter)
+setMethod("tblconn", "DuckDBColumn", function(x, select = TRUE, filter = TRUE) {
+    callGeneric(x@table, select = select, filter = filter)
 })
 
 setMethod(".keycols", "DuckDBColumn", function(x) callGeneric(x@table))
