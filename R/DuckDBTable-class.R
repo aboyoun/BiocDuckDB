@@ -223,7 +223,7 @@ setMethod("dbconn", "DuckDBTable", function(x) x@conn$src$con)
 
     # Create the tibble for the mutation
     env <- setNames(slist[["expr"]], slist[["name"]])
-    expr <- lapply(unname(datacols), function(y) {
+    expr <- lapply(unname(as.list(datacols)), function(y) {
         y <- do.call(substitute, list(y, env))
         if (is.name(y)) y else quo(!!y)
     })
@@ -238,7 +238,9 @@ setMethod("dbconn", "DuckDBTable", function(x) x@conn$src$con)
     slist <- slist[!(slist[["name"]] %in% klist[["name"]]), ]
     slist <- rbind(slist, klist)
     conn[["lazy_query"]][["select"]] <- slist
-    conn[["lazy_query"]][["x"]][["vars"]] <- slist[["name"]]
+    if (inherits(conn[["lazy_query"]][["x"]], "lazy_query")) {
+        conn[["lazy_query"]][["x"]][["vars"]] <- slist[["name"]]
+    }
 
     # Return the updated connection
     conn
@@ -296,14 +298,10 @@ setMethod("tblconn", "DuckDBTable", function(x, select = TRUE, filter = TRUE) {
 
     if (filter && !.has_row_number(x)) {
         conn <- .filter_tblconn(conn, keycols = x@keycols, dimtbls = x@dimtbls)
-
-        # Allow for 1 extra row to check for duplicate keys, up to integer.max
-        n <- as.integer(min(nrow(x) + 1L, .Machine$integer.max))
-        conn <- head(conn, n = n)
     }
 
     if (select) {
-        conn <- .select_tblconn(conn, keycols = x@keycols, datacols = as.list(x@datacols))
+        conn <- .select_tblconn(conn, keycols = x@keycols, datacols = x@datacols)
     }
 
     conn
@@ -836,6 +834,10 @@ function(x, row.names = NULL, optional = FALSE, ...) {
     conn <- tblconn(x)
     keycols <- x@keycols
     datacols <- as.list(x@datacols)
+
+    # Allow for 1 extra row to check for duplicate keys, up to integer.max
+    n <- as.integer(min(nrow(x) + 1L, .Machine$integer.max))
+    conn <- head(conn, n = n)
 
     df <- as.data.frame(conn)[, c(names(keycols), names(datacols))]
     if (anyDuplicated(df[, names(keycols)])) {
