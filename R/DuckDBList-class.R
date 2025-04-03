@@ -156,7 +156,7 @@ setValidity2("DuckDBList", function(x) {
 #' @importFrom S4Vectors new2
 setMethod("unlist", "DuckDBList", function(x, recursive = TRUE, use.names = TRUE) {
     unlistData <- x@unlistData
-    conn <- tblconn(unlistData, filter = FALSE)
+    conn <- tblconn(unlistData, select = FALSE, filter = FALSE)
     datacols <- x@partitioning
     keycols <- .keycols(unlistData)
     dimtbls <- dimtbls(unlistData)
@@ -197,7 +197,7 @@ setMethod("extractROWS", "DuckDBList", function(x, i) {
 setMethod("getListElement", "DuckDBList", function(x, i) {
     i <- normalizeDoubleBracketSubscript(i, elementNROWS(x))
     unlistData <- x@unlistData
-    conn <- tblconn(unlistData, filter = FALSE)
+    conn <- tblconn(unlistData, select = FALSE, filter = FALSE)
     datacols <- x@partitioning
     keycols <- .keycols(unlistData)
     dimtbls <- dimtbls(unlistData)

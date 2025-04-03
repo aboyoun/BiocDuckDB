@@ -157,8 +157,8 @@ setClass("DuckDBArraySeed", contains = "Array",
 setMethod("dbconn", "DuckDBArraySeed", function(x) callGeneric(x@table))
 
 #' @export
-setMethod("tblconn", "DuckDBArraySeed", function(x, filter = TRUE) {
-    callGeneric(x@table, filter = filter)
+setMethod("tblconn", "DuckDBArraySeed", function(x, select = TRUE, filter = TRUE) {
+    callGeneric(x@table, select = select, filter = filter)
 })
 
 #' @export
