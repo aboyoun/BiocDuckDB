@@ -287,5 +287,5 @@ setMethod("show", "DuckDBColumn", function(object) {
 #' @export
 #' @importFrom S4Vectors showAsCell
 setMethod("showAsCell", "DuckDBColumn", function(object) {
-    callGeneric(as.vector(object@table))
+    callGeneric(as.vector(object))
 })
