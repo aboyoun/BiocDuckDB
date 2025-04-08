@@ -28,6 +28,10 @@
 #'     Get the length (or nb of row for a matrix-like object) of each of the
 #'     elements.
 #'   }
+#'   \item{\code{dimtbls(x)}, \code{dimtbls(x) <- value}:}{
+#'     Get or set the list of dimension tables used to define partitions for
+#'     efficient queries.
+#'   }
 #' }
 #'
 #' @section Coercion:
@@ -71,6 +75,8 @@
 #'
 #' dbconn,DuckDBList-method
 #' tblconn,DuckDBList-method
+#' dimtbls,DuckDBList-method
+#' dimtbls<-,DuckDBList-method
 #' length,DuckDBList-method
 #' names,DuckDBList-method
 #' names<-,DuckDBList-method
@@ -109,6 +115,14 @@ setMethod("dbconn", "DuckDBList", function(x) callGeneric(x@unlistData))
 #' @export
 setMethod("tblconn", "DuckDBList", function(x, select = TRUE, filter = TRUE) {
     callGeneric(x@unlistData, select = select, filter = filter)
+})
+
+#' @export
+setMethod("dimtbls", "DuckDBList", function(x) callGeneric(x@unlistData))
+
+#' @export
+setReplaceMethod("dimtbls", "DuckDBList", function(x, value) {
+    callGeneric(x@unlistData, value)
 })
 
 #' @export

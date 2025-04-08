@@ -71,6 +71,8 @@
 #'
 #' dbconn,DuckDBTransposedDataFrame-method
 #' tblconn,DuckDBTransposedDataFrame-method
+#' dimtbls,DuckDBTransposedDataFrame-method
+#' dimtbls<-,DuckDBTransposedDataFrame-method
 #'
 #' t,DuckDBDataFrame-method
 #' t.DuckDBDataFrame
@@ -103,6 +105,14 @@ setMethod("dbconn", "DuckDBTransposedDataFrame", function(x) callGeneric(x@data)
 #' @export
 setMethod("tblconn", "DuckDBTransposedDataFrame", function(x, select = TRUE, filter = TRUE) {
     callGeneric(x@data, select = select, filter = filter)
+})
+
+#' @export
+setMethod("dimtbls", "DuckDBTransposedDataFrame", function(x) callGeneric(x@data))
+
+#' @export
+setReplaceMethod("dimtbls", "DuckDBTransposedDataFrame", function(x, value) {
+    callGeneric(x@data, value)
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -4,6 +4,8 @@
 \alias{DuckDBList-class}
 \alias{dbconn,DuckDBList-method}
 \alias{tblconn,DuckDBList-method}
+\alias{dimtbls,DuckDBList-method}
+\alias{dimtbls<-,DuckDBList-method}
 \alias{length,DuckDBList-method}
 \alias{names,DuckDBList-method}
 \alias{names<-,DuckDBList-method}
@@ -42,6 +44,10 @@ In the code snippets below, \code{x} is a DuckDBList object:
   \item{\code{elementNROWS(x)}:}{
     Get the length (or nb of row for a matrix-like object) of each of the
     elements.
+  }
+  \item{\code{dimtbls(x)}, \code{dimtbls(x) <- value}:}{
+    Get or set the list of dimension tables used to define partitions for
+    efficient queries.
   }
 }
 }
