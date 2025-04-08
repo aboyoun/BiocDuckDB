@@ -2,6 +2,8 @@
 % Please edit documentation in R/DuckDBList-class.R
 \name{DuckDBList-class}
 \alias{DuckDBList-class}
+\alias{dbconn,DuckDBList-method}
+\alias{tblconn,DuckDBList-method}
 \alias{length,DuckDBList-method}
 \alias{names,DuckDBList-method}
 \alias{names<-,DuckDBList-method}

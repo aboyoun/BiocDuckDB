@@ -69,6 +69,8 @@
 #' @aliases
 #' DuckDBList-class
 #'
+#' dbconn,DuckDBList-method
+#' tblconn,DuckDBList-method
 #' length,DuckDBList-method
 #' names,DuckDBList-method
 #' names<-,DuckDBList-method
@@ -99,6 +101,15 @@ setClass("DuckDBList", contains = c("List", "VIRTUAL"),
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Accessors
 ###
+
+#' @export
+#' @importFrom BiocGenerics dbconn
+setMethod("dbconn", "DuckDBList", function(x) callGeneric(x@unlistData))
+
+#' @export
+setMethod("tblconn", "DuckDBList", function(x, select = TRUE, filter = TRUE) {
+    callGeneric(x@unlistData, select = select, filter = filter)
+})
 
 #' @export
 setMethod("length", "DuckDBList", function(x) length(x@names))

@@ -2,6 +2,8 @@
 % Please edit documentation in R/DuckDBTransposedDataFrame.R
 \name{DuckDBTransposedDataFrame-class}
 \alias{DuckDBTransposedDataFrame-class}
+\alias{dbconn,DuckDBTransposedDataFrame-method}
+\alias{tblconn,DuckDBTransposedDataFrame-method}
 \alias{t,DuckDBDataFrame-method}
 \alias{t.DuckDBDataFrame}
 \alias{as.matrix,DuckDBTransposedDataFrame-method}

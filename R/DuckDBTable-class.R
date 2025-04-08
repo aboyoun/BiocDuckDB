@@ -106,14 +106,6 @@
 #'     If \code{n} is negative, returns all but the first \code{abs(n)} rows of
 #'     \code{x}.
 #'   }
-#'   \item{\code{subset(x, subset, select)}:}{
-#'     Return a new DuckDBTable using:
-#'     \describe{
-#'       \item{subset}{logical expression indicating rows to keep, where missing
-#'          values are taken as FALSE.}
-#'        \item{select}{expression indicating columns to keep.}
-#'     }
-#'   }
 #' }
 #'
 #' @author Patrick Aboyoun
@@ -768,21 +760,6 @@ setMethod("tail", "DuckDBTable", function(x, n = 6L, ...) {
     } else {
         extractROWS(x, (nr + 1L) - rev(seq_len(n)))
     }
-})
-
-#' @export
-#' @importFrom BiocGenerics subset
-setMethod("subset", "DuckDBTable",
-function(x, subset, select, drop = FALSE, ...) {
-    if (!missing(subset)) {
-        i <- eval(substitute(subset), as.env(x), parent.frame())
-        x <- extractROWS(x, i)
-    }
-    if (!missing(select)) {
-        j <- S4Vectors:::evalqForSelect(select, x, ...)
-        x <- extractCOLS(x, j)
-    }
-    x
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
