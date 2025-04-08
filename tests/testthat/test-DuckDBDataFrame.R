@@ -283,6 +283,7 @@ test_that("coersion to a DFrame works for a DuckDBDataFrame", {
     mcols(dframe) <- mc
 
     expect_identical(as(ddb, "DFrame"), dframe)
+    expect_identical(realize(ddb), dframe)
 })
 
 test_that("as.env works for a DuckDBDataFrame", {
@@ -311,6 +312,10 @@ test_that("column replacement works for a DuckDBDataFrame", {
 
     df$gpm <- 1 / df$mpg
     expected$gpm <- 1 / expected$mpg
+    checkDuckDBDataFrame(df, expected)
+
+    df$mpg <- NULL
+    expected$mpg <- NULL
     checkDuckDBDataFrame(df, expected)
 })
 

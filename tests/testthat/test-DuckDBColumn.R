@@ -1,6 +1,22 @@
 # Tests the basic functions of a DuckDBColumn.
 # library(testthat); library(BiocDuckDB); source("setup.R"); source("test-DuckDBColumn.R")
 
+test_that("head works for DuckDBColumn", {
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = list(model = rownames(mtcars)))
+    cyl <- df[["cyl"]]
+
+    checkDuckDBColumn(head(cyl, 0), head(setNames(mtcars[["cyl"]], rownames(mtcars)), 0))
+    checkDuckDBColumn(head(cyl, 20), head(setNames(mtcars[["cyl"]], rownames(mtcars)), 20))
+})
+
+test_that("tail works for DuckDBColumn", {
+    df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = list(model = rownames(mtcars)))
+    cyl <- df[["cyl"]]
+
+    checkDuckDBColumn(tail(cyl, 0), tail(setNames(mtcars[["cyl"]], rownames(mtcars)), 0))
+    checkDuckDBColumn(tail(cyl, 20), tail(setNames(mtcars[["cyl"]], rownames(mtcars)), 20))
+})
+
 test_that("DuckDBColumn can be cast to a different type", {
     df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = "model")
     cyl <- df[["cyl"]]

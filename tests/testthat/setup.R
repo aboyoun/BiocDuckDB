@@ -134,6 +134,9 @@ spatial_path <- system.file("extdata", "spatial", package = "BiocDuckDB")
 checkDuckDBTable <- function(object, expected) {
     expect_true(validObject(object))
     expect_s4_class(object, "DuckDBTable")
+    expect_true(length(capture.output(show(object))) > 0L)
+    expect_identical(dbconn(object), acquireDuckDBConn())
+    expect_s3_class(tblconn(object), "tbl_duckdb_connection")
     expect_gte(nrow(object), nrow(expected))
     expect_gte(NROW(object), NROW(expected))
     expect_equal(nkey(object) + ncol(object), ncol(expected))
@@ -155,6 +158,8 @@ checkDuckDBTable <- function(object, expected) {
 checkDuckDBArraySeed <- function(object, expected) {
     expect_true(validObject(object))
     expect_s4_class(object, "DuckDBArraySeed")
+    expect_identical(dbconn(object), acquireDuckDBConn())
+    expect_s3_class(tblconn(object), "tbl_duckdb_connection")
     expect_identical(type(object), type(expected))
     expect_identical(length(object), length(expected))
     expect_identical(dim(object), dim(expected))
@@ -165,6 +170,8 @@ checkDuckDBArraySeed <- function(object, expected) {
 checkDuckDBArray <- function(object, expected) {
     expect_true(validObject(object))
     expect_s4_class(object, "DuckDBArray")
+    expect_identical(dbconn(object), acquireDuckDBConn())
+    expect_s3_class(tblconn(object), "tbl_duckdb_connection")
     expect_identical(type(object), type(expected))
     expect_identical(length(object), length(expected))
     expect_identical(dim(object), dim(expected))
@@ -175,6 +182,8 @@ checkDuckDBArray <- function(object, expected) {
 checkDuckDBMatrix <- function(object, expected) {
     expect_true(validObject(object))
     expect_s4_class(object, "DuckDBMatrix")
+    expect_identical(dbconn(object), acquireDuckDBConn())
+    expect_s3_class(tblconn(object), "tbl_duckdb_connection")
     expect_identical(type(object), typeof(expected))
     expect_identical(length(object), length(expected))
     expect_identical(dim(object), dim(expected))
@@ -185,6 +194,9 @@ checkDuckDBMatrix <- function(object, expected) {
 checkDuckDBDataFrame <- function(object, expected) {
     expect_true(validObject(object))
     expect_s4_class(object, "DuckDBDataFrame")
+    expect_true(length(capture.output(show(object))) > 0L)
+    expect_identical(dbconn(object), acquireDuckDBConn())
+    expect_s3_class(tblconn(object), "tbl_duckdb_connection")
     expect_identical(nrow(object), nrow(expected))
     expect_identical(ncol(object), ncol(expected))
     expect_setequal(rownames(object), rownames(expected))
@@ -202,6 +214,9 @@ checkDuckDBDataFrame <- function(object, expected) {
 checkDuckDBColumn <- function(object, expected) {
     expect_true(validObject(object))
     expect_s4_class(object, "DuckDBColumn")
+    expect_true(length(capture.output(show(object))) > 0L)
+    expect_identical(dbconn(object), acquireDuckDBConn())
+    expect_s3_class(tblconn(object), "tbl_duckdb_connection")
     expect_identical(length(object), length(expected))
     if (nkey(object@table) == 0L) {
         object <- as.vector(object)
@@ -209,12 +224,16 @@ checkDuckDBColumn <- function(object, expected) {
     } else {
         expect_identical(names(object), names(expected))
         expect_equal(as.vector(object), expected)
+        expect_equal(realize(object), expected)
     }
 }
 
 checkDuckDBTransposedDataFrame <- function(object, texpected) {
     expect_true(validObject(object))
     expect_s4_class(object, "DuckDBTransposedDataFrame")
+    expect_true(length(capture.output(show(object))) > 0L)
+    expect_identical(dbconn(object), acquireDuckDBConn())
+    expect_s3_class(tblconn(object), "tbl_duckdb_connection")
     expect_identical(nrow(object), ncol(texpected))
     expect_identical(ncol(object), nrow(texpected))
     expect_identical(rownames(object), colnames(texpected))
@@ -231,6 +250,9 @@ checkDuckDBTransposedDataFrame <- function(object, texpected) {
 
 checkDuckDBGRanges <- function(object, expected) {
     expect_s4_class(object, "DuckDBGRanges")
+    expect_true(length(capture.output(show(object))) > 0L)
+    expect_identical(dbconn(object), acquireDuckDBConn())
+    expect_s3_class(tblconn(object), "tbl_duckdb_connection")
     expect_identical(length(object), length(expected))
     if (nkey(object@frame) > 0L) {
         expect_setequal(names(object), names(expected))
@@ -258,6 +280,9 @@ checkDuckDBGRanges <- function(object, expected) {
 checkDuckDBDataFrameList <- function(object, expected) {
     expect_true(validObject(object))
     expect_s4_class(object, "DuckDBDataFrameList")
+    expect_true(length(capture.output(show(object))) > 0L)
+    expect_identical(dbconn(object), acquireDuckDBConn())
+    expect_s3_class(tblconn(object), "tbl_duckdb_connection")
     expect_identical(length(object), length(expected))
     expect_identical(names(object), names(expected))
     expect_identical(NROW(object), NROW(expected))
@@ -278,6 +303,9 @@ checkDuckDBDataFrameList <- function(object, expected) {
 
 checkDuckDBGRangesList <- function(object, expected) {
     expect_s4_class(object, "DuckDBGRangesList")
+    expect_true(length(capture.output(show(object))) > 0L)
+    expect_identical(dbconn(object), acquireDuckDBConn())
+    expect_s3_class(tblconn(object), "tbl_duckdb_connection")
     expect_identical(length(object), length(expected))
     expect_identical(names(object), names(expected))
     expect_identical(elementNROWS(object), elementNROWS(expected))
