@@ -105,22 +105,22 @@ setMethod("Ops", c(e1 = "DuckDBArraySeed", e2 = "DuckDBArraySeed"), function(e1,
     if (!isTRUE(all.equal(e1@table, e2@table)) || !identical(e1@drop, e2@drop)) {
         stop("can only perform binary operations with compatible objects")
     }
-    replaceSlots(e1, table = callGeneric(e1@table, e2@table), check = FALSE)
+    replaceSlots(e1, table = callGeneric(e1@table, e2@table), fill = callGeneric(e1@fill, e2@fill), check = FALSE)
 })
 
 #' @export
 setMethod("Ops", c(e1 = "DuckDBArraySeed", e2 = "atomic"), function(e1, e2) {
-    replaceSlots(e1, table = callGeneric(e1@table, e2), check = FALSE)
+    replaceSlots(e1, table = callGeneric(e1@table, e2), fill = callGeneric(e1@fill, e2), check = FALSE)
 })
 
 #' @export
 setMethod("Ops", c(e1 = "atomic", e2 = "DuckDBArraySeed"), function(e1, e2) {
-    replaceSlots(e2, table = callGeneric(e1, e2@table), check = FALSE)
+    replaceSlots(e2, table = callGeneric(e1, e2@table), fill = callGeneric(e1, e2@fill), check = FALSE)
 })
 
 #' @export
 setMethod("Math", "DuckDBArraySeed", function(x) {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
+    replaceSlots(x, table = callGeneric(x@table), fill = callGeneric(x@fill), check = FALSE)
 })
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -129,17 +129,17 @@ setMethod("Math", "DuckDBArraySeed", function(x) {
 
 #' @export
 setMethod("is.finite", "DuckDBArraySeed", function(x) {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
+    replaceSlots(x, table = callGeneric(x@table), fill = callGeneric(x@fill), check = FALSE)
 })
 
 #' @export
 setMethod("is.infinite", "DuckDBArraySeed", function(x) {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
+    replaceSlots(x, table = callGeneric(x@table), fill = callGeneric(x@fill), check = FALSE)
 })
 
 #' @export
 setMethod("is.nan", "DuckDBArraySeed", function(x) {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
+    replaceSlots(x, table = callGeneric(x@table), fill = callGeneric(x@fill), check = FALSE)
 })
 
 #' @export
@@ -161,7 +161,7 @@ setMethod("colSums", "DuckDBArraySeed", function(x, na.rm = FALSE, dims = 1, ...
 #' @export
 #' @importFrom SparseArray is_nonzero
 setMethod("is_nonzero", "DuckDBArraySeed", function(x) {
-    replaceSlots(x, table = callGeneric(x@table), check = FALSE)
+    replaceSlots(x, table = callGeneric(x@table), fill = callGeneric(x@fill), check = FALSE)
 })
 
 #' @export

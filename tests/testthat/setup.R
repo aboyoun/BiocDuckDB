@@ -43,12 +43,17 @@ mtcars_mcols <- DataFrame(description = c("Miles/(US) gallon", "Number of cylind
 state_df <- data.frame(
   region = rep(as.character(state.region), times = ncol(state.x77)),
   division = rep(as.character(state.division), times = ncol(state.x77)),
-  rowname = rep(rownames(state.x77), times = ncol(state.x77)),
-  colname = rep(colnames(state.x77), each = nrow(state.x77)),
+  dim1 = rep(rownames(state.x77), times = ncol(state.x77)),
+  dim2 = rep(colnames(state.x77), each = nrow(state.x77)),
   value = as.vector(state.x77)
 )
+state_df <- subset(state_df, value != 0)
+state_tables <- list(dim1 = data.frame(region = state.region,
+                                       division = state.division,
+                                       row.names = state.name),
+                     dim2 = NULL)
 state_path <- tempfile()
-arrow::write_dataset(state_df, state_path, format = "parquet", partitioning = c("region", "division"))
+writeCoordArray(state.x77, state_path, dimtbls = state_tables)
 
 
 # Titanic dataset
