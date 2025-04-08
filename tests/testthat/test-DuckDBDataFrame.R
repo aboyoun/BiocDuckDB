@@ -9,6 +9,7 @@ test_that("basic methods work for a DuckDBDataFrame", {
     checkDuckDBDataFrame(df, mtcars)
     expect_identical(rownames(df), rownames(mtcars))
     expect_identical(as.data.frame(df), mtcars)
+    expect_identical(as.matrix(df), as.matrix(mtcars))
 
     df <- DuckDBDataFrame(infert_parquet)
     checkDuckDBDataFrame(df, infert)
