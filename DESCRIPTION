@@ -77,5 +77,4 @@ Collate:
     'DuckDBGRangesList-class.R'
     'DuckDBMatrix-class.R'
     'DuckDBTransposedDataFrame.R'
-    'listParquetDirs.R'
     'writeCoordArray.R'
