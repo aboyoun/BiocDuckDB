@@ -18,6 +18,7 @@
 \alias{cbind,DuckDBDataFrame-method}
 \alias{cbind.DuckDBDataFrame}
 \alias{as.data.frame,DuckDBDataFrame-method}
+\alias{as.matrix,DuckDBDataFrame-method}
 \alias{coerce,DuckDBDataFrame,DFrame-method}
 \alias{realize,DuckDBDataFrame-method}
 \alias{makeNakedCharacterMatrixForDisplay,DuckDBDataFrame-method}
@@ -114,6 +115,9 @@ In the code snippets below, \code{x} is a DuckDBDataFrame object:
 \describe{
   \item{\code{as.data.frame(x)}:}{
     Coerces \code{x} to a data.frame.
+  }
+  \item{\code{as.matrix(x)}:}{
+    Coerces \code{x} to a matrix.
   }
   \item{\code{as(from, "DFrame")}:}{
     Converts a DuckDBDataFrame object to a DFrame object. This process

@@ -144,14 +144,6 @@ In the code snippets below, \code{x} is a DuckDBTable object:
     If \code{n} is negative, returns all but the first \code{abs(n)} rows of
     \code{x}.
   }
-  \item{\code{subset(x, subset, select)}:}{
-    Return a new DuckDBTable using:
-    \describe{
-      \item{subset}{logical expression indicating rows to keep, where missing
-         values are taken as FALSE.}
-       \item{select}{expression indicating columns to keep.}
-    }
-  }
 }
 }
 

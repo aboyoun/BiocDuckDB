@@ -28,7 +28,7 @@ test_that("basic methods work as expected for a DuckDBTable", {
     checkDuckDBTable(tbl, mtcars_df[, 1:7])
 
     # state dataset
-    tbl <- DuckDBTable(state_path, datacols = "value", keycols = c("region", "division", "rowname", "colname"))
+    tbl <- DuckDBTable(state_path, datacols = "value", keycols = c("region", "division", "dim1", "dim2"), dimtbls = state_tables)
     checkDuckDBTable(tbl, state_df)
 
     # titanic dataset
@@ -152,10 +152,10 @@ test_that("Logic methods work as expected for a DuckDBTable", {
 })
 
 test_that("Math methods work as expected for a DuckDBTable", {
-    tbl <- DuckDBTable(state_path, datacols = "value", keycols = c("region", "division", "rowname", "colname"))
+    tbl <- DuckDBTable(state_path, datacols = "value", keycols = c("region", "division", "dim1", "dim2"), dimtbls = state_tables)
 
-    income <- tbl[list(colname = "Income"), ]
-    income_df <- state_df[state_df$colname == "Income", ]
+    income <- tbl[list(dim2 = "Income"), ]
+    income_df <- state_df[state_df$dim2 == "Income", ]
 
     ikeep <-
       c("Colorado", "Delaware", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas",
@@ -163,8 +163,8 @@ test_that("Math methods work as expected for a DuckDBTable", {
         "Nebraska", "Nevada", "New Hampshire", "North Dakota", "Ohio", "Oregon",
         "Pennsylvania", "South Dakota", "Utah", "Vermont", "Washington", "Wisconsin",
         "Wyoming")
-    illiteracy <- tbl[list(rowname = ikeep, colname = "Illiteracy"), ]
-    illiteracy_df <- state_df[state_df$rowname %in% ikeep & state_df$colname == "Illiteracy", ]
+    illiteracy <- tbl[list(dim1 = ikeep, dim2 = "Illiteracy"), ]
+    illiteracy_df <- state_df[state_df$dim1 %in% ikeep & state_df$dim2 == "Illiteracy", ]
 
     checkDuckDBTable(abs(income), cbind(income_df[, 1:4], value = abs(income_df$value)))
     checkDuckDBTable(sign(income), cbind(income_df[, 1:4], value = sign(income_df$value)))

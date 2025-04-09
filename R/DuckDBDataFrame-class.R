@@ -87,6 +87,9 @@
 #'   \item{\code{as.data.frame(x)}:}{
 #'     Coerces \code{x} to a data.frame.
 #'   }
+#'   \item{\code{as.matrix(x)}:}{
+#'     Coerces \code{x} to a matrix.
+#'   }
 #'   \item{\code{as(from, "DFrame")}:}{
 #'     Converts a DuckDBDataFrame object to a DFrame object. This process
 #'     involves first loading the data into memory using \code{as.data.frame}.
@@ -200,6 +203,7 @@
 #' cbind.DuckDBDataFrame
 #'
 #' as.data.frame,DuckDBDataFrame-method
+#' as.matrix,DuckDBDataFrame-method
 #' coerce,DuckDBDataFrame,DFrame-method
 #' realize,DuckDBDataFrame-method
 #'
@@ -534,6 +538,20 @@ function(x, row.names = NULL, optional = FALSE, ...) {
     }
 
     df
+})
+
+#' @export
+#' @importFrom bit64 is.integer64
+setMethod("as.matrix", "DuckDBDataFrame", function(x) {
+    df <- as.data.frame(x)
+    for (j in seq_along(df)) {
+        if (is.integer64(df[[j]])) {
+            df[[j]] <- as.double(df[[j]])
+        }
+    }
+    mat <- do.call(cbind, df)
+    rownames(mat) <- rownames(df)
+    mat
 })
 
 #' @export

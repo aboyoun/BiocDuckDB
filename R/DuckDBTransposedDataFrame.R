@@ -69,6 +69,11 @@
 #' @aliases
 #' DuckDBTransposedDataFrame-class
 #'
+#' dbconn,DuckDBTransposedDataFrame-method
+#' tblconn,DuckDBTransposedDataFrame-method
+#' dimtbls,DuckDBTransposedDataFrame-method
+#' dimtbls<-,DuckDBTransposedDataFrame-method
+#'
 #' t,DuckDBDataFrame-method
 #' t.DuckDBDataFrame
 #'
@@ -88,6 +93,27 @@ NULL
 #' @importClassesFrom S4Vectors TransposedDataFrame
 setClass("DuckDBTransposedDataFrame", contains = "TransposedDataFrame",
     slots = c(data = "DuckDBDataFrame"))
+
+### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+### Accessors
+###
+
+#' @export
+#' @importFrom BiocGenerics dbconn
+setMethod("dbconn", "DuckDBTransposedDataFrame", function(x) callGeneric(x@data))
+
+#' @export
+setMethod("tblconn", "DuckDBTransposedDataFrame", function(x, select = TRUE, filter = TRUE) {
+    callGeneric(x@data, select = select, filter = filter)
+})
+
+#' @export
+setMethod("dimtbls", "DuckDBTransposedDataFrame", function(x) callGeneric(x@data))
+
+#' @export
+setReplaceMethod("dimtbls", "DuckDBTransposedDataFrame", function(x, value) {
+    callGeneric(x@data, value)
+})
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Transposition

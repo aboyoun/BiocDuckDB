@@ -9,6 +9,8 @@ test_that("basic methods work for a DuckDBTransposedDataFrame", {
     checkDuckDBTransposedDataFrame(tdf, mtcars)
     expect_identical(colnames(tdf), rownames(mtcars))
     expect_identical(as.data.frame(t(tdf)), mtcars)
+    expect_identical(as.matrix(tdf), t(as.matrix(mtcars)))
+    expect_identical(realize(tdf), t(realize(t(tdf))))
 
     tdf <- t(DuckDBDataFrame(infert_parquet))
     checkDuckDBTransposedDataFrame(tdf, infert)

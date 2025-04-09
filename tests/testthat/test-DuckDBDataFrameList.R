@@ -116,11 +116,19 @@ test_that("tail works for a DuckDBDataFrameList", {
 
 test_that("coersion to a DFrameList works for a DuckDBDataFrameList", {
     df <- DuckDBDataFrame(mtcars_parquet, datacols = colnames(mtcars), keycol = list(model = rownames(mtcars)))
-    dflist <- as(split(df, df[["carb"]]), "DFrameList")
 
     expected <- DataFrame(mtcars)
     expected <- split(expected, expected[["carb"]])
 
+    dflist <- as(split(df, df[["carb"]]), "DFrameList")
+    for (i in names(dflist)) {
+        object_i <- dflist[[i]]
+        expected_i <- expected[[i]]
+        expected_i <- expected_i[rownames(object_i), , drop = FALSE]
+        expect_identical(object_i, expected_i)
+    }
+
+    dflist <- realize(split(df, df[["carb"]]))
     for (i in names(dflist)) {
         object_i <- dflist[[i]]
         expected_i <- expected[[i]]

@@ -9,6 +9,7 @@ test_that("basic methods work for a DuckDBDataFrame", {
     checkDuckDBDataFrame(df, mtcars)
     expect_identical(rownames(df), rownames(mtcars))
     expect_identical(as.data.frame(df), mtcars)
+    expect_identical(as.matrix(df), as.matrix(mtcars))
 
     df <- DuckDBDataFrame(infert_parquet)
     checkDuckDBDataFrame(df, infert)
@@ -283,6 +284,7 @@ test_that("coersion to a DFrame works for a DuckDBDataFrame", {
     mcols(dframe) <- mc
 
     expect_identical(as(ddb, "DFrame"), dframe)
+    expect_identical(realize(ddb), dframe)
 })
 
 test_that("as.env works for a DuckDBDataFrame", {
@@ -311,6 +313,10 @@ test_that("column replacement works for a DuckDBDataFrame", {
 
     df$gpm <- 1 / df$mpg
     expected$gpm <- 1 / expected$mpg
+    checkDuckDBDataFrame(df, expected)
+
+    df$mpg <- NULL
+    expected$mpg <- NULL
     checkDuckDBDataFrame(df, expected)
 })
 

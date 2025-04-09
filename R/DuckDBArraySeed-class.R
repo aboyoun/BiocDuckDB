@@ -145,8 +145,8 @@ NULL
 #' @import methods
 #' @importClassesFrom S4Arrays Array
 setClass("DuckDBArraySeed", contains = "Array",
-         slots = c(table = "DuckDBTable", drop = "logical"),
-         prototype = prototype(drop = FALSE))
+         slots = c(table = "DuckDBTable", fill = "atomic", drop = "logical"),
+         prototype = prototype(fill = FALSE, drop = FALSE))
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ### Accessors
@@ -193,6 +193,9 @@ setValidity2("DuckDBArraySeed", function(x) {
         if (ncol(table) != 1L) {
             msg <- c(msg, "'table' slot must be a single-column DuckDBTable")
         }
+    }
+    if (length(x@fill) != 1L) {
+        msg <- c(msg, "'fill' slot must be a single atomic value")
     }
     if (!isTRUEorFALSE(x@drop)) {
         msg <- c(msg, "'drop' slot must be TRUE or FALSE")
@@ -273,8 +276,7 @@ setMethod("extract_array", "DuckDBArraySeed", function(x, index) {
     index <- .extract_array_index(x, index)
 
     # Initialize output array
-    fill <- switch(type(x), logical = FALSE, integer = 0L, double = 0, character =, raw = "")
-    output <- array(fill, dim = lengths(index, use.names = FALSE))
+    output <- array(x@fill, dim = lengths(index, use.names = FALSE))
     if (min(dim(output)) == 0L) {
         return(output)
     }
@@ -327,7 +329,8 @@ DuckDBArraySeed <- function(conn, datacol, keycols, dimtbls = NULL, type = NULL)
     }
     table <- DuckDBTable(conn, datacols = datacol, keycols = keycols,
                          dimtbls = dimtbls, type = type)
-    new2("DuckDBArraySeed", table = table, drop = FALSE, check = FALSE)
+    fill <- switch(coltypes(table), logical = FALSE, integer = 0L, double = 0, character =, raw = "")
+    new2("DuckDBArraySeed", table = table, fill = fill, drop = FALSE, check = FALSE)
 }
 
 ### - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

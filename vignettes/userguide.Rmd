@@ -217,9 +217,6 @@ underlying table to define the row and column names. If the row and column
 names are known, they can be supplied as named lists to the `row` and `col` or
 `keycols` arguments to speed up object creation by avoiding a table scan.
 
-In this example we can use the `BiocDuckDB::listParquetDirs` helper function to
-understand the parquet directory layout.
-
 ```{r}
 # Write a set of parquet files to contain state data
 state_tables <- list(dim1 = data.frame(region = state.region,
@@ -228,7 +225,7 @@ state_tables <- list(dim1 = data.frame(region = state.region,
                      dim2 = NULL)
 state_tf <- tempfile()
 writeCoordArray(state.x77, state_tf, dimtbls = state_tables)
-listParquetDirs(state_tf)
+list.files(state_tf, pattern = "\\.parquet$", full.names = TRUE, recursive = TRUE)
 
 # Create a DuckDBMatrix and reorder the rows and columns to conform to state.x77
 state_ddb <- DuckDBMatrix(state_tf, row = "dim1", col = "dim2", datacol = "value",
