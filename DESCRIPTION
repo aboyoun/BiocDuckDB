@@ -1,6 +1,6 @@
 Package: BiocDuckDB
-Version: 0.5.15
-Date: 2025-04-08
+Version: 0.5.16
+Date: 2025-04-24
 Title: Bioconductor DuckDB Bindings
 Description:
     This package provides bindings for DuckDB tables that extend Bioconductor

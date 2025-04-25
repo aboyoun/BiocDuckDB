@@ -295,7 +295,6 @@ setMethod("extract_array", "DuckDBArraySeed", function(x, index) {
 })
 
 #' @export
-#' @importClassesFrom SparseArray SVT_SparseArray
 #' @importFrom SparseArray COO_SparseArray extract_sparse_array
 setMethod("extract_sparse_array", "DuckDBArraySeed", function(x, index) {
     index <- .extract_array_index(x, index)
@@ -308,8 +307,8 @@ setMethod("extract_sparse_array", "DuckDBArraySeed", function(x, index) {
     names(nzcoo) <- names(dimnames)
     nzcoo <- do.call(cbind, nzcoo)
     nzdata <- df[[colnames(table)]]
-    coo <- COO_SparseArray(dim = dim, nzcoo = nzcoo, nzdata = nzdata, dimnames = dimnames)
-    as(coo, "SVT_SparseArray")
+    COO_SparseArray(dim = dim, nzcoo = nzcoo, nzdata = nzdata,
+                    dimnames = dimnames, check = FALSE)
 })
 
 #' @export

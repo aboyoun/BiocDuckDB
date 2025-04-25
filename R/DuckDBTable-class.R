@@ -203,36 +203,41 @@ setClass("DuckDBTable", contains = c("RectangularData", "OutOfMemoryObject"),
 #' @importFrom BiocGenerics dbconn
 setMethod("dbconn", "DuckDBTable", function(x) x@conn$src$con)
 
-#' @importFrom stats setNames
+#' @importFrom dplyr mutate
 #' @importFrom rlang quo
+#' @importFrom stats setNames
 #' @importFrom tibble tibble
 .mutate_datacols <- function(conn, datacols) {
-    # Mutate the data columns
-    # conn <- mutate(conn, !!!as.list(datacols))
+    lazy_query <- conn[["lazy_query"]]
+    if (inherits(lazy_query, "lazy_select_query")) {
+        slist <- lazy_query[["select"]]
 
-    # Get the select list
-    slist <- conn[["lazy_query"]][["select"]]
+        # Create the tibble for the mutation
+        env <- setNames(slist[["expr"]], slist[["name"]])
+        expr <- lapply(unname(as.list(datacols)), function(y) {
+            y <- do.call(substitute, list(y, env))
+            if (is.name(y)) y else quo(!!y)
+        })
+        k <- length(datacols)
+        klist <- tibble(name = names(datacols),
+                        expr = expr,
+                        group_vars = rep.int(list(character()), k),
+                        order_vars = rep.int(list(NULL), k),
+                        frame = rep.int(list(NULL), k))
 
-    # Create the tibble for the mutation
-    env <- setNames(slist[["expr"]], slist[["name"]])
-    expr <- lapply(unname(as.list(datacols)), function(y) {
-        y <- do.call(substitute, list(y, env))
-        if (is.name(y)) y else quo(!!y)
-    })
-    k <- length(datacols)
-    klist <- tibble(name = names(datacols),
-                    expr = expr,
-                    group_vars = rep.int(list(character()), k),
-                    order_vars = rep.int(list(NULL), k),
-                    frame = rep.int(list(NULL), k))
+        # Combine the original select and mutate lists
+        slist <- slist[!(slist[["name"]] %in% klist[["name"]]), ]
+        slist <- rbind(slist, klist)
+        lazy_query[["select"]] <- slist
+        if (inherits(lazy_query[["x"]], "lazy_query")) {
+            lazy_query[["x"]][["vars"]] <- slist[["name"]]
+        }
 
-    # Combine the original select and mutate lists
-    slist <- slist[!(slist[["name"]] %in% klist[["name"]]), ]
-    slist <- rbind(slist, klist)
-    conn[["lazy_query"]][["select"]] <- slist
-    if (inherits(conn[["lazy_query"]][["x"]], "lazy_query")) {
-        conn[["lazy_query"]][["x"]][["vars"]] <- slist[["name"]]
+        conn[["lazy_query"]] <- lazy_query
+    } else {
+        conn <- mutate(conn, !!!as.list(datacols))
     }
+
 
     # Return the updated connection
     conn
