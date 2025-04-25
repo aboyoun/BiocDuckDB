@@ -1,6 +1,6 @@
 Package: BiocDuckDB
-Version: 0.5.16
-Date: 2025-04-24
+Version: 0.5.17
+Date: 2025-04-25
 Title: Bioconductor DuckDB Bindings
 Description:
     This package provides bindings for DuckDB tables that extend Bioconductor
@@ -76,5 +76,5 @@ Collate:
     'DuckDBGRanges-class.R'
     'DuckDBGRangesList-class.R'
     'DuckDBMatrix-class.R'
-    'DuckDBTransposedDataFrame.R'
+    'DuckDBTransposedDataFrame-class.R'
     'writeCoordArray.R'

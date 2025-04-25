@@ -195,6 +195,12 @@
 #' st_point_on_surface.DuckDBColumn
 #' st_reverse.DuckDBColumn
 #'
+#' @seealso
+#' \itemize{
+#'   \item \code{\link{DuckDBColumn-class}} for the main class
+#'   \item \code{\link[S4Vectors]{Vector}} for the base class
+#' }
+#'
 #' @include DuckDBColumn-class.R
 #' @include DuckDBTable-utils.R
 #'

@@ -141,6 +141,13 @@ grlist <- split(gr, gr$group)
 grlist
 
 }
+\seealso{
+\itemize{
+  \item \code{\link{DuckDBGRanges-class}} for the unsplit class
+  \item \code{\link{DuckDBList-class}} for the parent class
+  \item \code{\link[GenomicRanges]{GRangesList}} for the base class
+}
+}
 \author{
 Patrick Aboyoun
 }

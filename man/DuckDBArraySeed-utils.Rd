@@ -91,6 +91,14 @@ In the code snippets below, \code{x} is a DuckDBArraySeed object:
 }
 }
 
+\seealso{
+\itemize{
+  \item \code{\link{DuckDBArraySeed-class}} for the internal seed class
+  \item \code{\link{DuckDBArray-class}} for the main class
+  \item \code{\link{DuckDBArray-utils}} for the main class utilities
+  \item \code{\link[S4Arrays]{Array}} for the base class
+}
+}
 \author{
 Patrick Aboyoun
 }

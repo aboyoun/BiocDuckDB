@@ -141,6 +141,13 @@
 #'
 #' show,DuckDBGRangesList-method
 #'
+#' @seealso
+#' \itemize{
+#'   \item \code{\link{DuckDBGRanges-class}} for the unsplit class
+#'   \item \code{\link{DuckDBList-class}} for the parent class
+#'   \item \code{\link[GenomicRanges]{GRangesList}} for the base class
+#' }
+#'
 #' @include DuckDBGRanges-class.R
 #' @include DuckDBList-class.R
 #'
@@ -150,7 +157,7 @@
 NULL
 
 #' @export
-#' @importClassesFrom IRanges SplitDataFrameList
+#' @importClassesFrom GenomicRanges GRangesList
 setClass("DuckDBGRangesList", contains = c("GRangesList", "DuckDBList"),
          prototype = prototype(elementType = "DuckDBGRanges", unlistData = new("DuckDBGRanges")))
 

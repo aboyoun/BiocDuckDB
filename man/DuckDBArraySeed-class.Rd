@@ -132,8 +132,12 @@ pqaseed <- DuckDBArraySeed(tf, datacol = "fate", keycols = c("Class", "Sex", "Ag
 
 }
 \seealso{
-\code{\link{DuckDBArray}},
-\code{\link[S4Arrays]{Array}}
+\itemize{
+  \item \code{\link{DuckDBArraySeed-utils}} for the utilities
+  \item \code{\link{DuckDBArray-class}} for the main class
+  \item \code{\link{DuckDBArray-utils}} for the main class utilities
+  \item \code{\link[S4Arrays]{Array}} for the base class
+}
 }
 \author{
 Patrick Aboyoun

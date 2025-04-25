@@ -82,6 +82,12 @@
 #'
 #' show,DuckDBTransposedDataFrame-method
 #'
+#' @seealso
+#' \itemize{
+#'   \item \code{\link{DuckDBDataFrame-class}} for the DataFrame class
+#'   \item \code{\link[S4Vectors]{TransposedDataFrame}} for the base class
+#' }
+#'
 #' @include DuckDBDataFrame-class.R
 #'
 #' @keywords classes methods

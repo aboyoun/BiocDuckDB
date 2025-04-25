@@ -126,6 +126,16 @@
 #'
 #' [,DuckDBMatrix,ANY,ANY,ANY-method
 #'
+#' @seealso
+#' \itemize{
+#'   \item \code{\link{DuckDBArray-class}} for the array class
+#'   \item \code{\link{DuckDBArray-utils}} for the array utilities
+#'   \item \code{\link{DuckDBArraySeed-class}} for the internal seed class
+#'   \item \code{\link{DuckDBArraySeed-utils}} for the internal seed class
+#'         utilities
+#'   \item \code{\link[DelayedArray]{DelayedMatrix}} for the base class
+#' }
+#'
 #' @include DuckDBArray-class.R
 #'
 #' @keywords classes methods

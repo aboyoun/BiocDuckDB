@@ -88,6 +88,14 @@
 #' nzcount,DuckDBArraySeed-method
 #' is_sparse,DuckDBArraySeed-method
 #'
+#' @seealso
+#' \itemize{
+#'   \item \code{\link{DuckDBArraySeed-class}} for the internal seed class
+#'   \item \code{\link{DuckDBArray-class}} for the main class
+#'   \item \code{\link{DuckDBArray-utils}} for the main class utilities
+#'   \item \code{\link[S4Arrays]{Array}} for the base class
+#' }
+#'
 #' @include DuckDBArraySeed-class.R
 #' @include DuckDBTable-utils.R
 #'

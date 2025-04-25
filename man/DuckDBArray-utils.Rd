@@ -90,6 +90,16 @@ In the code snippets below, \code{x} is a DuckDBArray object:
 }
 }
 
+\seealso{
+\itemize{
+  \item \code{\link{DuckDBArray-class}} for the main class
+  \item \code{\link{DuckDBMatrix-class}} for the matrix class
+  \item \code{\link{DuckDBArraySeed-class}} for the internal seed class
+  \item \code{\link{DuckDBArraySeed-utils}} for the internal seed class
+        utilities
+  \item \code{\link[DelayedArray]{DelayedArray}} for the base class
+}
+}
 \author{
 Patrick Aboyoun
 }

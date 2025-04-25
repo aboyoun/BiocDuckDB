@@ -220,6 +220,12 @@ In the code snippets below, \code{x} is a DuckDBTable object:
 }
 }
 
+\seealso{
+\itemize{
+  \item \code{\link{DuckDBTable-class}} for the main class
+  \item \code{\link[S4Vectors]{RectangularData}} for the base class
+}
+}
 \author{
 Patrick Aboyoun
 }

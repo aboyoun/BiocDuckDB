@@ -128,6 +128,13 @@ dflist <- split(df, df$cyl)
 dflist
 
 }
+\seealso{
+\itemize{
+  \item \code{\link{DuckDBDataFrame-class}} for the unsplit class
+  \item \code{\link{DuckDBList-class}} for the parent class
+  \item \code{\link[IRanges]{SplitDataFrameList}} for the base class
+}
+}
 \author{
 Patrick Aboyoun
 }

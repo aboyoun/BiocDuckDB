@@ -160,6 +160,12 @@ arrow::write_parquet(df, tf)
 tbl <- DuckDBTable(tf, datacols = "fate", keycols = c("Class", "Sex", "Age", "Survived"))
 
 }
+\seealso{
+\itemize{
+  \item \code{\link{DuckDBTable-utils}} for the utilities
+  \item \code{\link[S4Vectors]{RectangularData}} for the base class
+}
+}
 \author{
 Patrick Aboyoun
 }
