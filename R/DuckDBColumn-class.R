@@ -77,6 +77,12 @@
 #' show,DuckDBColumn-method
 #' showAsCell,DuckDBColumn-method
 #'
+#' @seealso
+#' \itemize{
+#'   \item \code{\link{DuckDBColumn-utils}} for the utilities
+#'   \item \code{\link[S4Vectors]{Vector}} for the base class
+#' }
+#'
 #' @include DuckDBTable-class.R
 #'
 #' @keywords classes methods

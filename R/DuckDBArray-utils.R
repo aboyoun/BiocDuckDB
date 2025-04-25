@@ -87,6 +87,16 @@
 #' is_nonzero,DuckDBArray-method
 #' nzcount,DuckDBArray-method
 #'
+#' @seealso
+#' \itemize{
+#'   \item \code{\link{DuckDBArray-class}} for the main class
+#'   \item \code{\link{DuckDBMatrix-class}} for the matrix class
+#'   \item \code{\link{DuckDBArraySeed-class}} for the internal seed class
+#'   \item \code{\link{DuckDBArraySeed-utils}} for the internal seed class
+#'         utilities
+#'   \item \code{\link[DelayedArray]{DelayedArray}} for the base class
+#' }
+#'
 #' @include DuckDBArray-class.R
 #' @include DuckDBTable-utils.R
 #'

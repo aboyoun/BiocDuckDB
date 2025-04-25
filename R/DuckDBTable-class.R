@@ -160,6 +160,12 @@
 #'
 #' show,DuckDBTable-method
 #'
+#' @seealso
+#' \itemize{
+#'   \item \code{\link{DuckDBTable-utils}} for the utilities
+#'   \item \code{\link[S4Vectors]{RectangularData}} for the base class
+#' }
+#'
 #' @include DuckDBConnection.R
 #' @include keynames.R
 #' @include tblconn.R
@@ -368,6 +374,7 @@ setMethod("keydimnames", "DuckDBTable", function(x) {
 })
 
 #' @export
+#' @importFrom S4Vectors setValidity2
 setReplaceMethod("keydimnames", "DuckDBTable", function(x, value) {
     if (!is.list(value)) {
         stop("'value' must be a list of vectors")

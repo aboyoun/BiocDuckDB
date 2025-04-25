@@ -121,8 +121,14 @@
 #' t,DuckDBArray-method
 #'
 #' @seealso
-#' \code{\link{DuckDBArraySeed}},
-#' \code{\link[DelayedArray]{DelayedArray}}
+#' \itemize{
+#'   \item \code{\link{DuckDBArray-utils}} for the utilities
+#'   \item \code{\link{DuckDBMatrix-class}} for the matrix class
+#'   \item \code{\link{DuckDBArraySeed-class}} for the internal seed class
+#'   \item \code{\link{DuckDBArraySeed-utils}} for the internal seed class
+#'         utilities
+#'   \item \code{\link[DelayedArray]{DelayedArray}} for the base class
+#' }
 #'
 #' @include DuckDBArraySeed-class.R
 #' @include DuckDBArraySeed-utils.R

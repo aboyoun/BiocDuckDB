@@ -77,6 +77,12 @@ In the code snippets below, \code{x} is a DuckDBColumn object:
 }
 }
 
+\seealso{
+\itemize{
+  \item \code{\link{DuckDBColumn-utils}} for the utilities
+  \item \code{\link[S4Vectors]{Vector}} for the base class
+}
+}
 \author{
 Patrick Aboyoun
 }

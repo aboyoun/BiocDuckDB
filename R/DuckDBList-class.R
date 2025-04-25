@@ -89,6 +89,15 @@
 #' head,DuckDBList-method
 #' tail,DuckDBList-method
 #'
+#' @seealso
+#' \itemize{
+#'   \item \code{\link{DuckDBDataFrameList-class}} for the split DataFrame
+#'         subclass
+#'   \item \code{\link{DuckDBGRangesList-class}} for the split GRanges
+#'         subclass
+#'   \item \code{\link[S4Vectors]{List}} for the base class
+#' }
+#'
 #' @include DuckDBTable-class.R
 #'
 #' @keywords classes methods

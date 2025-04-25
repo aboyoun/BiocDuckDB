@@ -124,6 +124,13 @@
 #' coerce,DuckDBDataFrameList,DFrameList-method
 #' realize,DuckDBDataFrameList-method
 #'
+#' @seealso
+#' \itemize{
+#'   \item \code{\link{DuckDBDataFrame-class}} for the unsplit class
+#'   \item \code{\link{DuckDBList-class}} for the parent class
+#'   \item \code{\link[IRanges]{SplitDataFrameList}} for the base class
+#' }
+#'
 #' @include DuckDBDataFrame-class.R
 #' @include DuckDBList-class.R
 #'

@@ -173,6 +173,12 @@
 #'
 #' @author Patrick Aboyoun
 #'
+#' @seealso
+#' \itemize{
+#'   \item \code{\link{DuckDBTable-class}} for the main class
+#'   \item \code{\link[S4Vectors]{RectangularData}} for the base class
+#' }
+#'
 #' @aliases
 #' Ops,DuckDBTable,DuckDBTable-method
 #' Ops,DuckDBTable,atomic-method

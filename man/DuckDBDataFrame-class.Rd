@@ -215,6 +215,18 @@ combined2 <- cbind(df, some_new_name=df[,1])
 class(combined2)
 
 }
+\seealso{
+\itemize{
+  \item \code{\link{DuckDBTable-class}} for the table base class
+  \item \code{\link{DuckDBTable-utils}} for the table base class utilities
+  \item \code{\link{DuckDBColumn-class}} for the extracted column class
+  \item \code{\link{DuckDBColumn-utils}} for the extracted column utilities
+  \item \code{\link{DuckDBTransposedDataFrame-class}} for the transposed
+        DataFrame class
+  \item \code{\link{DuckDBDataFrameList-class}} for the split DataFrame class
+  \item \code{\link[S4Vectors]{DataFrame}} for the base class
+}
+}
 \author{
 Patrick Aboyoun, Aaron Lun
 }

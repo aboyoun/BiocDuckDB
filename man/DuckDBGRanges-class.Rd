@@ -230,6 +230,12 @@ gr <- DuckDBGRanges(tf, seqnames = "seqnames", start = "start", width = "width",
 gr
 
 }
+\seealso{
+\itemize{
+  \item \code{\link{DuckDBGRangesList-class}} for the split GRanges class
+  \item \code{\link[GenomicRanges]{GenomicRanges}} for the base class
+}
+}
 \author{
 Patrick Aboyoun
 }

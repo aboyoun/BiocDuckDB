@@ -226,6 +226,12 @@
 #'
 #' show,DuckDBGRanges-method
 #'
+#' @seealso
+#' \itemize{
+#'   \item \code{\link{DuckDBGRangesList-class}} for the split GRanges class
+#'   \item \code{\link[GenomicRanges]{GenomicRanges}} for the base class
+#' }
+#'
 #' @include DuckDBDataFrame-class.R
 #'
 #' @keywords classes methods
