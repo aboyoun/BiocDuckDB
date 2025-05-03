@@ -289,8 +289,9 @@ setMethod("extract_array", "DuckDBArraySeed", function(x, index) {
     # Fill output array
     table <- x@table[index, ]
     df <- as.data.frame(table)
-    keycols <- df[, keynames(table)]
-    output[as.matrix(keycols)] <- df[[colnames(table)]]
+    keycols <- df[, keynames(table), drop = FALSE]
+    midx <- do.call(cbind, lapply(keycols, as.character))
+    output[midx] <- df[[colnames(table)]]
     if (x@drop) {
         output <- as.array(drop(output))
     }
@@ -301,6 +302,10 @@ setMethod("extract_array", "DuckDBArraySeed", function(x, index) {
 #' @export
 #' @importFrom SparseArray COO_SparseArray extract_sparse_array
 setMethod("extract_sparse_array", "DuckDBArraySeed", function(x, index) {
+    if (!identical(coltypes(x@table), x@fill)) {
+        return(as(extract_array(x, index), "COO_SparseArray"))
+    }
+
     index <- .extract_array_index(x, index)
     table <- x@table[index, ]
     df <- as.data.frame(table)
@@ -332,7 +337,7 @@ DuckDBArraySeed <- function(conn, datacol, keycols, dimtbls = NULL, type = NULL)
     }
     table <- DuckDBTable(conn, datacols = datacol, keycols = keycols,
                          dimtbls = dimtbls, type = type)
-    fill <- switch(coltypes(table), logical = FALSE, integer = 0L, double = 0, character =, raw = "")
+    fill <- vector(coltypes(table), 1L)
     new2("DuckDBArraySeed", table = table, fill = fill, drop = FALSE, check = FALSE)
 }
 

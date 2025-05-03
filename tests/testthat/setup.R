@@ -194,6 +194,7 @@ checkDuckDBMatrix <- function(object, expected) {
     expect_identical(dim(object), dim(expected))
     expect_identical(dimnames(object), dimnames(expected))
     expect_equal(as.matrix(object), expected)
+    expect_equal(as(object, "CsparseMatrix"), as(expected, "CsparseMatrix"))
 }
 
 checkDuckDBDataFrame <- function(object, expected) {
