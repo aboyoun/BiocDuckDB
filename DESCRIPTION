@@ -1,6 +1,6 @@
 Package: BiocDuckDB
-Version: 0.5.18
-Date: 2025-05-02
+Version: 0.5.19
+Date: 2025-06-24
 Title: Bioconductor DuckDB Bindings
 Description:
     This package provides bindings for DuckDB tables that extend Bioconductor
@@ -33,7 +33,6 @@ Imports:
     DBI,
     dplyr,
     duckdb,
-    duckdbfs,
     arrow,
     rlang,
     tibble
