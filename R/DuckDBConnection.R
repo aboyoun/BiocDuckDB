@@ -41,17 +41,36 @@ reg.finalizer(.duckdb, function(env) {
 #' @name DuckDBConnection
 NULL
 
+#' @importFrom DBI dbExecute dbGetQuery
+loadExtension <- function(conn, extension) {
+    qry <-
+      sprintf("SELECT * FROM duckdb_extensions() WHERE extension_name = '%s';",
+              extension)
+    tbl <- dbGetQuery(conn, qry)
+    if (nrow(tbl) == 0L) {
+        stop(sprintf("Extension '%s' not found in DuckDB.", extension))
+    }
+    if (!tbl[["installed"]]) {
+        dbExecute(conn, sprintf("INSTALL '%s';", extension))
+    }
+    status <- 0L
+    if (!tbl[["loaded"]]) {
+        status <- dbExecute(conn, sprintf("LOAD '%s';", extension))
+    }
+    invisible(status)
+}
+
 #' @export
 #' @importFrom DBI dbConnect dbDisconnect
 #' @importFrom duckdb duckdb
-#' @importFrom duckdbfs load_spatial
 #' @rdname DuckDBConnection
 acquireDuckDBConn <- function(conn = dbConnect(duckdb(bigint = "integer64"))) {
     if (is.null(.duckdb$drv)) {
         if (!inherits(conn, "duckdb_connection")) {
             stop("'conn' must be a DuckDB connection")
         }
-        load_spatial(conn)
+        loadExtension(conn, "httpfs")
+        loadExtension(conn, "spatial")
         .duckdb$drv <- conn
     }
     .duckdb$drv
